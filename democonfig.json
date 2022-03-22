@@ -4,12 +4,12 @@
   },
   "source": {
     "file": {
-      "name": "../../../../../samples/spiimage-ghostbusters3.dat"
+      "name": "../../../samples/spiimage-ghostbusters3.dat"
     }
   },
   "processor": {
     "pubcapture": {
-      "directory": "../../../../../samples/gbpub/"
+      "directory": "../../samples/gbpub/"
     }
   },
   "renderer": {
