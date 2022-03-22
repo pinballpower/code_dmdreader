@@ -1,0 +1,18 @@
+{
+  "general": {
+    "bitsperpixel": 4
+  },
+  "source": {
+    "file": {
+      "name": "../../../../../samples/spiimage-ghostbusters3.dat"
+    }
+  },
+  "processor": {
+    "pubcapture": {
+      "directory": "../../../../../samples/gbpub/"
+    }
+  },
+  "renderer": {
+    "raylib": {}
+  }
+}
