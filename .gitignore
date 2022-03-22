@@ -1,0 +1,10 @@
+build
+CMakeCache.txt
+CopyOfCMakeCache.txt
+Makefile
+cmake_install.cmake
+**/core
+**/out/**
+.vs
+samples/afmpub
+samples/gbpub
