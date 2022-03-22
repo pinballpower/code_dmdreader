@@ -10,7 +10,7 @@
 #include "../util/image.h"
 #include "color.h"
 
-#define  PIXVAL uint8_t  // we don't deal with more than 8 bits/pixel
+#define  PIXVAL uint32_t  // up to 32bit/pixel
 
 using namespace std;
 
@@ -21,11 +21,11 @@ protected:
 	int columns;
 	int rows;
 	int bitsperpixel;
-	uint8_t* data;
+	uint32_t* data;
 
 public:
 
-	DMDFrame(int columns1 = 0, int rows1 = 0, int bitsperpixel1 = 0, uint8_t* data1 = NULL);
+	DMDFrame(int columns = 0, int rows = 0, int bitsperpixel = 0, uint32_t* data1 = NULL);
 	~DMDFrame();
 
 	PIXVAL getPixel(int x, int y);
@@ -38,33 +38,26 @@ public:
 	int get_width();
 	int get_height();
 	int get_bitsperpixel();
-	uint8_t get_pixelmask();
+	uint32_t get_pixelmask();
 
-	uint8_t* get_data();
+	uint32_t* get_data();
 
 	string str();
-
-	/*
-	 * Convert bits per pixel
-	 */
-	DMDFrame* to_gray8();
-	DMDFrame* to_gray1(int threshold = 1);
-
 
 protected:
 
 	void recalc_checksum();
 
-	void init_mem(uint8_t* data1 = NULL);
+	void init_mem(uint32_t* data1 = NULL);
 
 	// cache some stuff
 	int datalen;
 	int rowlen;
-	uint8_t pixel_mask;
+	uint32_t pixel_mask;
 	uint32_t checksum; // uses for fast equality check
 
-	uint8_t get_next_pixel(uint8_t** buf, int* pixel_bit);
-	void calc_next_pixel(uint8_t** buf, int* pixel_bit, bool clear = false);
+	uint32_t get_next_pixel(uint32_t** buf, int* pixel_bit);
+	void calc_next_pixel(uint32_t** buf, int* pixel_bit, bool clear = false);
 };
 
 class MaskedDMDFrame : DMDFrame {
@@ -86,7 +79,7 @@ public:
 
 private:
 
-	uint8_t* mask;
+	uint32_t* mask;
 
 };
 

@@ -12,16 +12,16 @@
 #include "dmdframe.h"
 #include "../util/numutils.h"
 
-DMDFrame::DMDFrame(int columns1, int rows1, int bitsperpixel1, uint8_t* data1)
+DMDFrame::DMDFrame(int columns, int rows, int bitsperpixel, uint32_t* data)
 {
-	columns = columns1;
-	rows = rows1;
-	bitsperpixel = bitsperpixel1;
-	data = NULL;
+	this->columns = columns;
+	this->rows = rows;
+	this->bitsperpixel = bitsperpixel;
+	this->data = NULL;
 	checksum = 0;
 	pixel_mask = 0;
 
-	this->init_mem(data1);
+	this->init_mem(data);
 }
 
 
@@ -33,7 +33,7 @@ DMDFrame::~DMDFrame() {
 
 PIXVAL DMDFrame::getPixel(int x, int y) {
 	int offset = y * rowlen + x / bitsperpixel;
-	int pixoffset = 8 - (x % bitsperpixel);
+	int pixoffset = 32 - (x % bitsperpixel);
 	return (data[offset] >> pixoffset) & pixel_mask;
 }
 
@@ -51,7 +51,10 @@ int DMDFrame::read_from_stream(std::ifstream& fis)
 		bitsperpixel = (header[6] << 8) + header[7];
 		this->init_mem(NULL);
 
-		fis.read((char*)data, datalen);
+		fis.read((char*)data, datalen*4);
+		for (int i = 0; i < datalen; i++) {
+			fix_uint32_endian(&data[i]);
+		}
 		recalc_checksum();
 	}
 	catch (std::ios_base::failure) {
@@ -82,20 +85,20 @@ std::string DMDFrame::str() {
 
 void DMDFrame::recalc_checksum() {
 	if (data && datalen) {
-		checksum = crc32buf(data, datalen);
+		checksum = crc32buf((uint8_t*)data, datalen);
 	}
 	else {
 		checksum = 0;
 	};
 }
 
-void DMDFrame::init_mem(uint8_t* data1) {
-	rowlen = columns * bitsperpixel / 8;
+void DMDFrame::init_mem(uint32_t* data) {
+	assert((bitsperpixel <= 32) && (bitsperpixel >= 0));
 
-	// make sure it's 32bit aligned (usually it should be, but just to be sure)
+	rowlen = roundup_4(columns * bitsperpixel / 8)/4;
 	datalen = roundup_4(rowlen * rows);
 
-	pixel_mask = 0xff >> (8 - bitsperpixel);
+	pixel_mask = 0xffffffff >> (32 - bitsperpixel);
 
 	if (datalen) {
 
@@ -104,19 +107,19 @@ void DMDFrame::init_mem(uint8_t* data1) {
 			data = NULL;
 		}
 
-		data = new uint8_t[datalen];
+		this->data = new uint32_t[datalen];
 
-		if (data1) {
-			memcpy_s(data, datalen, data1, datalen);
+		if (data) {
+			memcpy_s(this->data, datalen, data, datalen);
 		}
 		else {
-			memset(data, 0, datalen);
+			memset(this->data, 0, datalen);
 		}
 
 		recalc_checksum();
 	}
 	else {
-		data = NULL;
+		this->data = NULL;
 	}
 }
 
@@ -124,82 +127,23 @@ void DMDFrame::init_mem(uint8_t* data1) {
  * Internal helper funtions
  * Calculate the next pixel in a bytearray where each pixel uses bitperpixel bits
  */
-uint8_t DMDFrame::get_next_pixel(uint8_t **buf, int *pixel_bit) {
+uint32_t DMDFrame::get_next_pixel(uint32_t **buf, int *pixel_bit) {
 	*pixel_bit -= bitsperpixel;
 	if (*pixel_bit < 0) {
-		*pixel_bit += 8;
+		*pixel_bit += 32;
 		(*buf)++;
 	}
 
 	return ((**buf >> *pixel_bit) & pixel_mask);
 }
 
-
-void DMDFrame::calc_next_pixel(uint8_t** buf, int* pixel_bit, bool clear) {
+void DMDFrame::calc_next_pixel(uint32_t** buf, int* pixel_bit, bool clear) {
 	*pixel_bit -= bitsperpixel;
 	if (*pixel_bit < 0) {
-		*pixel_bit += 8;
+		*pixel_bit += 32;
 		(*buf)++;
 		if (clear) **buf = 0;
 	}
-}
-
-
-
-DMDFrame* DMDFrame::to_gray8() {
-	DMDFrame* res = new DMDFrame(columns, rows, 8);
-
-	int pixel_bit = 8;
-	uint8_t *src = data;
-	uint8_t *dst = res->data;
-
-	int shift = 8 - bitsperpixel;
-
-	for (int pixel = 0; pixel < rows*columns; pixel++) {
-		uint8_t pv = get_next_pixel(&src, &pixel_bit);
-
-		// copy pixel
-		*dst = pv << shift;
-		dst++;
-	}
-
-	res->recalc_checksum();
-
-	return res;
-}
-
-DMDFrame* DMDFrame::to_gray1(int threshold) {
-	DMDFrame* res = new DMDFrame(columns, rows, 1);
-
-	int src_bit = 8;
-	int dst_bit = 8;
-
-	uint8_t* src = data;
-	uint8_t* dst = res->data;
-	uint8_t nv = 0;
-
-	int shift = 8 - bitsperpixel;
-
-	for (int pixel = 0; pixel < rows * columns; pixel++) {
-		uint8_t pv = get_next_pixel(&src, &src_bit);
-
-
-		dst_bit -= 1;
-		nv <<= 1;
-		if (pv > threshold) {
-			nv += 1;
-		}
-		if (dst_bit <= 0) {
-			*dst = nv;
-			nv = 0;
-			dst_bit += 8;
-			dst++;
-		}
-	}
-
-	res->recalc_checksum();
-
-	return res;
 }
 
 
@@ -211,11 +155,11 @@ int DMDFrame::get_height() {
 	return rows;
 }
 
-uint8_t* DMDFrame::get_data() {
+uint32_t* DMDFrame::get_data() {
 	return data;
 }
 
-uint8_t DMDFrame::get_pixelmask() {
+uint32_t DMDFrame::get_pixelmask() {
 	return pixel_mask;
 }
 
@@ -242,8 +186,7 @@ bool MaskedDMDFrame::matches(DMDFrame* frame) {
 		return false;
 	}
 
-	/* Everything is 4-byte aligned, therefore we'll use 32-bit operators */
-	uint32_t* orig = (uint32_t * )frame->get_data();
+	uint32_t* orig = frame->get_data();
 	uint32_t* to_compare = (uint32_t*) DMDFrame::data;
 	uint32_t* msk = (uint32_t*)mask;
 
@@ -274,7 +217,7 @@ int MaskedDMDFrame::read_from_rgbimage(RGBBuffer* rgbdata, DMDPalette* palette, 
 	if (mask) {
 		delete[] mask;
 	};
-	mask = new uint8_t[rgbdata->width * rgbdata->height];
+	mask = new uint32_t[this->datalen];
 
 
 	// Mask calculations
@@ -284,16 +227,16 @@ int MaskedDMDFrame::read_from_rgbimage(RGBBuffer* rgbdata, DMDPalette* palette, 
 	mask_y1 = rows + 1;
 	mask_y2 = -1;
 
-	uint8_t* src = (uint8_t*)rgbdata->data;
-	uint8_t* dst = DMDFrame::data;
-	int dst_bit = 8;
+	uint8_t* rgb_src = (uint8_t*)rgbdata->data;
+	uint32_t* dst = DMDFrame::data;
+	int dst_bit = 32;
 
 	bool color_not_found = false;
 
 	for (int y = 0; y < rgbdata->height; y++) {
-		for (int x = 0; x < rgbdata->width; x++, src+=3) {
+		for (int x = 0; x < rgbdata->width; x++, rgb_src+=3) {
 
-			int color_index = palette->find(src[0], src[1], src[2]);
+			int color_index = palette->find(rgb_src[0], rgb_src[1], rgb_src[2]);
 
 			if (color_index < 0) {
 				color_not_found = true;
@@ -334,9 +277,9 @@ int MaskedDMDFrame::read_from_rgbimage(RGBBuffer* rgbdata, DMDPalette* palette, 
 
 	// Masking
 	dst = mask;
-	src = data;
-	int src_bit = 8;
-	dst_bit = 8;
+	uint32_t *src = data;
+	int src_bit = 32;
+	dst_bit = 32;
 
 	if ((mask_x1 <= mask_x2) && (mask_y1 <= mask_y2)) {
 		// mask rectangle found

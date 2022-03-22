@@ -57,11 +57,10 @@ void RaylibRenderer::render_frame(DMDFrame* f) {
     int bpp = f->get_bitsperpixel();
     uint8_t pixel_mask = f->get_pixelmask();
 
-    int pixel_bit = 8;
-
+    int pixel_bit = 32;
     int pixel_index = 0;
 
-    uint8_t* databuff = f->get_data();
+    uint32_t* databuff = f->get_data();
 
     for (int r = 0; r < max_r; r++) {
         c_x = px_radius + px_spacing;
@@ -70,11 +69,11 @@ void RaylibRenderer::render_frame(DMDFrame* f) {
 
             pixel_bit -= bpp;
             if (pixel_bit < 0) {
-                pixel_bit += 8;
+                pixel_bit += 32;
                 pixel_index += 1;
             }
-            uint8_t d = databuff[pixel_index];
-            uint8_t pv = ((d >> pixel_bit) & pixel_mask);
+            uint32_t d = databuff[pixel_index];
+            uint32_t pv = ((d >> pixel_bit) & pixel_mask);
 
             assert(pv < palette_size);
             DrawCircle(c_x, c_y, px_radius, palette[pv]);

@@ -18,7 +18,7 @@ find_package(Boost COMPONENTS log REQUIRED)
 
 #add_library(Boost STATIC IMPORTED)
 
-add_executable (${PROJECT_NAME} "dmdreader.cpp" "dmdreader.h" "util/crc32.cpp" "util/crc32.h" "render/framerenderer.h" "render/raylibrenderer.h" "render/raylibrenderer.cpp"  "dmd/dmdframe.cpp" "dmd/dmdframe.h" "render/framerenderer.cpp" "util/bmp.h" "util/bmp.cpp" "util/numutils.cpp" "util/numutils.h" "dmd/color.h" "dmd/color.cpp" "util/endian.h" "dmd/pubcapture.cpp" "dmd/frameprocessor.h" "dmd/frameprocessor.cpp" "util/image.h" "util/image.cpp" "dmd/dmdsource.h" "dmd/dmdsource.cpp" "util/objectfactory.h" "util/objectfactory.cpp")
+add_executable (${PROJECT_NAME} "dmdreader.cpp" "dmdreader.h" "util/crc32.cpp" "util/crc32.h" "render/framerenderer.h" "render/raylibrenderer.h" "render/raylibrenderer.cpp"  "dmd/dmdframe.cpp" "dmd/dmdframe.h" "render/framerenderer.cpp" "util/bmp.h" "util/bmp.cpp" "util/numutils.cpp" "util/numutils.h" "dmd/color.h" "dmd/color.cpp" "util/endian.h" "util/endian.cpp" "dmd/pubcapture.cpp" "dmd/frameprocessor.h" "dmd/frameprocessor.cpp" "util/image.h" "util/image.cpp" "dmd/dmdsource.h" "dmd/dmdsource.cpp" "util/objectfactory.h" "util/objectfactory.cpp" "util/endian.cpp")
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${raylib_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${raylib_LIBRARIES} ${Boost_LIBRARIES} winmm.lib)
