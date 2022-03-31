@@ -17,7 +17,7 @@ public:
 	virtual bool configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source);
 	bool load_triggers(int bitsperpixel, string directory, DMDPalette* palette = NULL);
 
-	virtual void process_frame(DMDFrame*);
+	virtual DMDFrame* process_frame(DMDFrame*);
 
 private:
 	DMDPalette* palette;

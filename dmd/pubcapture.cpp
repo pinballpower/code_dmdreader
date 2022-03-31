@@ -128,7 +128,7 @@ PubCapture::~PubCapture()
     trigger_frames.clear();
 }
 
-void PubCapture::process_frame(DMDFrame* f)
+DMDFrame* PubCapture::process_frame(DMDFrame* f)
 {
     // check all maksedframes if one matches
     map<int, MaskedDMDFrame*>::iterator itr;
@@ -140,5 +140,7 @@ void PubCapture::process_frame(DMDFrame* f)
             cout << "found pubcapture match: " << i << "\n";
         }
     }
+
+    return f;
 }
 
