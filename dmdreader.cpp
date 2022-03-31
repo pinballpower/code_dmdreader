@@ -23,6 +23,9 @@
 #include "render/raylibrenderer.h"
 #include "util/objectfactory.h"
 
+#include "colorize/coloring.h"
+#include "colorize/vnianimationset.h"
+
 using namespace std;
 
 DMDSource* source = NULL;
@@ -61,8 +64,9 @@ bool read_config(string filename) {
 	//
 	// Sources
 	//
+	bool source_configured = false;
 	BOOST_FOREACH(const boost::property_tree::ptree::value_type &v, pt.get_child("source")) {
-		if (i > 0) {
+		if (source_configured) {
 			BOOST_LOG_TRIVIAL(info) << "ignoring " << v.first << " only a single source is supported";
 		}
 		else {
@@ -70,18 +74,20 @@ bool read_config(string filename) {
 			if (source) {
 				if (source->configure_from_ptree(pt_general, v.second)) {
 					BOOST_LOG_TRIVIAL(info) << "successfully initialized input type " << v.first;
+					source_configured = true;
 				}
 				else {
-					BOOST_LOG_TRIVIAL(error) << "couldn't initialise source " << v.first;
-					return false;
+					BOOST_LOG_TRIVIAL(warning) << "couldn't initialise source " << v.first << "ignoring";
 				}
 			}
 			else {
-				BOOST_LOG_TRIVIAL(error) << "don't know input type " << v.first;
-				return false;
+				BOOST_LOG_TRIVIAL(warning) << "don't know input type " << v.first << "ignoring";
 			}
 		}
-		i++;
+	}
+	if (!(source_configured)) {
+		BOOST_LOG_TRIVIAL(error) << "couldn't initialise any source, aborting";
+		return false;
 	}
 
 	// 
