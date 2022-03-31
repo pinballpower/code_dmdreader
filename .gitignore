@@ -8,3 +8,6 @@ cmake_install.cmake
 .vs
 samples/afmpub
 samples/gbpub
+*.pal
+*.vni
+
