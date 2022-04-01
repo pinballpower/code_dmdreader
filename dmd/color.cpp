@@ -19,8 +19,16 @@ DMDColor::DMDColor(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t alpha1) {
 	c.cols.alpha = alpha1;
 }
 
-DMDColor::DMDColor(uint32_t colors) {
-	c.value = colors;
+DMDColor::DMDColor(uint32_t colors, bool revert_endian) {
+	if (revert_endian) {
+		c.cols.r = colors && 0xff;
+		c.cols.g = (colors >> 8) && 0xff;
+		c.cols.g = (colors >> 16) && 0xff;
+		c.cols.alpha= (colors >> 24) && 0xff;
+	}
+	else {
+		c.value = colors;
+	}
 }
 
 bool DMDColor::matches(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t alpha1) {
@@ -41,6 +49,11 @@ bool DMDColor::matches(DMDColor color, bool ignore_alpha) {
 		}
 	}
 	return false;
+}
+
+uint32_t DMDColor::get_color_data()
+{
+	return c.value;
 }
 
 DMDPalette::DMDPalette(int size, int bitsperpixel, string name) {

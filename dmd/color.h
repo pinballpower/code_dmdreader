@@ -8,17 +8,15 @@
 
 using namespace std;
 
-#if ENDIAN == LITTLE
 union colorUnion{
 	uint32_t value;
 	struct {
-		uint8_t alpha;
-		uint8_t b;
-		uint8_t g;
 		uint8_t r;
+		uint8_t g;
+		uint8_t b;
+		uint8_t alpha;
 	} cols;
 };
-#endif
 
 class DMDColor {
 
@@ -26,12 +24,14 @@ public:
 	colorUnion c;
 
 	DMDColor();
-	DMDColor(uint32_t colors);
+	DMDColor(uint32_t colors, bool revert_endian=false);
 	DMDColor(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t alpha1 = 0);
 
 	bool matches(uint8_t r1, uint8_t g1, uint8_t b1);
 	bool matches(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t alpha1);
 	bool matches(DMDColor c, bool ignore_alpha = true);
+
+	uint32_t get_color_data();
 
 };
 
