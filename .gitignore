@@ -10,4 +10,4 @@ samples/afmpub
 samples/gbpub
 *.pal
 *.vni
-
+samples/*.txt
