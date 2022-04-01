@@ -1,0 +1,12 @@
+{
+  "general": {
+  },
+  "source": {
+    "txt": {
+      "filename": "../../../samples/baywatch.txt"
+    }
+  },
+  "renderer": {
+    "raylib": {}
+  }
+}
