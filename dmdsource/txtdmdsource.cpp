@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include <boost/log/trivial.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "txtdmdsource.h"
 
@@ -41,6 +41,7 @@ void TXTDMDSource::read_next_frame()
 {
 	// Look for checksum
 	bool checksum_found = false;
+	uint32_t crc32 = 0;
 	string line;
 	regex checksum_regex("0x[0-9a-fA-F]{8}");
 	while (!checksum_found) {
@@ -48,6 +49,8 @@ void TXTDMDSource::read_next_frame()
 
 		if (regex_match(line, checksum_regex)) {
 			checksum_found = true;
+			char* p;
+			crc32 = strtoul(line.c_str(), &p, 16);
 		}
 	}
 
@@ -99,6 +102,7 @@ void TXTDMDSource::read_next_frame()
 DMDFrame* TXTDMDSource::next_frame(bool blocking)
 {
 	DMDFrame* res = frame;
+	frame = NULL;
 	read_next_frame();
 	return res;
 }
