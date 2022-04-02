@@ -6,7 +6,7 @@
 * A simple object factory. As the number of classes is limited, all mappings are hardcoded.
 */
 
-#include "../dmd/dmdsource.h"
+#include "../dmdsource/dmdsource.h"
 #include "../dmd/frameprocessor.h"
 #include "../render/framerenderer.h"
 
