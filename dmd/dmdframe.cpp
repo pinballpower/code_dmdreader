@@ -102,18 +102,14 @@ void DMDFrame::init_mem(uint32_t* data) {
 
 	if (datalen) {
 
-		if (data) {
-			delete[] data;
-			data = NULL;
-		}
-
+		delete[] this->data;
 		this->data = new uint32_t[datalen];
 
 		if (data) {
-			memcpy_s(this->data, datalen, data, datalen);
+			memcpy_s(this->data, datalen*4, data, datalen*4);
 		}
 		else {
-			memset(this->data, 0, datalen);
+			memset(this->data, 0, datalen*4);
 		}
 
 		recalc_checksum();
@@ -161,6 +157,11 @@ uint32_t* DMDFrame::get_data() {
 
 uint32_t DMDFrame::get_pixelmask() {
 	return pixel_mask;
+}
+
+uint32_t DMDFrame::get_checksum()
+{
+	return checksum;
 }
 
 int DMDFrame::get_bitsperpixel() {

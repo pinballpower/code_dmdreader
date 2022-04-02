@@ -39,9 +39,9 @@ public:
 	int get_height();
 	int get_bitsperpixel();
 	uint32_t get_pixelmask();
+	uint32_t get_checksum();
 
 	uint32_t* get_data();
-
 	string str();
 
 protected:
