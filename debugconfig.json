@@ -6,7 +6,13 @@
       "filename": "../../../samples/baywatch.txt"
     }
   },
+  "processor": {
+    "frameinfo": {}
+  },
   "renderer": {
-    "raylib": {}
+    "raylib": {
+      "width": 1920,
+      "height": 640
+    }
   }
 }
