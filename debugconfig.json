@@ -2,8 +2,8 @@
   "general": {
   },
   "source": {
-    "txt": {
-      "filename": "../../../samples/baywatch.txt"
+    "vni": {
+      "basename": "../../../samples/baywatch"
     }
   },
   "processor": {
@@ -12,7 +12,8 @@
   "renderer": {
     "raylib": {
       "width": 1920,
-      "height": 640
+      "height": 640,
+      "bitsperpixel": 8
     }
   }
 }
