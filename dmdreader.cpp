@@ -8,6 +8,7 @@
 #include <thread>
 #include <filesystem>
 #include <map>
+#include <stdlib.h>
 
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
@@ -39,7 +40,12 @@ bool read_config(string filename) {
 	int i = 0;
 
 	boost::property_tree::ptree pt;
-	boost::property_tree::json_parser::read_json(filename, pt);
+	try {
+		boost::property_tree::json_parser::read_json(filename, pt);
+	} catch (const boost::property_tree::json_parser::json_parser_error e) {
+		BOOST_LOG_TRIVIAL(fatal) << "couldn't parse JSON configuration file " << e.what() << ", aborting";
+		exit(1);
+	}
 
 	//
 	// General
@@ -187,7 +193,7 @@ int main()
 {
 	boost::log::core::get()->set_filter
 	(
-		boost::log::trivial::severity >= boost::log::trivial::trace
+		boost::log::trivial::severity > boost::log::trivial::trace
 	);
 
 
