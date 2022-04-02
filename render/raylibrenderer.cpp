@@ -15,7 +15,7 @@ RaylibRenderer::RaylibRenderer() {
 
 void RaylibRenderer::set_display_parameters(int width, int height, int px_radius, int px_spacing, int bitsperpixel) {
 
-    assert((bitsperpixel > 0) && (bitsperpixel <= 8));
+    assert((bitsperpixel > 0) && (bitsperpixel <= 32));
 
 	this->width = width;
 	this->height = height;
@@ -41,7 +41,13 @@ RaylibRenderer::~RaylibRenderer() {
 
 void RaylibRenderer::render_frame(DMDFrame* f) {
 
-    if (!(palette)) {
+    bool use_palette = true;
+    // if the frame contains 32-bit data, these are already colored, no palette is needed anymore
+    if (f->get_bitsperpixel() == 32) {
+        use_palette = false;
+    }
+
+    if (use_palette && !(palette)) {
         BOOST_LOG_TRIVIAL(error) << "can't render frame, no palette found";
         return;
     }
@@ -75,8 +81,14 @@ void RaylibRenderer::render_frame(DMDFrame* f) {
             uint32_t d = databuff[pixel_index];
             uint32_t pv = ((d >> pixel_bit) & pixel_mask);
 
-            assert(pv < palette_size);
-            DrawCircle(c_x, c_y, px_radius, palette[pv]);
+            if (use_palette) {
+                assert(pv < palette_size);
+                DrawCircle(c_x, c_y, px_radius, palette[pv]);
+            }
+            else {
+                DrawCircle(c_x, c_y, px_radius, (Color)pv);
+            }
+
             c_x += 2 * px_radius + px_spacing;
         }
 
