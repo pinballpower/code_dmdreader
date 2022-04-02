@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include <boost/lexical_cast.hpp>
+#include <boost/log/trivial.hpp>
 
 #include "txtdmdsource.h"
 
@@ -82,7 +82,7 @@ void TXTDMDSource::read_next_frame()
 		for (int x = 0; x < width; x++) {
 			bit -= bits;
 			char pv = frametxt[y][x] - '0';
-			if (bit <= 0) {
+			if (bit < 0) {
 				bit += 32;
 				px++;
 			}
@@ -132,7 +132,7 @@ void TXTDMDSource::get_properties(SourceProperties* p) {
 
 bool TXTDMDSource::configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {
 	bits = pt_source.get("bpp", 2);
-	bool res=open_file(pt_source.get("filename", ""));
+	bool res=open_file(pt_source.get("name", ""));
 	if (res) read_next_frame();
 	return res;
 }
