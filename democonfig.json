@@ -5,8 +5,11 @@
     "vni": {
       "basename": "../../../samples/ghostbusters"
     },
-    "file": {
+    "dat": {
       "name": "../../../samples/spiimage-ghostbusters3.dat"
+    },
+    "txt": {
+      "name": "../../../samples/baywatch.txt"
     }
   },
   "processor": {
@@ -15,6 +18,12 @@
     }
   },
   "renderer": {
-    "raylib": {}
+    "raylib": {
+      "row": 64,
+      "colums": 192,
+      "width": 1920,
+      "height": 640,
+      "bitsperpixel": 2
+    }
   }
 }
