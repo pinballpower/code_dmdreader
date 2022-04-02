@@ -105,7 +105,10 @@ void RaylibRenderer::start_display() {
 
 bool RaylibRenderer::configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_renderer) {
 
-    int bitsperpixel = pt_general.get("bitsperpixel", 0);
+    int bitsperpixel = pt_renderer.get("bitsperpixel", 0);
+    if (!bitsperpixel) {
+        bitsperpixel = pt_general.get("bitsperpixel", 0);
+    }
     if (!bitsperpixel) {
         BOOST_LOG_TRIVIAL(error) << "couldn't detect bits/pixel";
         return false;
