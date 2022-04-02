@@ -9,7 +9,9 @@
 #include <filesystem>
 #include <map>
 
+#include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
 #include <boost/foreach.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -18,7 +20,7 @@
 #include "dmd/dmdframe.h"
 #include "dmd/dmddata.h"
 #include "dmd/pubcapture.h"
-#include "dmd/dmdsource.h"
+#include "dmdsource/dmdsource.h"
 #include "render/framerenderer.h"
 #include "render/raylibrenderer.h"
 #include "util/objectfactory.h"
@@ -65,26 +67,30 @@ bool read_config(string filename) {
 	// Sources
 	//
 	bool source_configured = false;
-	BOOST_FOREACH(const boost::property_tree::ptree::value_type &v, pt.get_child("source")) {
-		if (source_configured) {
-			BOOST_LOG_TRIVIAL(info) << "ignoring " << v.first << " only a single source is supported";
-		}
-		else {
-			source = createSource(v.first);
-			if (source) {
-				if (source->configure_from_ptree(pt_general, v.second)) {
-					BOOST_LOG_TRIVIAL(info) << "successfully initialized input type " << v.first;
-					source_configured = true;
-				}
-				else {
-					BOOST_LOG_TRIVIAL(warning) << "couldn't initialise source " << v.first << "ignoring";
-				}
+	try {
+		BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("source")) {
+			if (source_configured) {
+				BOOST_LOG_TRIVIAL(info) << "ignoring " << v.first << " only a single source is supported";
 			}
 			else {
-				BOOST_LOG_TRIVIAL(warning) << "don't know input type " << v.first << "ignoring";
+				source = createSource(v.first);
+				if (source) {
+					if (source->configure_from_ptree(pt_general, v.second)) {
+						BOOST_LOG_TRIVIAL(info) << "successfully initialized input type " << v.first;
+						source_configured = true;
+					}
+					else {
+						BOOST_LOG_TRIVIAL(warning) << "couldn't initialise source " << v.first << ", ignoring";
+					}
+				}
+				else {
+					BOOST_LOG_TRIVIAL(warning) << "don't know input type " << v.first << ", ignoring";
+				}
 			}
 		}
 	}
+	catch (const boost::property_tree::ptree_bad_path& e) {}
+
 	if (!(source_configured)) {
 		BOOST_LOG_TRIVIAL(error) << "couldn't initialise any source, aborting";
 		return false;
@@ -132,18 +138,25 @@ bool read_config(string filename) {
 	//
 	// Processors
 	//
-	BOOST_FOREACH(const boost::property_tree::ptree::value_type& v, pt.get_child("processor")) {
-		DMDFrameProcessor* proc = createProcessor(v.first);
-		if (proc) {
-			if (proc->configure_from_ptree(pt_general, v.second)) {
-				BOOST_LOG_TRIVIAL(info) << "successfully initialized processor " << v.first;
-				processors.push_back(proc);
-			} else {
-				delete proc;
+	try {
+		BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("processor")) {
+			DMDFrameProcessor* proc = createProcessor(v.first);
+			if (proc) {
+				if (proc->configure_from_ptree(pt_general, v.second)) {
+					BOOST_LOG_TRIVIAL(info) << "successfully initialized processor " << v.first;
+					processors.push_back(proc);
+				}
+				else {
+					delete proc;
+				}
 			}
-		} else {
-			BOOST_LOG_TRIVIAL(error) << "don't know processor type " << v.first << ", ignoring";
+			else {
+				BOOST_LOG_TRIVIAL(error) << "don't know processor type " << v.first << ", ignoring";
+			}
 		}
+	}
+	catch (const boost::property_tree::ptree_bad_path& e) {
+		BOOST_LOG_TRIVIAL(info) << "no processors defined";
 	}
 
 
@@ -169,10 +182,17 @@ bool read_config(string filename) {
 	return true;
 }
 
+
 int main()
 {
+	boost::log::core::get()->set_filter
+	(
+		boost::log::trivial::severity >= boost::log::trivial::trace
+	);
+
+
 	string basedir = "../../../";
-	if (!read_config(basedir + "democonfig.json")) {
+	if (!read_config(basedir + "debugconfig.json")) {
 		BOOST_LOG_TRIVIAL(error) << "couldn't configure DMDReader, aborting";
 		exit(1);
 	}
