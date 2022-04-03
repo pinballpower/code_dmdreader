@@ -7,13 +7,16 @@
     }
   },
   "processor": {
-    "frameinfo": {}
+    "frameinfo": {},
+    "vni": {
+      "basename": "../../../samples/baywatch"
+    }
   },
   "renderer": {
     "raylib": {
       "width": 1920,
       "height": 640,
-      "bitsperpixel": 8
+      "bitsperpixel": 32
     }
   }
 }
