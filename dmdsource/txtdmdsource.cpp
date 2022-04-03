@@ -69,21 +69,21 @@ void TXTDMDSource::read_next_frame()
 
 	// Initialize frame
 	delete frame;
-	int len = width * height * bits / 32;
-	uint32_t *buf = new uint32_t[len];
+	int len = width * height * bits / 8;
+	uint8_t *buf = new uint8_t[len];
 
 	// create a bitmap buffer
-	int bit = 32;
-	uint32_t* px = buf;
-	uint32_t bitmask = 0xffffffff >> (32 - bits);
-	uint32_t inverted_bitmask = ~bitmask;
+	int bit = 8;
+	uint8_t* px = buf;
+	uint8_t bitmask = 0xff >> (8 - bits);
+	uint8_t inverted_bitmask = ~bitmask;
 
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 			bit -= bits;
 			char pv = frametxt[y][x] - '0';
 			if (bit < 0) {
-				bit += 32;
+				bit += 8;
 				px++;
 			}
 
@@ -95,8 +95,6 @@ void TXTDMDSource::read_next_frame()
 
 	// create frame
 	frame = new DMDFrame(width, height, bits, buf);
-
-	// delete[] buf;
 }
 
 DMDFrame* TXTDMDSource::next_frame(bool blocking)

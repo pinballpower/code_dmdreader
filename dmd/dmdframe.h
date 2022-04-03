@@ -21,11 +21,11 @@ protected:
 	int columns;
 	int rows;
 	int bitsperpixel;
-	uint32_t* data;
+	uint8_t* data;
 
 public:
 
-	DMDFrame(int columns = 0, int rows = 0, int bitsperpixel = 0, uint32_t* data1 = NULL, bool copy_data = true);
+	DMDFrame(int columns = 0, int rows = 0, int bitsperpixel = 0, uint8_t* data1 = NULL, bool copy_data = true);
 	~DMDFrame();
 
 	PIXVAL getPixel(int x, int y);
@@ -38,10 +38,10 @@ public:
 	int get_width();
 	int get_height();
 	int get_bitsperpixel();
-	uint32_t get_pixelmask();
+	uint8_t get_pixelmask();
 	uint32_t get_checksum();
 
-	uint32_t* get_data();
+	uint8_t* get_data();
 	string str();
 
 	void start_pixel_loop();
@@ -51,20 +51,20 @@ protected:
 
 	void recalc_checksum();
 
-	void init_mem(uint32_t* data1, bool copy_data);
+	void init_mem(uint8_t* data1, bool copy_data);
 
 	// cache some stuff
 	int datalen;
 	int rowlen;
-	uint32_t pixel_mask;
+	uint8_t pixel_mask;
 	uint32_t checksum; // uses for fast equality check
 
-	void calc_next_pixel(uint32_t** buf, int* pixel_bit, bool clear = false);
-	uint32_t get_next_pixel(uint32_t** buf, int* pixel_bit);
+	void calc_next_pixel(uint8_t** buf, int* pixel_bit, bool clear = false);
+	uint8_t get_next_pixel(uint8_t** buf, int* pixel_bit);
 
 	// Used to loop through all pixels
-	uint32_t* loop_data;
-	int loop_bit = 32;
+	uint8_t* loop_data;
+	int loop_bit = 8;
 };
 
 class MaskedDMDFrame : DMDFrame {
@@ -86,7 +86,7 @@ public:
 
 private:
 
-	uint32_t* mask;
+	uint8_t* mask;
 
 };
 

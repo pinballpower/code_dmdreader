@@ -8,8 +8,8 @@ DMDFrame* color_frame(DMDFrame* frame, COLOR_VECTOR& colors)
 	int height = frame->get_height();
 	int len = width * height;
 
-	uint32_t* colordata = new uint32_t[len];
-	uint32_t* d = colordata;
+	uint8_t* colordata = new uint8_t[len*3];
+	uint8_t* d = colordata;
 
 	frame->start_pixel_loop();
 	DMDColor c;

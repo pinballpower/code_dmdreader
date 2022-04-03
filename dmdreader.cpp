@@ -19,7 +19,6 @@
 
 #include "DMDReader.h"
 #include "dmd/dmdframe.h"
-#include "dmd/dmddata.h"
 #include "dmd/pubcapture.h"
 #include "dmdsource/dmdsource.h"
 #include "render/framerenderer.h"
