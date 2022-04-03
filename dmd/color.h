@@ -8,6 +8,8 @@
 
 using namespace std;
 
+#define COLOR_VECTOR vector<DMDColor>
+
 union colorUnion{
 	uint32_t value;
 	struct {
