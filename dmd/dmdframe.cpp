@@ -12,7 +12,7 @@
 #include "dmdframe.h"
 #include "../util/numutils.h"
 
-DMDFrame::DMDFrame(int columns, int rows, int bitsperpixel, uint32_t* data)
+DMDFrame::DMDFrame(int columns, int rows, int bitsperpixel, uint32_t* data, bool copy_data)
 {
 	this->columns = columns;
 	this->rows = rows;
@@ -21,7 +21,7 @@ DMDFrame::DMDFrame(int columns, int rows, int bitsperpixel, uint32_t* data)
 	checksum = 0;
 	pixel_mask = 0;
 
-	this->init_mem(data);
+	this->init_mem(data, copy_data);
 }
 
 
@@ -49,7 +49,7 @@ int DMDFrame::read_from_stream(std::ifstream& fis)
 		rows = (header[0] << 8) + header[1];
 		columns = (header[2] << 8) + header[3];
 		bitsperpixel = (header[6] << 8) + header[7];
-		this->init_mem(NULL);
+		this->init_mem(NULL, false);
 
 		fis.read((char*)data, datalen*4);
 		for (int i = 0; i < datalen; i++) {
@@ -83,6 +83,23 @@ std::string DMDFrame::str() {
 	return "DMDFrame(" + std::to_string(columns) + "x" + std::to_string(rows) + "," + std::to_string(bitsperpixel) + "bpp, checksum=" + cs + ")";
 }
 
+void DMDFrame::start_pixel_loop()
+{
+	loop_data = data;
+	loop_bit = 32;
+}
+
+uint32_t DMDFrame::get_next_pixel()
+{
+	loop_bit -= bitsperpixel;
+	if (loop_bit < 0) {
+		loop_bit += 32;
+		loop_data++;
+	}
+
+	return ((*loop_data >> loop_bit) & pixel_mask);
+}
+
 void DMDFrame::recalc_checksum() {
 	if (data && datalen) {
 		checksum = crc32buf((uint8_t*)data, datalen);
@@ -92,7 +109,7 @@ void DMDFrame::recalc_checksum() {
 	};
 }
 
-void DMDFrame::init_mem(uint32_t* data) {
+void DMDFrame::init_mem(uint32_t* data, bool copy_data) {
 	assert((bitsperpixel <= 32) && (bitsperpixel >= 0));
 
 	rowlen = roundup_4(columns * bitsperpixel / 8)/4;
@@ -105,11 +122,16 @@ void DMDFrame::init_mem(uint32_t* data) {
 		delete[] this->data;
 		this->data = new uint32_t[datalen];
 
-		if (data) {
-			memcpy_s(this->data, datalen*4, data, datalen*4);
+		if (copy_data) {
+			if (data) {
+				memcpy_s(this->data, datalen * 4, data, datalen * 4);
+			}
+			else {
+				memset(this->data, 0, datalen * 4);
+			}
 		}
 		else {
-			memset(this->data, 0, datalen*4);
+			this->data = data;
 		}
 
 		recalc_checksum();
@@ -214,7 +236,7 @@ int MaskedDMDFrame::read_from_rgbimage(RGBBuffer* rgbdata, DMDPalette* palette, 
 	DMDFrame::columns = rgbdata->width;
 	DMDFrame::rows = rgbdata->height;
 	DMDFrame::bitsperpixel = bitsperpixel;
-	init_mem();
+	init_mem(NULL,false);
 	if (mask) {
 		delete[] mask;
 	};
