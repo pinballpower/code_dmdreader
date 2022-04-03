@@ -26,7 +26,7 @@
 #include "render/raylibrenderer.h"
 #include "util/objectfactory.h"
 
-#include "colorize/coloring.h"
+#include "colorize/palcoloring.h"
 #include "colorize/vnianimationset.h"
 
 using namespace std;
@@ -203,18 +203,20 @@ int main()
 		exit(1);
 	}
 
+	int frameno = 0;
 	while (!(source->finished())) {
 
 		DMDFrame* frame = source->next_frame();
 
 		for (DMDFrameProcessor* proc : processors) {
-			proc->process_frame(frame);
+			frame=proc->process_frame(frame);
 		}
 
 		for (FrameRenderer* renderer : renderers) {
 			renderer->render_frame(frame);
 		}
 
+		frameno++;
 
 	}
 

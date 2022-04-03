@@ -61,7 +61,7 @@ void RaylibRenderer::render_frame(DMDFrame* f) {
     int max_r = f->get_height();
     int max_c = f->get_width();
     int bpp = f->get_bitsperpixel();
-    uint8_t pixel_mask = f->get_pixelmask();
+    uint32_t pixel_mask = f->get_pixelmask();
 
     int pixel_bit = 32;
     int pixel_index = 0;
@@ -86,7 +86,12 @@ void RaylibRenderer::render_frame(DMDFrame* f) {
                 DrawCircle(c_x, c_y, px_radius, palette[pv]);
             }
             else {
-                DrawCircle(c_x, c_y, px_radius, (Color)pv);
+                Color col;
+                col.r = pv >> 24;
+                col.g = pv >> 16;
+                col.b = pv >> 8;
+
+                DrawCircle(c_x, c_y, px_radius, col);
             }
 
             c_x += 2 * px_radius + px_spacing;
