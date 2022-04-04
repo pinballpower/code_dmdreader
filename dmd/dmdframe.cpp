@@ -97,6 +97,43 @@ uint32_t DMDFrame::get_next_pixel()
 	return ((*loop_data >> loop_bit) & pixel_mask);
 }
 
+/// <summary>
+/// Return 1 one-bit plane 
+/// </summary>
+/// <param name="bitno">The plane number 0: LSB</param>
+/// <returns></returns>
+uint8_t* DMDFrame::get_plane(int bitno)
+{
+	int len = rows * columns;
+
+	uint8_t* res = new uint8_t[len / 8];
+	uint8_t* rp = res;
+	uint8_t bit = 0;
+
+	*rp = 0;
+
+	start_pixel_loop();
+	for (int i = 0; i < len; i++) {
+		uint8_t pv = get_next_pixel();
+		// get n'th bit
+		pv = (pv >> bitno) & 0x01;
+
+		// store it
+		*rp = *rp << 1;
+		*rp = *rp | pv;
+
+		// next byte?
+		bit++;
+		if (bit == 8) {
+			bit = 0;
+			rp++;
+			*rp = 0;
+		}
+	}
+
+	return res;
+}
+
 void DMDFrame::recalc_checksum() {
 	if (data && datalen) {
 		checksum = crc32buf(data, datalen);
@@ -214,9 +251,9 @@ bool MaskedDMDFrame::matches(DMDFrame* frame) {
 		if ((*orig & *msk) != *to_compare) {
 			return false;
 		}
-		*orig++;
-		*msk++;
-		*to_compare++;
+		orig++;
+		msk++;
+		to_compare++;
 	}
 
 	return true;

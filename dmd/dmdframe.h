@@ -47,6 +47,8 @@ public:
 	void start_pixel_loop();
 	uint32_t get_next_pixel();
 
+	uint8_t* get_plane(int bitno);
+
 protected:
 
 	void recalc_checksum();
