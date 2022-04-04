@@ -129,7 +129,7 @@ void TXTDMDSource::get_properties(SourceProperties* p) {
 }
 
 bool TXTDMDSource::configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {
-	bits = pt_source.get("bpp", 2);
+	bits = pt_source.get("bitsperpixel", 2);
 	bool res=open_file(pt_source.get("name", ""));
 	if (res) read_next_frame();
 	return res;
