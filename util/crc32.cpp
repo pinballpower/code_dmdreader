@@ -1,5 +1,6 @@
 #include <cstdint>
 #include "crc32.h"
+#include "bithelper.h"
 
 static uint32_t crc_32_tab[] = { /* CRC polynomial 0xedb88320 */
 0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
@@ -52,18 +53,35 @@ uint32_t updateCRC32(uint8_t ch, uint32_t crc)
     return UPDC32(ch, crc);
 }
 
-
-uint32_t crc32buf(uint8_t* buf, size_t len)
+/// <summary>
+/// Calculate a CRC32 checksum of a byte buffer
+/// </summary>
+/// <param name="buf">Buffer of bytes</param>
+/// <param name="len">length of the buffer</param>
+/// <param name="reverse">Reverse direction of bytes before calculating checksum</param>
+/// <param name="mask">Optional mask. If this is given, the buf array will be masked using this mask (by logical AND)</param>
+/// <returns></returns>
+uint32_t crc32buf(uint8_t* buf, size_t len, bool reverse, uint8_t *mask)
 {
-    register uint32_t oldcrc32;
+    register uint32_t crc32 = 0xFFFFFFFF;
+    uint8_t dat;
 
-    oldcrc32 = 0xFFFFFFFF;
-
-    for (; len; --len, ++buf)
+    for (int i=0; i<len; i++)
     {
-        oldcrc32 = UPDC32(*buf, oldcrc32);
+        dat = *buf;
+
+        if (reverse) {
+            dat = reverse_byte(dat);
+        }
+        if (mask) {
+            dat &= *mask;
+            mask++;
+        }
+        crc32 = UPDC32(dat, crc32);
+
+        buf++;
     }
 
-    return ~oldcrc32;
+    return ~crc32;
 
 }

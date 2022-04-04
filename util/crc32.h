@@ -10,5 +10,5 @@
      ^ ((uint8_t)octet)) & 0xff] ^ ((crc) >> 8))
 
 uint32_t updateCRC32(uint8_t ch, uint32_t crc);
-uint32_t crc32buf(uint8_t* buf, size_t len);
+uint32_t crc32buf(uint8_t* buf, size_t len, bool reverse = false, uint8_t* mask = NULL);
 
