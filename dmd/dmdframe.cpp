@@ -49,7 +49,7 @@ int DMDFrame::read_from_stream(std::ifstream& fis)
 		rows = (header[0] << 8) + header[1];
 		columns = (header[2] << 8) + header[3];
 		bitsperpixel = (header[6] << 8) + header[7];
-		this->init_mem(NULL, false);
+		this->init_mem(NULL, true);
 
 		fis.read((char*)data, datalen);
 		recalc_checksum();
@@ -144,19 +144,23 @@ void DMDFrame::recalc_checksum() {
 }
 
 void DMDFrame::init_mem(uint8_t* data, bool copy_data) {
-	assert((bitsperpixel <= 8) && (bitsperpixel >= 0));
+	assert(((bitsperpixel <= 8) && (bitsperpixel >= 0)) || (bitsperpixel==24) || (bitsperpixel==32));
 
 	rowlen = roundup_4(columns * bitsperpixel / 8);
 	datalen = roundup_4(rowlen * rows);
 
 	pixel_mask = 0xff >> (8 - bitsperpixel);
 
+	if (!(data)) {
+		copy_data = true;
+	}
+
 	if (datalen) {
 
 		delete[] this->data;
-		this->data = new uint8_t[datalen];
-
+		
 		if (copy_data) {
+			this->data = new uint8_t[datalen];
 			if (data) {
 				memcpy_s(this->data, datalen, data, datalen);
 			}
@@ -171,6 +175,7 @@ void DMDFrame::init_mem(uint8_t* data, bool copy_data) {
 		recalc_checksum();
 	}
 	else {
+		delete[] this->data;
 		this->data = NULL;
 	}
 }
