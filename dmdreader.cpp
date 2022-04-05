@@ -192,18 +192,20 @@ int main()
 {
 	boost::log::core::get()->set_filter
 	(
-		boost::log::trivial::severity > boost::log::trivial::trace
+		boost::log::trivial::severity >= boost::log::trivial::trace
 	);
 
 
 	string basedir = "../../../";
-	if (!read_config(basedir + "debugconfig.json")) {
+	if (!read_config(basedir + "gb.json")) {
 		BOOST_LOG_TRIVIAL(error) << "couldn't configure DMDReader, aborting";
 		exit(1);
 	}
 
 	int frameno = 0;
 	while (!(source->finished())) {
+
+		BOOST_LOG_TRIVIAL(trace) << "[dmdreader] processing frame " << frameno;
 
 		DMDFrame* frame = source->next_frame();
 
@@ -216,7 +218,6 @@ int main()
 		}
 
 		frameno++;
-
 	}
 
 	return 0;
