@@ -1,0 +1,30 @@
+{
+  "general": {
+  },
+  "source": {
+    "txt": {
+      "name": "../../../samples/baywatch.txt",
+      "bitsperpixel": 2
+    },
+    "txt": {
+      "name": "../../../samples/baywatch-small.txt",
+      "bitsperpixel": 2
+    },
+    "vni": {
+      "basename": "../../../samples/baywatch"
+    }
+  },
+  "processor": {
+    "frameinfo": {},
+    "vni": {
+      "basename": "../../../samples/baywatch"
+    }
+  },
+  "renderer": {
+    "raylib": {
+      "width": 1920,
+      "height": 640,
+      "bitsperpixel":  2
+    }
+  }
+}
