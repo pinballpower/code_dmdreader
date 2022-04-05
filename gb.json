@@ -1,0 +1,22 @@
+{
+  "general": {
+  },
+  "source": {
+    "dat": {
+      "name": "../../../samples/spiimage-ghostbusters3.dat"
+    }
+  },
+  "processor": {
+    "frameinfo": {},
+    "vni": {
+      "basename": "../../../samples/ghostbusters"
+    }
+  },
+  "renderer": {
+    "raylib": {
+      "width": 1280,
+      "height": 320,
+      "bitsperpixel":  2
+    }
+  }
+}
