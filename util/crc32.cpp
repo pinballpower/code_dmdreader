@@ -85,3 +85,29 @@ uint32_t crc32buf(uint8_t* buf, size_t len, bool reverse, uint8_t *mask)
     return ~crc32;
 
 }
+
+uint32_t crc32vect(const vector<uint8_t> data,const vector<uint8_t> mask, bool reverse)
+{
+    uint32_t crc32 = 0xFFFFFFFF;
+
+    auto itData = data.begin();
+    auto itMask = mask.begin();
+
+
+    for (; itData != data.end(); itData++)
+    {
+        uint8_t dat = *itData;
+
+        if (reverse) {
+            dat = reverse_byte(dat);
+        }
+        if (itMask != mask.end()) {
+            dat &= *itMask;
+            itMask++;
+        }
+        crc32 = UPDC32(dat, crc32);
+    }
+
+    return ~crc32;
+
+}
