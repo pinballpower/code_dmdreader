@@ -98,7 +98,7 @@ bool PubCapture::load_triggers(int bitsperpixel, string directory, DMDPalette* p
         int i = itr->first;
         RGBBuffer* buf = itr->second;
 
-        MaskedDMDFrame* mf = new MaskedDMDFrame();
+        MaskedDMDFrame *mf = new MaskedDMDFrame();
         mf->read_from_rgbimage(buf, this->palette, bitsperpixel);
         trigger_frames.insert(pair<int, MaskedDMDFrame*>(i, mf));
     }
@@ -136,7 +136,7 @@ DMDFrame* PubCapture::process_frame(DMDFrame* f)
         int i = itr->first;
         MaskedDMDFrame* mf = itr->second;
 
-        if (mf->matches(f)) {
+        if (mf->matches(*f)) {
             cout << "found pubcapture match: " << i << "\n";
         }
     }

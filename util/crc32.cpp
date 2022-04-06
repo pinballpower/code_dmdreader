@@ -63,7 +63,7 @@ uint32_t updateCRC32(uint8_t ch, uint32_t crc)
 /// <returns></returns>
 uint32_t crc32buf(uint8_t* buf, size_t len, bool reverse, uint8_t *mask)
 {
-    register uint32_t crc32 = 0xFFFFFFFF;
+    uint32_t crc32 = 0xFFFFFFFF;
     uint8_t dat;
 
     for (int i=0; i<len; i++)

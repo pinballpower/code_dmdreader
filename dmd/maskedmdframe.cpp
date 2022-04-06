@@ -1,0 +1,118 @@
+#include <cassert>
+
+#include "maskeddmdframe.h"
+
+
+MaskedDMDFrame::MaskedDMDFrame() {
+}
+
+MaskedDMDFrame::~MaskedDMDFrame() {
+}
+
+bool MaskedDMDFrame::matches(DMDFrame &frame) {
+
+	if (frame.get_data().size() != data.size()) {
+		return false;
+	}
+
+	auto myData = data.begin();
+	auto maskData = mask.begin();
+	auto otherData = frame.get_data().begin();
+
+	for (; myData != data.end(); myData++, otherData++, maskData++) 
+	{
+		// if the pixel is masked, don't compare
+		if (*maskData == 0) {
+			continue;
+		}
+
+		if (*myData != *otherData) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+int MaskedDMDFrame::read_from_rgbimage(RGBBuffer* rgbdata, DMDPalette* palette, int bitsperpixel) {
+
+	assert((bitsperpixel > 0) && (bitsperpixel <= 8));
+
+	int max_index = (1 << bitsperpixel) - 1;
+	uint8_t allset = (uint8_t)max_index;
+
+	// Initialize memory
+	DMDFrame::columns = rgbdata->width;
+	DMDFrame::rows = rgbdata->height;
+	DMDFrame::bitsperpixel = bitsperpixel;
+	init_mem();
+
+	// Mask calculations
+	int mask_x1, mask_x2, mask_y1, mask_y2;
+	mask_x1 = columns + 1;
+	mask_x2 = -1;
+	mask_y1 = rows + 1;
+	mask_y2 = -1;
+
+	uint8_t* rgb_src = (uint8_t*)rgbdata->data;
+	int dst_bit = 32;
+
+	bool color_not_found = false;
+
+	for (int y = 0; y < rgbdata->height; y++) {
+		for (int x = 0; x < rgbdata->width; x++, rgb_src += 3) {
+
+			int color_index = palette->find(rgb_src[0], rgb_src[1], rgb_src[2]);
+
+			if (color_index < 0) {
+				color_not_found = true;
+				color_index = 0;
+			}
+			else if (color_index > max_index)
+			{
+				// in this case, this is a mask color
+				color_index = 0;
+
+				if (x < mask_x1) {
+					mask_x1 = x;
+				}
+				if (x > mask_x2) {
+					mask_x2 = x;
+				}
+				if (y < mask_y1) {
+					mask_y1 = y;
+				}
+				if (y > mask_y2) {
+					mask_y2 = y;
+				}
+
+			}
+
+			data.push_back(color_index);
+
+		}
+	}
+
+	// Masking
+	mask.clear();
+	mask.reserve(rows * columns);
+	if ((mask_x1 <= mask_x2) && (mask_y1 <= mask_y2)) {
+		// mask rectangle found
+		for (int y = 0; y < rgbdata->height; y++) {
+			for (int x = 0; x < rgbdata->width; x++) {
+				if ((x <= mask_x1) || (x >= mask_x2) || (y <= mask_y1) || (y >= mask_y2)) {
+					// masked (do not use for comparisson)
+					mask.push_back(0);
+				}
+				else {
+					// unmasked
+					mask.push_back(0xff);
+				}
+			}
+		}
+	}
+
+	DMDFrame::recalc_checksum();
+
+	return 0;
+}

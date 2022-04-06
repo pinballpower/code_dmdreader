@@ -15,7 +15,7 @@ public:
 
 	bool read_file(string filename);
 
-	virtual DMDFrame* next_frame(bool blocking = true);
+	virtual unique_ptr<DMDFrame> next_frame(bool blocking = true);
 
 	virtual bool finished();
 	virtual bool frame_ready();
@@ -26,5 +26,6 @@ public:
 
 private:
 
+	DMDFrame* read_from_dat(std::ifstream& fis);
 	queue<DMDFrame*> frames;
 };

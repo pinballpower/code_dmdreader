@@ -11,22 +11,20 @@ DMDFrame* color_frame(DMDFrame* frame, COLOR_VECTOR& colors)
 	uint8_t* colordata = new uint8_t[len*3];
 	uint8_t* d = colordata;
 
-	frame->start_pixel_loop();
 	DMDColor c;
-	for (int i = 0; i < len; i++) {
-		uint32_t pxval = frame->get_next_pixel();
-		if (pxval > colors.size()) {
-			c=DMDColor(0);
-			BOOST_LOG_TRIVIAL(warning) << "[palette_colorizer] pixel value " << pxval << " larger than palette (" << colors.size() << ")";
-		}		
-		else {
-			c = colors[pxval];
+	DMDFrame* result = new DMDFrame(width, height, 24);
+	for (auto px: frame->get_data()) {
+		if (px > colors.size()) {
+			c = DMDColor(0);
+			BOOST_LOG_TRIVIAL(warning) << "[palette_colorizer] pixel value " << px << " larger than palette (" << colors.size() << ")";
 		}
-		*d = c.get_color_data();
-		d++;
+		else {
+			c = colors[px];
+		}
+		result->add_pixel(c.c.cols.r);
+		result->add_pixel(c.c.cols.g);
+		result->add_pixel(c.c.cols.b);
 	}
-
-	DMDFrame* result = new DMDFrame(width, height, 32, colordata, false);
 
 	return result;
 }

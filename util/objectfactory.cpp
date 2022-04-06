@@ -1,6 +1,7 @@
 #include "../dmdsource/dmdsource.h"
 #include "../dmdsource/datdmdsource.h"
 #include "../dmdsource/txtdmdsource.h"
+#include "../dmdsource/nullsource.h"
 #include "../dmd/pubcapture.h"
 #include "../dmd/frameprocessor.h"
 #include "../dmd/frameinfologger.h"
@@ -18,6 +19,9 @@ DMDSource* createSource(string name) {
 		return (DMDSource*)(new DATDMDSource());
 	} else if (name == "txt") {
 		return (DMDSource*)(new TXTDMDSource());
+	}
+	else if (name == "null") {
+		return (DMDSource*)(new NullDMDSource());
 	}
 #ifdef VNICOLORING
 	else if (name == "vni") {

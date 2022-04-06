@@ -41,7 +41,8 @@ bool read_config(string filename) {
 	boost::property_tree::ptree pt;
 	try {
 		boost::property_tree::json_parser::read_json(filename, pt);
-	} catch (const boost::property_tree::json_parser::json_parser_error e) {
+	}
+	catch (const boost::property_tree::json_parser::json_parser_error e) {
 		BOOST_LOG_TRIVIAL(fatal) << "couldn't parse JSON configuration file " << e.what() << ", aborting";
 		exit(1);
 	}
@@ -50,7 +51,7 @@ bool read_config(string filename) {
 	// General
 	//
 	boost::property_tree::ptree pt_general = pt.get_child("general");
-	if ((pt_general.get("type","") == "spike") || (pt_general.get("type","") == "spike1")) {
+	if ((pt_general.get("type", "") == "spike") || (pt_general.get("type", "") == "spike1")) {
 		pt_general.put("bitsperpixel", 4);
 		pt_general.put("rows", 32);
 		pt_general.put("columns", 128);
@@ -109,8 +110,9 @@ bool read_config(string filename) {
 	source->get_properties(&sourceprop);
 
 	if (!(bpp_configured)) {
-		pt_general.put("bitsperpixel",sourceprop.bitsperpixel);
-	} else if (sourceprop.bitsperpixel && (bpp_configured != sourceprop.bitsperpixel)) {
+		pt_general.put("bitsperpixel", sourceprop.bitsperpixel);
+	}
+	else if (sourceprop.bitsperpixel && (bpp_configured != sourceprop.bitsperpixel)) {
 
 		BOOST_LOG_TRIVIAL(error) << "bits/pixel configured=" << bpp_configured << ", detected=" << sourceprop.bitsperpixel <<
 			" do not match, aborting";
@@ -168,20 +170,26 @@ bool read_config(string filename) {
 	//
 	// Renderers
 	//
-	BOOST_FOREACH(const boost::property_tree::ptree::value_type& v, pt.get_child("renderer")) {
-		FrameRenderer* renderer = createRenderer(v.first);
-		if (renderer) {
-			if (renderer->configure_from_ptree(pt_general, v.second)) {
-				BOOST_LOG_TRIVIAL(info) << "successfully initialized renderer " << v.first;
-				renderers.push_back(renderer);
+	try {
+		BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("renderer")) {
+			FrameRenderer* renderer = createRenderer(v.first);
+			if (renderer) {
+				if (renderer->configure_from_ptree(pt_general, v.second)) {
+					BOOST_LOG_TRIVIAL(info) << "successfully initialized renderer " << v.first;
+					renderers.push_back(renderer);
+				}
+				else {
+					delete renderer;
+				}
 			}
 			else {
-				delete renderer;
+				BOOST_LOG_TRIVIAL(error) << "don't know renderer type " << v.first << ", ignoring";
 			}
 		}
-		else {
-			BOOST_LOG_TRIVIAL(error) << "don't know renderer type " << v.first << ", ignoring";
-		}
+	}
+
+	catch (const boost::property_tree::ptree_bad_path& e) {
+		BOOST_LOG_TRIVIAL(info) << "no renderers defined";
 	}
 
 	return true;
@@ -197,7 +205,7 @@ int main()
 
 
 	string basedir = "../../../";
-	if (!read_config(basedir + "gb.json")) {
+	if (!read_config(basedir + "debug.json")) {
 		BOOST_LOG_TRIVIAL(error) << "couldn't configure DMDReader, aborting";
 		exit(1);
 	}
@@ -207,15 +215,17 @@ int main()
 
 		BOOST_LOG_TRIVIAL(trace) << "[dmdreader] processing frame " << frameno;
 
-		DMDFrame* frame = source->next_frame();
+		std::unique_ptr<DMDFrame> frame = source->next_frame();
 
-		for (DMDFrameProcessor* proc : processors) {
-			frame=proc->process_frame(frame);
-		}
+//		for (DMDFrameProcessor* proc : processors) {
+//			frame = proc->process_frame(frame);
+//		}
 
-		for (FrameRenderer* renderer : renderers) {
-			renderer->render_frame(frame);
-		}
+//		for (FrameRenderer* renderer : renderers) {
+//			renderer->render_frame(frame);
+//		}
+
+//		delete frame;
 
 		frameno++;
 	}

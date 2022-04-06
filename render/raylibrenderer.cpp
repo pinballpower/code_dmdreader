@@ -66,9 +66,7 @@ void RaylibRenderer::render_frame(DMDFrame* f) {
     int max_c = f->get_width();
     uint32_t pixel_mask = f->get_pixelmask();
 
-    f->start_pixel_loop();
-
-    uint8_t* data = f->get_data();
+    auto pxIter = f->get_data().begin();
 
     for (int r = 0; r < max_r; r++) {
         c_x = px_radius + px_spacing;
@@ -76,17 +74,21 @@ void RaylibRenderer::render_frame(DMDFrame* f) {
         for (int c = 0; c < max_c; c++) {
 
             if (use_palette) {
-                uint8_t pv = f->get_next_pixel();
+                uint8_t pv = *pxIter;
+                pxIter++;
                 assert(pv < palette_size);
                 DrawCircle(c_x, c_y, px_radius, palette[pv]);
             }
             else {
                 Color c;
-                c.r = *(data++);
-                c.g = *(data++);
-                c.b = *(data++);
+                c.r = *pxIter;
+                pxIter++;
+                c.g = *pxIter;
+                pxIter++;
+                c.b = *pxIter;
+                pxIter++;
                 if (has_alpha) {
-                    data++;
+                    pxIter++;
                 }
                 DrawCircle(c_x, c_y, px_radius, c);
             }

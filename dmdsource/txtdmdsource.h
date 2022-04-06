@@ -14,7 +14,7 @@ public:
 	~TXTDMDSource();
 
 
-	virtual DMDFrame* next_frame(bool blocking = true);
+	virtual unique_ptr<DMDFrame> next_frame(bool blocking = true);
 
 	virtual bool finished();
 	virtual bool frame_ready();

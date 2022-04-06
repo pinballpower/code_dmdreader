@@ -1,0 +1,15 @@
+{
+  "general": {
+  },
+  "source": {
+    "txt": {
+      "name": "../../../samples/baywatch.txt",
+      "bitsperpixel": 2
+    },
+    "null": {
+    }
+  },
+  "processor": {
+    "frameinfo": {}
+  }
+}

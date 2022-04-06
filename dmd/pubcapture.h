@@ -5,7 +5,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/log/trivial.hpp>
 
-#include "dmdframe.h"
+#include "maskeddmdframe.h"
 #include "frameprocessor.h"
 
 class PubCapture : DMDFrameProcessor {

@@ -31,9 +31,8 @@ bool DATDMDSource::read_file(string filename)
 	{
 		int rc = 0;
 		while (rc == 0) {
-			DMDFrame* frame = new DMDFrame();
-			rc = frame->read_from_stream(df);
-			if (rc == 0) {
+			DMDFrame* frame = this->read_from_dat(df);
+			if (frame) {
 				frames.push(frame);
 				framecount++;
 			}
@@ -49,11 +48,53 @@ bool DATDMDSource::read_file(string filename)
 	return true;
 }
 
-DMDFrame* DATDMDSource::next_frame(bool blocking)
+DMDFrame* DATDMDSource::read_from_dat(std::ifstream& fis)
+{
+	if ((!fis.good()) || fis.eof()) {
+		return nullptr;
+	}
+
+	uint8_t header[8];
+	DMDFrame* res = nullptr;
+
+	try {
+		fis.read((char*)header, 8);
+		int rows = (header[0] << 8) + header[1];
+		int columns = (header[2] << 8) + header[3];
+		int bitsperpixel = (header[6] << 8) + header[7];
+
+		assert((bitsperpixel == 1) || (bitsperpixel == 2) || (bitsperpixel == 4) || (bitsperpixel == 8));
+		int datalen = rows * columns * bitsperpixel / 8;
+		int px_per_byte = 8 / bitsperpixel;
+
+		res = new DMDFrame(columns, rows, bitsperpixel);
+
+		char* buf = new char[rows * columns * bitsperpixel / 8];
+		uint8_t* current_px = (uint8_t*)buf;
+		fis.read(buf, datalen);
+		// data are packed, convert these to plain bytes
+		for (int i = 0; i < datalen; i++, current_px++) {
+			uint8_t px = *current_px;
+			for (int bit = 8 - bitsperpixel; bit >= 0; bit -= bitsperpixel) {
+				uint8_t pv = (px >> bit) & res->get_pixelmask();
+				res->add_pixel(pv);
+			}
+		}
+		delete[] buf;
+	}
+	catch (std::ios_base::failure) {
+		return nullptr;
+	}
+
+	return res;
+}
+
+
+unique_ptr<DMDFrame> DATDMDSource::next_frame(bool blocking)
 {
 	DMDFrame* res = frames.front();
 	frames.pop();
-	return res;
+	return std::unique_ptr<DMDFrame>(res);
 }
 
 bool DATDMDSource::finished()

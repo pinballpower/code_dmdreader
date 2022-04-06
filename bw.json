@@ -15,10 +15,7 @@
     }
   },
   "processor": {
-    "frameinfo": {},
-    "vni": {
-      "basename": "../../../samples/baywatch"
-    }
+    "frameinfo": {}
   },
   "renderer": {
     "raylib": {
