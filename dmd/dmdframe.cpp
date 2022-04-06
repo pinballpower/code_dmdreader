@@ -10,7 +10,6 @@
 #include "../util/bmp.h"
 
 #include "dmdframe.h"
-#include "../util/numutils.h"
 
 DMDFrame::DMDFrame(int columns, int rows, int bitsperpixel, uint8_t* data)
 {
@@ -44,13 +43,13 @@ PIXVAL DMDFrame::getPixel(int x, int y) {
 	return (data[offset]);
 }
 
-bool DMDFrame::same_size(DMDFrame* f2) {
-	return ((columns = f2->columns) && (rows = f2->rows) && (bitsperpixel = f2->bitsperpixel));
+bool DMDFrame::same_size(DMDFrame &f2) {
+	return ((columns = f2.columns) && (rows = f2.rows) && (bitsperpixel = f2.bitsperpixel));
 }
 
-bool DMDFrame::equals_fast(DMDFrame* f2) {
+bool DMDFrame::equals_fast(DMDFrame &f2) {
 	if (this->same_size(f2)) {
-		return checksum == f2->checksum;
+		return checksum == f2.checksum;
 	}
 	else {
 		return false;

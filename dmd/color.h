@@ -52,7 +52,7 @@ public:
 	int find(uint32_t color, bool ignore_alpha=true);
 	int find(uint8_t r, uint8_t g, uint8_t b);
 
-	bool matches(RGBBuffer* buf);
+	bool matches(RGBBuffer& buf);
 
 };
 

@@ -32,7 +32,7 @@ bool PubCapture::load_triggers(int bitsperpixel, string directory, DMDPalette* p
         return false;
     }
 
-    map<int, RGBBuffer*> rgbdata;
+    map<int, RGBBuffer> rgbdata;
 
     // find highest ID
     int max_index = 0;
@@ -49,8 +49,8 @@ bool PubCapture::load_triggers(int bitsperpixel, string directory, DMDPalette* p
                 int i = stoi(match.str(1));
                 if (i > max_index) { max_index = i; };
 
-                RGBBuffer *buff = read_BMP(full_name);
-                rgbdata.insert(pair<int, RGBBuffer*>(i, buff));
+                RGBBuffer buff = read_BMP(full_name);
+                rgbdata.insert(pair<int, RGBBuffer>(i, buff));
 
                 BOOST_LOG_TRIVIAL(debug) << "loaded " << filename;
 
@@ -71,9 +71,9 @@ bool PubCapture::load_triggers(int bitsperpixel, string directory, DMDPalette* p
             BOOST_LOG_TRIVIAL(debug) << "Checking palette " << p->name;
             bool matches = true;
 
-            map<int, RGBBuffer*>::iterator itr;
+            map<int, RGBBuffer>::iterator itr;
             for (itr = rgbdata.begin(); itr != rgbdata.end(); ++itr) {
-                RGBBuffer* buff = itr->second;
+                RGBBuffer buff = itr->second;
 
                 if (!p->matches(buff)) {
                     break;
@@ -93,10 +93,10 @@ bool PubCapture::load_triggers(int bitsperpixel, string directory, DMDPalette* p
     }
 
     // create masked frames
-    map<int, RGBBuffer*>::iterator itr;
+    map<int, RGBBuffer>::iterator itr;
     for (itr = rgbdata.begin(); itr != rgbdata.end(); ++itr) {
         int i = itr->first;
-        RGBBuffer* buf = itr->second;
+        RGBBuffer buf = itr->second;
 
         MaskedDMDFrame *mf = new MaskedDMDFrame();
         mf->read_from_rgbimage(buf, this->palette, bitsperpixel);

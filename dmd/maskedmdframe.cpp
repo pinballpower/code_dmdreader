@@ -34,7 +34,7 @@ bool MaskedDMDFrame::matches(DMDFrame &frame) {
 	return true;
 }
 
-int MaskedDMDFrame::read_from_rgbimage(RGBBuffer* rgbdata, DMDPalette* palette, int bitsperpixel) {
+int MaskedDMDFrame::read_from_rgbimage(RGBBuffer &rgbdata, DMDPalette* palette, int bitsperpixel) {
 
 	assert((bitsperpixel > 0) && (bitsperpixel <= 8));
 
@@ -42,8 +42,8 @@ int MaskedDMDFrame::read_from_rgbimage(RGBBuffer* rgbdata, DMDPalette* palette, 
 	uint8_t allset = (uint8_t)max_index;
 
 	// Initialize memory
-	DMDFrame::columns = rgbdata->width;
-	DMDFrame::rows = rgbdata->height;
+	DMDFrame::columns = rgbdata.width;
+	DMDFrame::rows = rgbdata.height;
 	DMDFrame::bitsperpixel = bitsperpixel;
 	init_mem();
 
@@ -53,16 +53,18 @@ int MaskedDMDFrame::read_from_rgbimage(RGBBuffer* rgbdata, DMDPalette* palette, 
 	mask_x2 = -1;
 	mask_y1 = rows + 1;
 	mask_y2 = -1;
+	mask.clear();
 
-	uint8_t* rgb_src = (uint8_t*)rgbdata->data;
+	vector<uint8_t> rgb_src = rgbdata.get_data();
 	int dst_bit = 32;
 
 	bool color_not_found = false;
 
-	for (int y = 0; y < rgbdata->height; y++) {
-		for (int x = 0; x < rgbdata->width; x++, rgb_src += 3) {
+	int i = 0;
+	for (int y = 0; y < rgbdata.height; y++) {
+		for (int x = 0; x < rgbdata.width; x++, i+=3) {
 
-			int color_index = palette->find(rgb_src[0], rgb_src[1], rgb_src[2]);
+			int color_index = palette->find(rgb_src[i], rgb_src[i+1], rgb_src[i+2]);
 
 			if (color_index < 0) {
 				color_not_found = true;
@@ -98,8 +100,8 @@ int MaskedDMDFrame::read_from_rgbimage(RGBBuffer* rgbdata, DMDPalette* palette, 
 	mask.reserve(rows * columns);
 	if ((mask_x1 <= mask_x2) && (mask_y1 <= mask_y2)) {
 		// mask rectangle found
-		for (int y = 0; y < rgbdata->height; y++) {
-			for (int x = 0; x < rgbdata->width; x++) {
+		for (int y = 0; y < rgbdata.height; y++) {
+			for (int x = 0; x < rgbdata.width; x++) {
 				if ((x <= mask_x1) || (x >= mask_x2) || (y <= mask_y1) || (y >= mask_y2)) {
 					// masked (do not use for comparisson)
 					mask.push_back(0);

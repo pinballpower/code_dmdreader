@@ -36,8 +36,8 @@ public:
 
 	PIXVAL getPixel(int x, int y);
 
-	bool same_size(DMDFrame* f2);
-	bool equals_fast(DMDFrame* f2);
+	bool same_size(DMDFrame &f2);
+	bool equals_fast(DMDFrame &f2);
 
 	int get_width();
 	int get_height();

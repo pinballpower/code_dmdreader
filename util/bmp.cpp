@@ -3,13 +3,14 @@
 #include <cstdint>
 #include <iostream>
 #include <fstream>
+#include <string> 
 
 #include "bmp.h"
 #include "image.h"
 
 using namespace std;
 
-RGBBuffer* read_BMP(std::string filename)
+RGBBuffer read_BMP(std::string filename)
 {
     ifstream is;
     is.exceptions(ifstream::failbit | ifstream::badbit);
@@ -20,8 +21,7 @@ RGBBuffer* read_BMP(std::string filename)
 
     // check if it is the format with the 54 byte header
     if (info[14] != 40) {
-        cerr << "Can't read " << filename << ", only BITMAPINFOHEADER supported, but type is " << info[14] << "\n";
-        return NULL;
+        throw std::ios_base::failure("Can't read "+filename+", only BITMAPINFOHEADER supported, but type is "+ std::to_string(info[14]));
     }
     
     // extract image height and width from header
@@ -30,28 +30,27 @@ RGBBuffer* read_BMP(std::string filename)
 
     if ((width <= 0) || (height <= 0)) {
         cerr << "Can't read " << filename << ", invalid dimensions.\n";
-        return NULL;
+        throw std::ios_base::failure("Can't read " + filename + ", invalid dimensions.");
     }
 
     int row_padded = (width * 3 + 3) & (~3);
     int bytesperline = 3 * width;
 
     uint8_t* linedata = new uint8_t[row_padded];
-    RGBBuffer* res = new RGBBuffer(width,height);
 
-    rgb_t* dst;
+    RGBBuffer buf = RGBBuffer(width, height);
 
-    for (int i = 0; i < height; i++)
+    for (int y = height; y ; y--)
     {
         is.read((char*)linedata, row_padded);
-        dst = res->data + ((height-1-i) * width);
 
-        for (int j = 0; j < width * 3; j += 3, dst ++)
+        for (int x=0, z = 0; x < width; x++, z+=3)
         {
             // Convert (B, G, R) to (R, G, B)
-            (*dst).r = linedata[j + 2];
-            (*dst).g = linedata[j + 1];
-            (*dst).b = linedata[j];
+            uint8_t r = linedata[z + 2];
+            uint8_t g = linedata[z + 1];
+            uint8_t b = linedata[z];
+            buf.set_pixel(x, y, r, g, b);
         }
     }
 
@@ -60,5 +59,5 @@ RGBBuffer* read_BMP(std::string filename)
     is.close();
 
     // return width, height and data
-    return res;
+    return buf;
 }
