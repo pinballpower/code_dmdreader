@@ -111,3 +111,19 @@ uint32_t crc32vect(const vector<uint8_t> data,const vector<uint8_t> mask, bool r
     return ~crc32;
 
 }
+
+uint32_t crc32vect(const vector<uint8_t> data, bool reverse)
+{
+    uint32_t crc32 = 0xFFFFFFFF;
+
+    for (auto d: data)
+    {
+        if (reverse) {
+            d = reverse_byte(d);
+        }
+        crc32 = UPDC32(d, crc32);
+    }
+
+    return ~crc32;
+
+}
