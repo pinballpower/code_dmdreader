@@ -15,7 +15,7 @@ typedef struct SourceProperties {
 class DMDSource {
 
 public:
-	virtual DMDFrame* next_frame(bool blocking = true);
+	virtual unique_ptr<DMDFrame> next_frame(bool blocking = true);
 	virtual bool finished();
 	virtual bool frame_ready();
 	virtual bool configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source);

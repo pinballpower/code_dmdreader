@@ -1,9 +1,9 @@
 #include "dmdsource.h"
 #include "../dmd/dmdframe.h"
 
-DMDFrame* DMDSource::next_frame(bool blocking)
+unique_ptr<DMDFrame> DMDSource::next_frame(bool blocking)
 {
-	return nullptr;
+	return std::unique_ptr<DMDFrame>(nullptr);
 }
 
 bool DMDSource::finished()
