@@ -106,8 +106,8 @@ uint8_t* DMDFrame::get_plane(int bitno)
 {
 	int len = rows * columns;
 
-	uint8_t* res = new uint8_t[len / 8];
-	uint8_t* rp = res;
+	uint8_t *res = new uint8_t[len/8];
+	uint8_t *rp = res;
 	uint8_t bit = 0;
 
 	*rp = 0;
