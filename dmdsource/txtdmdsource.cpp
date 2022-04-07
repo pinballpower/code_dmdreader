@@ -27,15 +27,15 @@ TXTDMDSource::~TXTDMDSource()
 bool TXTDMDSource::open_file(string filename)
 {
 	is.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-	is.open(filename);
-	if (!is) {
-		BOOST_LOG_TRIVIAL(error) << "[txtdmdsource] can't open file " << filename;
+	try {
+		is.open(filename);
+	} catch (std::ios_base::failure e) {
+		BOOST_LOG_TRIVIAL(error) << "[txtdmdsource] can't open file " << filename << ": " << e.what();
 		eof = true;
 		return false;
 	}
 
 	BOOST_LOG_TRIVIAL(info) << "[txtdmdsource] successfully opened " << filename;
-
 	return true;
 }
 
