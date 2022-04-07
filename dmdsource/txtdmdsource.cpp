@@ -26,14 +26,15 @@ TXTDMDSource::~TXTDMDSource()
 
 bool TXTDMDSource::open_file(string filename)
 {
+	is.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	is.open(filename);
 	if (!is) {
-		BOOST_LOG_TRIVIAL(error) << "can't open file " << filename;
-		eof = false;
+		BOOST_LOG_TRIVIAL(error) << "[txtdmdsource] can't open file " << filename;
+		eof = true;
 		return false;
 	}
 
-	BOOST_LOG_TRIVIAL(info) << "successfully opened " << filename;
+	BOOST_LOG_TRIVIAL(info) << "[txtdmdsource] successfully opened " << filename;
 
 	return true;
 }
@@ -41,27 +42,27 @@ bool TXTDMDSource::open_file(string filename)
 void TXTDMDSource::read_next_frame()
 {
 	// Look for checksum
-	bool checksum_found = false;
-	uint32_t crc32 = 0;
-	string line;
-	regex checksum_regex("0x[0-9a-fA-F]{8}");
-	while (!checksum_found) {
-		getline(is, line);
+	bool timestamp_found = false;
+	char line[255];
+	regex timestamp_regex("0x[0-9a-fA-F]{8}");
+	while (!timestamp_found) {
+		is.getline(line,255);
 
-		if (regex_match(line, checksum_regex)) {
-			checksum_found = true;
+		if (regex_match(line, timestamp_regex)) {
+			timestamp_found = true;
 			char* p;
-			crc32 = strtoul(line.c_str(), &p, 16);
 		}
 	}
 
 	// read lines
 	vector<string> frametxt;
 	int width = 0;
-	while (line != "") {
-		getline(is, line);
-		if (line.size() > width) {
-			width = line.size();
+	int len = 1;
+	while (len) {
+		is.getline(line, 255);
+		len = strlen(line);
+		if (len > width) {
+			width = len;
 		}
 		frametxt.push_back(line);
 	}
@@ -82,7 +83,17 @@ void TXTDMDSource::read_next_frame()
 DMDFrame TXTDMDSource::next_frame(bool blocking)
 {
 	DMDFrame res = std::move(preloaded_frame);
-	read_next_frame();
+	try {
+		read_next_frame();
+	}
+	catch (std::ios_base::failure e) {
+		if (!is.eof()) {
+			BOOST_LOG_TRIVIAL(error) << "[txtdmdsource] error reading file " << e.what();
+		}
+
+		eof = true;
+		is.close();
+	}
 	return res;
 }
 
