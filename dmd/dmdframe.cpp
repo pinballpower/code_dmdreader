@@ -20,7 +20,7 @@ DMDFrame::DMDFrame(int width, int height, int bitsperpixel, uint8_t* data)
 	pixel_mask = 0;
 	init_mem();
 	if (data != nullptr) {
-		this->copy_data(data, width*height);
+		this->copy_data(data, width*height*bytesperpixel());
 	}
 }
 
@@ -83,9 +83,19 @@ void DMDFrame::add_pixel(uint8_t px)
 
 }
 
+int DMDFrame::bytesperpixel() {
+	return  (bitsperpixel + 7) / 8;
+}
+
 bool DMDFrame::is_null()
 {
 	return ((width == 0) && (height == 0));
+}
+
+bool DMDFrame::is_valid()
+{
+	return data.size() == (width * height * bytesperpixel());
+
 }
 
 void DMDFrame::recalc_checksum() {

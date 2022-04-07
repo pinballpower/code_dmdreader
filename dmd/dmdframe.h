@@ -53,6 +53,7 @@ public:
 	void add_pixel(uint8_t px);
 
 	bool is_null();
+	bool is_valid();
 
 	string str();
 
@@ -63,6 +64,8 @@ protected:
 	void init_mem(int no_of_pixels = 0);
 	void copy_data(uint8_t* dat, int len);
 	void calc_planes();
+
+	int bytesperpixel();
 
 	// cache some stuff
 	int datalen;

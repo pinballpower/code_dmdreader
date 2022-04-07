@@ -216,12 +216,16 @@ int main()
 
 		DMDFrame frame = source->next_frame();
 
+		assert(frame.is_valid());
+
 		for (DMDFrameProcessor* proc : processors) {
 			frame = proc->process_frame(frame);
+			assert(frame.is_valid());
 		}
 
 		for (FrameRenderer* renderer : renderers) {
 			renderer->render_frame(frame);
+			assert(frame.is_valid());
 		}
 
 		frameno++;
