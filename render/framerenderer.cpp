@@ -6,7 +6,7 @@ FrameRenderer::FrameRenderer() {
 FrameRenderer::~FrameRenderer() {
 }
 
-void FrameRenderer::render_frame(DMDFrame* f) {
+void FrameRenderer::render_frame(DMDFrame &f) {
 
 }
 

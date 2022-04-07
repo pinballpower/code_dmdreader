@@ -39,11 +39,11 @@ RaylibRenderer::~RaylibRenderer() {
 }
 
 
-void RaylibRenderer::render_frame(DMDFrame* f) {
+void RaylibRenderer::render_frame(DMDFrame &f) {
 
     bool use_palette = true;
 
-    int bpp = f->get_bitsperpixel();
+    int bpp = f.get_bitsperpixel();
     bool has_alpha= (bpp == 32);
 
     // if the frame contains 32-bit data, these are already colored, no palette is needed anymore
@@ -62,11 +62,12 @@ void RaylibRenderer::render_frame(DMDFrame* f) {
     int c_y = px_radius + px_spacing;
     int c_x = 0;
 
-    int max_r = f->get_height();
-    int max_c = f->get_width();
-    uint32_t pixel_mask = f->get_pixelmask();
+    int max_r = f.get_height();
+    int max_c = f.get_width();
+    uint32_t pixel_mask = f.get_pixelmask();
 
-    auto pxIter = f->get_data().begin();
+    vector<uint8_t> data = f.get_data();
+    auto pxIter = data.begin();
 
     for (int r = 0; r < max_r; r++) {
         c_x = px_radius + px_spacing;

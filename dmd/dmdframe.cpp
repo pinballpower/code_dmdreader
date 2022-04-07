@@ -11,23 +11,23 @@
 
 #include "dmdframe.h"
 
-DMDFrame::DMDFrame(int columns, int rows, int bitsperpixel, uint8_t* data)
+DMDFrame::DMDFrame(int width, int height, int bitsperpixel, uint8_t* data)
 {
-	this->columns = columns;
-	this->rows = rows;
+	this->width = width;
+	this->height = height;
 	this->bitsperpixel = bitsperpixel;
 	checksum = 0;
 	pixel_mask = 0;
 	init_mem();
 	if (data != nullptr) {
-		this->copy_data(data, rows * columns);
+		this->copy_data(data, width*height);
 	}
 }
 
 DMDFrame::DMDFrame(int columns, int rows, int bitsperpixel, vector<uint8_t> data)
 {
-	this->columns = columns;
-	this->rows = rows;
+	this->width = columns;
+	this->height = rows;
 	this->bitsperpixel = bitsperpixel;
 	checksum = 0;
 	pixel_mask = 0;
@@ -44,7 +44,7 @@ PIXVAL DMDFrame::getPixel(int x, int y) {
 }
 
 bool DMDFrame::same_size(DMDFrame &f2) {
-	return ((columns = f2.columns) && (rows = f2.rows) && (bitsperpixel = f2.bitsperpixel));
+	return ((width = f2.width) && (height = f2.height) && (bitsperpixel = f2.bitsperpixel));
 }
 
 bool DMDFrame::equals_fast(DMDFrame &f2) {
@@ -59,7 +59,7 @@ bool DMDFrame::equals_fast(DMDFrame &f2) {
 std::string DMDFrame::str() {
 	char cs[8];
 	snprintf(cs, sizeof(cs), "%08x", checksum);
-	return "DMDFrame(" + std::to_string(columns) + "x" + std::to_string(rows) + "," + std::to_string(bitsperpixel) + "bpp, checksum=" + cs + ")";
+	return "DMDFrame(" + std::to_string(width) + "x" + std::to_string(height) + "," + std::to_string(bitsperpixel) + "bpp, checksum=" + cs + ")";
 }
 
 /// <summary>
@@ -83,6 +83,11 @@ void DMDFrame::add_pixel(uint8_t px)
 
 }
 
+bool DMDFrame::is_null()
+{
+	return ((width == 0) && (height == 0));
+}
+
 void DMDFrame::recalc_checksum() {
 	checksum = crc32vect(data);
 }
@@ -91,14 +96,14 @@ void DMDFrame::init_mem(int no_of_pixels) {
 	assert(((bitsperpixel <= 8) && (bitsperpixel >= 0)) || (bitsperpixel==24) || (bitsperpixel==32));
 
 	if (bitsperpixel <= 8) {
-		rowlen = columns;
+		rowlen = width;
 	} else if (bitsperpixel == 24) {
-		rowlen = columns * 3; 
+		rowlen = width * 3; 
 	}
 	else if (bitsperpixel == 32) {
-		rowlen = columns * 4;
+		rowlen = width * 4;
 	}
-	datalen = rowlen * rows;
+	datalen = rowlen * width;
 
 	pixel_mask = 0xff >> (8 - bitsperpixel);
 
@@ -126,7 +131,7 @@ void DMDFrame::calc_planes()
 	}
 	for (int i = 0; i < bitsperpixel; i++) {
 		vector<uint8_t> plane = vector<uint8_t>();
-		plane.reserve(rows * columns / 8);
+		plane.reserve(width*height / 8);
 		planes.push_back(plane);
 	}
 
@@ -152,11 +157,11 @@ void DMDFrame::calc_planes()
 }
 
 int DMDFrame::get_width() {
-	return columns;
+	return width;
 }
 
 int DMDFrame::get_height() {
-	return rows;
+	return height;
 }
 
 const vector<uint8_t> DMDFrame::get_data() {
@@ -170,6 +175,24 @@ uint8_t DMDFrame::get_pixelmask() {
 uint32_t DMDFrame::get_checksum()
 {
 	return checksum;
+}
+
+/// <summary>
+/// Reset DMDFrame to the given size. If the size is different, the data will be removed
+/// </summary>
+/// <param name="width"></param>
+/// <param name="height"></param>
+/// <param name="bits_per_pixel"></param>
+void DMDFrame::set_size(int width, int height, int bits_per_pixel)
+{
+	if ((this->width == width) && (this->height == height) && (this->bitsperpixel == bits_per_pixel)) {
+		return;
+	}
+
+	this->width=width;
+	this->height=height;
+	this->bitsperpixel=bits_per_pixel;
+	init_mem();
 }
 
 int DMDFrame::get_bitsperpixel() {

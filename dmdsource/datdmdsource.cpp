@@ -13,7 +13,6 @@ DATDMDSource::DATDMDSource(string filename)
 
 DATDMDSource::~DATDMDSource()
 {
-	// TODO: clear
 }
 
 bool DATDMDSource::read_file(string filename)
@@ -27,20 +26,13 @@ bool DATDMDSource::read_file(string filename)
 	df.exceptions(ifstream::failbit | ifstream::badbit);
 
 	int framecount = 0;
-	try
-	{
-		int rc = 0;
-		while (rc == 0) {
-			DMDFrame* frame = this->read_from_dat(df);
-			if (frame) {
-				frames.push(frame);
-				framecount++;
-			}
+
+	while (true) {
+		try {
+			DMDFrame frame = read_from_dat(df);
+		} catch (std::ios_base::failure e) {
+			break;
 		}
-	}
-	catch (int e) {
-		BOOST_LOG_TRIVIAL(error) << "I/O error reading " << filename << ": " << e;
-		return false;
 	}
 
 	BOOST_LOG_TRIVIAL(info) << "successfully loaded " << framecount << " from " << filename;
@@ -48,53 +40,48 @@ bool DATDMDSource::read_file(string filename)
 	return true;
 }
 
-DMDFrame* DATDMDSource::read_from_dat(std::ifstream& fis)
+DMDFrame DATDMDSource::read_from_dat(std::ifstream& fis)
 {
+	DMDFrame res = DMDFrame();
 	if ((!fis.good()) || fis.eof()) {
-		return nullptr;
+		throw std::ios_base::failure("Error reading from input stream");
 	}
 
 	uint8_t header[8];
-	DMDFrame* res = nullptr;
 
-	try {
-		fis.read((char*)header, 8);
-		int rows = (header[0] << 8) + header[1];
-		int columns = (header[2] << 8) + header[3];
-		int bitsperpixel = (header[6] << 8) + header[7];
+	fis.read((char*)header, 8);
+	int rows = (header[0] << 8) + header[1];
+	int columns = (header[2] << 8) + header[3];
+	int bitsperpixel = (header[6] << 8) + header[7];
 
-		assert((bitsperpixel == 1) || (bitsperpixel == 2) || (bitsperpixel == 4) || (bitsperpixel == 8));
-		int datalen = rows * columns * bitsperpixel / 8;
-		int px_per_byte = 8 / bitsperpixel;
+	assert((bitsperpixel == 1) || (bitsperpixel == 2) || (bitsperpixel == 4) || (bitsperpixel == 8));
+	int datalen = rows * columns * bitsperpixel / 8;
+	int px_per_byte = 8 / bitsperpixel;
 
-		res = new DMDFrame(columns, rows, bitsperpixel);
+	res.set_size(columns, rows, bitsperpixel);
 
-		char* buf = new char[rows * columns * bitsperpixel / 8];
-		uint8_t* current_px = (uint8_t*)buf;
-		fis.read(buf, datalen);
-		// data are packed, convert these to plain bytes
-		for (int i = 0; i < datalen; i++, current_px++) {
-			uint8_t px = *current_px;
-			for (int bit = 8 - bitsperpixel; bit >= 0; bit -= bitsperpixel) {
-				uint8_t pv = (px >> bit) & res->get_pixelmask();
-				res->add_pixel(pv);
-			}
+	char* buf = new char[rows * columns * bitsperpixel / 8];
+	uint8_t* current_px = (uint8_t*)buf;
+	fis.read(buf, datalen);
+	// data are packed, convert these to plain bytes
+	for (int i = 0; i < datalen; i++, current_px++) {
+		uint8_t px = *current_px;
+		for (int bit = 8 - bitsperpixel; bit >= 0; bit -= bitsperpixel) {
+			uint8_t pv = (px >> bit) & res.get_pixelmask();
+			res.add_pixel(pv);
 		}
-		delete[] buf;
 	}
-	catch (std::ios_base::failure) {
-		return nullptr;
-	}
+	delete[] buf;
 
 	return res;
 }
 
 
-unique_ptr<DMDFrame> DATDMDSource::next_frame(bool blocking)
+DMDFrame DATDMDSource::next_frame(bool blocking)
 {
-	DMDFrame* res = frames.front();
+	DMDFrame res = frames.front();
 	frames.pop();
-	return std::unique_ptr<DMDFrame>(res);
+	return DMDFrame(res);
 }
 
 bool DATDMDSource::finished()
@@ -108,17 +95,9 @@ bool DATDMDSource::frame_ready()
 }
 
 
-void DATDMDSource::get_properties(SourceProperties* p) {
-	DMDFrame* frame = frames.front();
-	if (frame) {
-		p->width = frame->get_width();
-		p->height = frame->get_height();
-		p->bitsperpixel = frame->get_bitsperpixel();
-	}
-	else {
-		p->width = p->height = p->bitsperpixel = 0;
-	}
-
+SourceProperties DATDMDSource::get_properties() {
+	DMDFrame frame = frames.front();
+	return SourceProperties(frame.get_width(), frame.get_height(), frame.get_bitsperpixel());
 }
 
 bool DATDMDSource::configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {

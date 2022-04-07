@@ -1,9 +1,9 @@
 #include "dmdsource.h"
 #include "../dmd/dmdframe.h"
 
-unique_ptr<DMDFrame> DMDSource::next_frame(bool blocking)
+DMDFrame DMDSource::next_frame(bool blocking)
 {
-	return std::unique_ptr<DMDFrame>(nullptr);
+	return DMDFrame();
 }
 
 bool DMDSource::finished()
@@ -20,6 +20,20 @@ bool DMDSource::configure_from_ptree(boost::property_tree::ptree pt_general, boo
 	return false;
 }
 
-void DMDSource::get_properties(SourceProperties* p) {
-	p->width = p->height = p->bitsperpixel = 0;
+SourceProperties DMDSource::get_properties() {
+	throw std::logic_error("Function not yet implemented");	
+}
+
+SourceProperties::SourceProperties(int width, int height, int bitsperpixel)
+{
+	this->width = width;
+	this->height = height;
+	this->bitsperpixel = bitsperpixel;
+}
+
+SourceProperties::SourceProperties(DMDFrame& f)
+{
+	width = f.get_width();
+	height = f.get_height();
+	bitsperpixel = f.get_bitsperpixel();
 }

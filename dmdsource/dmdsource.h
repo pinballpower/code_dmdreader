@@ -6,19 +6,24 @@
 
 using namespace std;
 
-typedef struct SourceProperties {
+class SourceProperties {
+
+public:
 	int width;
 	int height;
 	int bitsperpixel;
-} SourceProperties;
+
+	SourceProperties(int width = 0, int height = 0, int bitsperpixel = 0);
+	SourceProperties(DMDFrame &f);
+};
 
 class DMDSource {
 
 public:
-	virtual unique_ptr<DMDFrame> next_frame(bool blocking = true);
+	virtual DMDFrame next_frame(bool blocking = true);
 	virtual bool finished();
 	virtual bool frame_ready();
 	virtual bool configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source);
 
-	virtual void get_properties(SourceProperties* p);
+	virtual SourceProperties get_properties();
 };

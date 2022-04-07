@@ -106,8 +106,7 @@ bool read_config(string filename) {
 	// Sanity checks
 	//
 	int bpp_configured = pt_general.get("bitsperpixel", 0);
-	SourceProperties sourceprop = { 0,0,0 };
-	source->get_properties(&sourceprop);
+	SourceProperties sourceprop = source->get_properties();
 
 	if (!(bpp_configured)) {
 		pt_general.put("bitsperpixel", sourceprop.bitsperpixel);
@@ -215,17 +214,15 @@ int main()
 
 		BOOST_LOG_TRIVIAL(trace) << "[dmdreader] processing frame " << frameno;
 
-		std::unique_ptr<DMDFrame> frame = source->next_frame();
+		DMDFrame frame = source->next_frame();
 
-//		for (DMDFrameProcessor* proc : processors) {
-//			frame = proc->process_frame(frame);
-//		}
+		for (DMDFrameProcessor* proc : processors) {
+			frame = proc->process_frame(frame);
+		}
 
-//		for (FrameRenderer* renderer : renderers) {
-//			renderer->render_frame(frame);
-//		}
-
-//		delete frame;
+		for (FrameRenderer* renderer : renderers) {
+			renderer->render_frame(frame);
+		}
 
 		frameno++;
 	}

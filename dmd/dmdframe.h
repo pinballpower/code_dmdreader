@@ -19,8 +19,8 @@ class DMDFrame {
 
 protected:
 
-	int columns;
-	int rows;
+	int width;
+	int height;
 	int bitsperpixel;
 	vector<uint8_t> data;
 	/// <summary>
@@ -30,8 +30,8 @@ protected:
 
 public:
 
-	DMDFrame(int columns = 0, int rows = 0, int bitsperpixel = 0, uint8_t* data1 = NULL);
-	DMDFrame(int columns, int rows, int bitsperpixel, vector <uint8_t> data1);
+	DMDFrame(int width = 0, int height = 0, int bitsperpixel = 0, uint8_t* data1 = NULL);
+	DMDFrame(int width, int height, int bitsperpixel, vector <uint8_t> data1);
 	~DMDFrame();
 
 	PIXVAL getPixel(int x, int y);
@@ -45,10 +45,14 @@ public:
 	uint8_t get_pixelmask();
 	uint32_t get_checksum();
 
+	void set_size(int width, int height, int bits_per_pixel);
+
 	const vector<uint8_t> get_data();
-	const vector <uint8_t> get_plane(int bitno);
+	const vector<uint8_t> get_plane(int bitno);
 
 	void add_pixel(uint8_t px);
+
+	bool is_null();
 
 	string str();
 

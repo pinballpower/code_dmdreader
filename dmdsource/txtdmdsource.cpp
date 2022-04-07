@@ -29,6 +29,7 @@ bool TXTDMDSource::open_file(string filename)
 	is.open(filename);
 	if (!is) {
 		BOOST_LOG_TRIVIAL(error) << "can't open file " << filename;
+		eof = false;
 		return false;
 	}
 
@@ -68,46 +69,36 @@ void TXTDMDSource::read_next_frame()
 	int height = frametxt.size()-1;
 
 	// Initialize frame
-	delete frame;
-	frame = new DMDFrame(width, height, bits);
+	preloaded_frame = DMDFrame(width, height, bits);
 
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 			uint8_t pv = frametxt[y][x] - '0';
-			frame->add_pixel(pv);
+			preloaded_frame.add_pixel(pv);
 		}
 	}
 }
 
-std::unique_ptr<DMDFrame> TXTDMDSource::next_frame(bool blocking)
+DMDFrame TXTDMDSource::next_frame(bool blocking)
 {
-	DMDFrame* res = frame;
-	frame = nullptr;
+	DMDFrame res = std::move(preloaded_frame);
 	read_next_frame();
-	return std::unique_ptr<DMDFrame>(res);
+	return res;
 }
 
 bool TXTDMDSource::finished()
 {
-	return frame == NULL;
+	return eof;
 }
 
 bool TXTDMDSource::frame_ready()
 {
-	return (!finished());
+	return (!eof);
 }
 
 
-void TXTDMDSource::get_properties(SourceProperties* p) {
-	if (frame) {
-		p->width = frame->get_width();
-		p->height = frame->get_height();
-		p->bitsperpixel = frame->get_bitsperpixel();
-	}
-	else {
-		p->width = p->height = p->bitsperpixel = 0;
-	}
-
+SourceProperties TXTDMDSource::get_properties() {
+	return SourceProperties(preloaded_frame);
 }
 
 bool TXTDMDSource::configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {

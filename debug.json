@@ -11,5 +11,12 @@
   },
   "processor": {
     "frameinfo": {}
+  },
+  "renderer": {
+    "raylib": {
+      "width": 1920,
+      "height": 640,
+      "bitsperpixel": 2
+    }
   }
 }

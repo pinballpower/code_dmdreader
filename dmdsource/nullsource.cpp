@@ -4,9 +4,9 @@ NullDMDSource::NullDMDSource()
 {
 }
 
-unique_ptr<DMDFrame> NullDMDSource::next_frame(bool blocking)
+DMDFrame NullDMDSource::next_frame(bool blocking)
 {
-	return unique_ptr<DMDFrame>();
+	return DMDFrame(width, height, bitsperpixel);
 }
 
 bool NullDMDSource::finished()
@@ -27,9 +27,7 @@ bool NullDMDSource::configure_from_ptree(boost::property_tree::ptree pt_general,
 	return true;
 }
 
-void NullDMDSource::get_properties(SourceProperties* p)
+SourceProperties NullDMDSource::get_properties()
 {
-	p->width = width;
-	p->height = height;
-	p->bitsperpixel = bitsperpixel;
+	return SourceProperties(width, height, bitsperpixel);
 }

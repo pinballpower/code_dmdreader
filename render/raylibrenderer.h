@@ -10,7 +10,7 @@ public:
 
 	RaylibRenderer();
 	~RaylibRenderer();
-	virtual void render_frame(DMDFrame* f);
+	virtual void render_frame(DMDFrame &f);
 	void set_palette(DMDPalette*);
 
 	void set_display_parameters(int width, int height, int px_radius, int px_spacing, int bitsperpixel);

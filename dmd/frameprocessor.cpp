@@ -1,6 +1,6 @@
 #include "frameprocessor.h"
 
-DMDFrame* DMDFrameProcessor::process_frame(DMDFrame* f)
+DMDFrame DMDFrameProcessor::process_frame(DMDFrame& f)
 {
 	return f;
 }

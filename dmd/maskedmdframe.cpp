@@ -42,16 +42,16 @@ int MaskedDMDFrame::read_from_rgbimage(RGBBuffer &rgbdata, DMDPalette* palette, 
 	uint8_t allset = (uint8_t)max_index;
 
 	// Initialize memory
-	DMDFrame::columns = rgbdata.width;
-	DMDFrame::rows = rgbdata.height;
+	DMDFrame::width = rgbdata.width;
+	DMDFrame::height = rgbdata.height;
 	DMDFrame::bitsperpixel = bitsperpixel;
 	init_mem();
 
 	// Mask calculations
 	int mask_x1, mask_x2, mask_y1, mask_y2;
-	mask_x1 = columns + 1;
+	mask_x1 = width + 1;
 	mask_x2 = -1;
-	mask_y1 = rows + 1;
+	mask_y1 = height + 1;
 	mask_y2 = -1;
 	mask.clear();
 
@@ -97,7 +97,7 @@ int MaskedDMDFrame::read_from_rgbimage(RGBBuffer &rgbdata, DMDPalette* palette, 
 
 	// Masking
 	mask.clear();
-	mask.reserve(rows * columns);
+	mask.reserve(width*height);
 	if ((mask_x1 <= mask_x2) && (mask_y1 <= mask_y2)) {
 		// mask rectangle found
 		for (int y = 0; y < rgbdata.height; y++) {
