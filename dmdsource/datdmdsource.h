@@ -5,7 +5,7 @@
 #include "../dmd/dmdframe.h"
 #include "dmdsource.h"
 
-class DATDMDSource : DMDSource {
+class DATDMDSource : public DMDSource {
 
 public:
 

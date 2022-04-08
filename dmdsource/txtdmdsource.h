@@ -5,7 +5,7 @@
 #include "../dmd/dmdframe.h"
 #include "dmdsource.h"
 
-class TXTDMDSource : DMDSource {
+class TXTDMDSource : public DMDSource {
 
 public:
 

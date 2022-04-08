@@ -5,7 +5,7 @@
 #include "raylib.h"
 #include "framerenderer.h"
 
-class RaylibRenderer: FrameRenderer
+class RaylibRenderer: public FrameRenderer
 {
 public:
 

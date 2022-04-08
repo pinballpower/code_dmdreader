@@ -8,7 +8,7 @@
 #include "dmdframe.h"
 #include "frameprocessor.h"
 
-class FrameInfoLogger : DMDFrameProcessor {
+class FrameInfoLogger : public DMDFrameProcessor {
 
 public:
 
