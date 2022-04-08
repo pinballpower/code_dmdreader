@@ -22,7 +22,7 @@ RGBBuffer::~RGBBuffer()
 {
 }
 
-const vector<uint8_t> RGBBuffer::get_data()
+const vector<uint8_t> RGBBuffer::get_data() const
 {
 	return data;
 }

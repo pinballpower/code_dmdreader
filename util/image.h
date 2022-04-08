@@ -22,7 +22,7 @@ public:
 	RGBBuffer(int width, int height);
 	~RGBBuffer();
 
-	const vector <uint8_t> get_data();
+	const vector<uint8_t> get_data() const;
 
 	void set_pixel(int x, int y, rgb data);
 	void set_pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b);
