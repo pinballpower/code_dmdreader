@@ -43,7 +43,7 @@ bool read_config(string filename) {
 		boost::property_tree::json_parser::read_json(filename, pt);
 	}
 	catch (const boost::property_tree::json_parser::json_parser_error e) {
-		BOOST_LOG_TRIVIAL(fatal) << "couldn't parse JSON configuration file " << e.what() << ", aborting";
+		BOOST_LOG_TRIVIAL(fatal) << "[readconfig] couldn't parse JSON configuration file " << e.what() << ", aborting";
 		exit(1);
 	}
 
@@ -80,21 +80,21 @@ bool read_config(string filename) {
 	try {
 		BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("source")) {
 			if (source_configured) {
-				BOOST_LOG_TRIVIAL(info) << "ignoring " << v.first << " only a single source is supported";
+				BOOST_LOG_TRIVIAL(info) << "[readconfig] ignoring " << v.first << " only a single source is supported";
 			}
 			else {
 				source = createSource(v.first);
 				if (source) {
 					if (source->configure_from_ptree(pt_general, v.second)) {
-						BOOST_LOG_TRIVIAL(info) << "successfully initialized input type " << v.first;
+						BOOST_LOG_TRIVIAL(info) << "[readconfig] successfully initialized input type " << v.first;
 						source_configured = true;
 					}
 					else {
-						BOOST_LOG_TRIVIAL(warning) << "couldn't initialise source " << v.first << ", ignoring";
+						BOOST_LOG_TRIVIAL(warning) << "[readconfig] couldn't initialise source " << v.first << ", ignoring";
 					}
 				}
 				else {
-					BOOST_LOG_TRIVIAL(warning) << "don't know input type " << v.first << ", ignoring";
+					BOOST_LOG_TRIVIAL(warning) << "[readconfig] don't know input type " << v.first << ", ignoring";
 				}
 			}
 		}
@@ -102,7 +102,7 @@ bool read_config(string filename) {
 	catch (const boost::property_tree::ptree_bad_path& e) {}
 
 	if (!(source_configured)) {
-		BOOST_LOG_TRIVIAL(error) << "couldn't initialise any source, aborting";
+		BOOST_LOG_TRIVIAL(error) << "[readconfig] couldn't initialise any source, aborting";
 		return false;
 	}
 
@@ -117,7 +117,7 @@ bool read_config(string filename) {
 	}
 	else if (sourceprop.bitsperpixel && (bpp_configured != sourceprop.bitsperpixel)) {
 
-		BOOST_LOG_TRIVIAL(error) << "bits/pixel configured=" << bpp_configured << ", detected=" << sourceprop.bitsperpixel <<
+		BOOST_LOG_TRIVIAL(error) << "[readconfig] bits/pixel configured=" << bpp_configured << ", detected=" << sourceprop.bitsperpixel <<
 			" do not match, aborting";
 		return false;
 	}
@@ -128,7 +128,7 @@ bool read_config(string filename) {
 	}
 	else if (sourceprop.width && (width_configured != sourceprop.width)) {
 
-		BOOST_LOG_TRIVIAL(error) << "columns configured=" << width_configured << ", detected=" << sourceprop.width <<
+		BOOST_LOG_TRIVIAL(error) << "[readconfig] columns configured=" << width_configured << ", detected=" << sourceprop.width <<
 			" do not match, aborting";
 		return false;
 	}
@@ -139,7 +139,7 @@ bool read_config(string filename) {
 	}
 	else if (sourceprop.height && (height_configured != sourceprop.height)) {
 
-		BOOST_LOG_TRIVIAL(error) << "height configured=" << width_configured << ", detected=" << sourceprop.height <<
+		BOOST_LOG_TRIVIAL(error) << "[readconfig] height configured=" << width_configured << ", detected=" << sourceprop.height <<
 			" do not match, aborting";
 		return false;
 	}
@@ -153,7 +153,7 @@ bool read_config(string filename) {
 			DMDFrameProcessor* proc = createProcessor(v.first);
 			if (proc) {
 				if (proc->configure_from_ptree(pt_general, v.second)) {
-					BOOST_LOG_TRIVIAL(info) << "successfully initialized processor " << v.first;
+					BOOST_LOG_TRIVIAL(info) << "[readconfig] successfully initialized processor " << v.first;
 					processors.push_back(proc);
 				}
 				else {
@@ -161,12 +161,12 @@ bool read_config(string filename) {
 				}
 			}
 			else {
-				BOOST_LOG_TRIVIAL(error) << "don't know processor type " << v.first << ", ignoring";
+				BOOST_LOG_TRIVIAL(error) << "[readconfig] don't know processor type " << v.first << ", ignoring";
 			}
 		}
 	}
 	catch (const boost::property_tree::ptree_bad_path& e) {
-		BOOST_LOG_TRIVIAL(info) << "no processors defined";
+		BOOST_LOG_TRIVIAL(info) << "[readconfig] no processors defined";
 	}
 
 
@@ -178,7 +178,7 @@ bool read_config(string filename) {
 			FrameRenderer* renderer = createRenderer(v.first);
 			if (renderer) {
 				if (renderer->configure_from_ptree(pt_general, v.second)) {
-					BOOST_LOG_TRIVIAL(info) << "successfully initialized renderer " << v.first;
+					BOOST_LOG_TRIVIAL(info) << "[readconfig] successfully initialized renderer " << v.first;
 					renderers.push_back(renderer);
 				}
 				else {
@@ -186,13 +186,13 @@ bool read_config(string filename) {
 				}
 			}
 			else {
-				BOOST_LOG_TRIVIAL(error) << "don't know renderer type " << v.first << ", ignoring";
+				BOOST_LOG_TRIVIAL(error) << "[readconfig] don't know renderer type " << v.first << ", ignoring";
 			}
 		}
 	}
 
 	catch (const boost::property_tree::ptree_bad_path& e) {
-		BOOST_LOG_TRIVIAL(info) << "no renderers defined";
+		BOOST_LOG_TRIVIAL(info) << "[readconfig] no renderers defined";
 	}
 
 	return true;
