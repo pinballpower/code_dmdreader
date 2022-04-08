@@ -10,7 +10,7 @@
 
 #if __has_include("../colorize/config.h")
 #include "../colorize/config.h"
-#include "../colorize/vnicolorisation.h"
+#include "../colorize/pin2dmdcolorisation.h"
 #endif
 
 DMDSource* createSource(string name) {
@@ -25,7 +25,7 @@ DMDSource* createSource(string name) {
 	}
 #ifdef VNICOLORING
 	else if (name == "vni") {
-		return (DMDSource*)(new VniColorisation());
+		return (DMDSource*)(new Pin2DMDColorisation());
 	}
 #endif
 	else {
@@ -42,7 +42,7 @@ DMDFrameProcessor* createProcessor(string name) {
 	}
 #ifdef VNICOLORING
 	else if (name == "vni") {
-		return (DMDFrameProcessor*)(new VniColorisation());
+		return (DMDFrameProcessor*)(new Pin2DMDColorisation());
 	}
 #endif
 	else if (name == "frameinfo") {
