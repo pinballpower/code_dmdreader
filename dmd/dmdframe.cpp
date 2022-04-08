@@ -32,6 +32,7 @@ DMDFrame::DMDFrame(int columns, int rows, int bitsperpixel, vector<uint8_t> data
 	checksum = 0;
 	pixel_mask = 0;
 	init_mem();
+	this->data = std::move(data);
 }
 
 
