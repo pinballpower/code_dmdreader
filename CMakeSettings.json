@@ -2,7 +2,7 @@
   "configurations": [
     {
       "buildCommandArgs": "",
-      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "buildRoot": "c:\\Temp\\DMDReader\\${name}",
       "cmakeCommandArgs": "",
       "configurationType": "Debug",
       "ctestCommandArgs": "",
@@ -21,6 +21,7 @@
           "value": "x64-windows-static",
           "type": "STRING"
         }
+
       ]
     },
     {
