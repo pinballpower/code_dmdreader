@@ -231,7 +231,7 @@ int main(int argc, char** argv)
 		assert(frame.is_valid());
 
 		for (DMDFrameProcessor* proc : processors) {
-			// frame = proc->process_frame(frame);
+			frame = proc->process_frame(frame);
 			assert(frame.is_valid());
 		}
 
