@@ -44,7 +44,14 @@ void reverse_byte_array(uint8_t* arr, int len) {
 	for (int i = 0; i < len; i++, p++) {
 		*p = reverse_byte(*p);
 	}
-};
+}
+void reverse_byte_vector(vector<uint8_t>& vect)
+{
+	for (auto& b : vect) {
+		b = reverse_byte(b);
+	}
+}
+;
 
 uint32_t reverse_word_order(uint32_t x) {
 	return (x >> 24) | ((x >> 8) & 0xff00) | (x << 8 & 0xff0000) | (x << 24);
