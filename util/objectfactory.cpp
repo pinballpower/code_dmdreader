@@ -41,7 +41,7 @@ DMDFrameProcessor* createProcessor(string name) {
 		return (DMDFrameProcessor*)(new PubCapture());
 	}
 #ifdef VNICOLORING
-	else if (name == "vni") {
+	else if (name == "pin2dmd") {
 		return (DMDFrameProcessor*)(new Pin2DMDColorisation());
 	}
 #endif
@@ -49,7 +49,7 @@ DMDFrameProcessor* createProcessor(string name) {
 		return (DMDFrameProcessor*)(new FrameInfoLogger());
 	}
 	else {
-		BOOST_LOG_TRIVIAL(error) << "processor name " << name << "unknown";
+		BOOST_LOG_TRIVIAL(error) << "processor name " << name << " unknown";
 		return NULL;
 	}
 
@@ -61,7 +61,7 @@ FrameRenderer* createRenderer(string name) {
 		return (FrameRenderer*)(new RaylibRenderer());
 	}
 	else {
-		BOOST_LOG_TRIVIAL(error) << "renderer name " << name << "unknown";
+		BOOST_LOG_TRIVIAL(error) << "renderer name " << name << " unknown";
 		return NULL;
 	}
 
