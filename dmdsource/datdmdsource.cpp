@@ -25,17 +25,16 @@ bool DATDMDSource::read_file(string filename)
 
 	df.exceptions(ifstream::failbit | ifstream::badbit);
 
-	int framecount = 0;
-
 	while (true) {
 		try {
 			DMDFrame frame = read_from_dat(df);
+			frames.push(frame);
 		} catch (std::ios_base::failure e) {
 			break;
 		}
 	}
 
-	BOOST_LOG_TRIVIAL(info) << "successfully loaded " << framecount << " from " << filename;
+	BOOST_LOG_TRIVIAL(info) << "successfully loaded " << frames.size() << " from " << filename;
 
 	return true;
 }
