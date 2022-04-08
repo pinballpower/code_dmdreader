@@ -1,5 +1,6 @@
 {
   "general": {
+    "cwd_to_configdir":  true
   },
   "source": {
     "vni": {

@@ -1,9 +1,10 @@
 {
   "general": {
+    "cwd_to_configdir":  true
   },
   "source": {
     "txt": {
-      "name": "../../../samples/baywatch.txt",
+      "name": "samples/baywatch.txt",
       "bitsperpixel": 2
     },
     "null": {
@@ -12,7 +13,7 @@
   "processor": {
     "frameinfo": {},
     "vni": {
-      "basename": "../../../samples/baywatch"
+      "basename": "samples/baywatch"
     }
   },
   "renderer": {

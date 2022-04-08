@@ -69,6 +69,10 @@ bool read_config(string filename) {
 		pt_general.put("columns", 128);
 	}
 
+	if (pt_general.get("cwd_to_configdir", false)) {
+		filesystem::current_path(filesystem::path(filename).parent_path());
+	}
+
 	//
 	// Sources
 	//
@@ -195,17 +199,25 @@ bool read_config(string filename) {
 }
 
 
-int main()
+int main(int argc, char** argv)
 {
 	boost::log::core::get()->set_filter
 	(
 		boost::log::trivial::severity >= boost::log::trivial::trace
 	);
 
+	BOOST_LOG_TRIVIAL(trace) << "[dmdreader] cwd: " << filesystem::current_path();
 
-	string basedir = "../../../";
-	if (!read_config(basedir + "debug.json")) {
-		BOOST_LOG_TRIVIAL(error) << "couldn't configure DMDReader, aborting";
+	string config_file;
+	if (argc >= 2) {
+		config_file = argv[1]; 
+	}
+	else {
+		config_file = "dmdreader.json";
+	}
+
+	if (!read_config(config_file)) {
+		BOOST_LOG_TRIVIAL(error) << "[dmdreader]couldn't configure DMDReader, aborting";
 		exit(1);
 	}
 
@@ -219,7 +231,7 @@ int main()
 		assert(frame.is_valid());
 
 		for (DMDFrameProcessor* proc : processors) {
-			frame = proc->process_frame(frame);
+			// frame = proc->process_frame(frame);
 			assert(frame.is_valid());
 		}
 
