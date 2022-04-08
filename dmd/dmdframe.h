@@ -39,21 +39,21 @@ public:
 	bool same_size(DMDFrame &f2);
 	bool equals_fast(DMDFrame &f2);
 
-	int get_width();
-	int get_height();
-	int get_bitsperpixel();
-	uint8_t get_pixelmask();
-	uint32_t get_checksum();
+	int get_width() const;
+	int get_height() const;
+	int get_bitsperpixel() const;
+	uint8_t get_pixelmask() const;
+	uint32_t get_checksum() const;
 
 	void set_size(int width, int height, int bits_per_pixel);
 
-	const vector<uint8_t> get_data();
+	const vector<uint8_t> get_data() const;
 	const vector<uint8_t> get_plane(int bitno);
 
 	void add_pixel(uint8_t px);
 
-	bool is_null();
-	bool is_valid();
+	bool is_null() const;
+	bool is_valid() const;
 
 	string str();
 
@@ -65,7 +65,7 @@ protected:
 	void copy_data(uint8_t* dat, int len);
 	void calc_planes();
 
-	int bytesperpixel();
+	int bytesperpixel() const;
 
 	// cache some stuff
 	int datalen;

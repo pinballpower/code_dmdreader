@@ -9,17 +9,18 @@ MaskedDMDFrame::MaskedDMDFrame() {
 MaskedDMDFrame::~MaskedDMDFrame() {
 }
 
-bool MaskedDMDFrame::matches(DMDFrame &frame) {
+bool MaskedDMDFrame::matches(const DMDFrame frame) const {
 
 	if (frame.get_data().size() != data.size()) {
 		return false;
 	}
 
-	auto myData = data.begin();
-	auto maskData = mask.begin();
-	auto otherData = frame.get_data().begin();
+	auto myData = data.cbegin();
+	auto maskData = mask.cbegin();
+	const auto frameData = frame.get_data();
+	auto otherData = frameData.cbegin();
 
-	for (; myData != data.end(); myData++, otherData++, maskData++) 
+	for (; myData != data.cend(); myData++, otherData++, maskData++) 
 	{
 		// if the pixel is masked, don't compare
 		if (*maskData == 0) {
@@ -34,7 +35,7 @@ bool MaskedDMDFrame::matches(DMDFrame &frame) {
 	return true;
 }
 
-int MaskedDMDFrame::read_from_rgbimage(RGBBuffer &rgbdata, DMDPalette* palette, int bitsperpixel) {
+void MaskedDMDFrame::read_from_rgbimage(const RGBBuffer rgbdata, const DMDPalette palette, int bitsperpixel) {
 
 	assert((bitsperpixel > 0) && (bitsperpixel <= 8));
 
@@ -64,7 +65,7 @@ int MaskedDMDFrame::read_from_rgbimage(RGBBuffer &rgbdata, DMDPalette* palette, 
 	for (int y = 0; y < rgbdata.height; y++) {
 		for (int x = 0; x < rgbdata.width; x++, i+=3) {
 
-			int color_index = palette->find(rgb_src[i], rgb_src[i+1], rgb_src[i+2]);
+			int color_index = palette.index_of(rgb_src[i], rgb_src[i+1], rgb_src[i+2]);
 
 			if (color_index < 0) {
 				color_not_found = true;
@@ -115,6 +116,4 @@ int MaskedDMDFrame::read_from_rgbimage(RGBBuffer &rgbdata, DMDPalette* palette, 
 	}
 
 	DMDFrame::recalc_checksum();
-
-	return 0;
 }

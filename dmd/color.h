@@ -8,8 +8,6 @@
 
 using namespace std;
 
-#define COLOR_VECTOR vector<DMDColor>
-
 union colorUnion{
 	uint32_t value;
 	struct {
@@ -29,32 +27,12 @@ public:
 	DMDColor(uint32_t colors, bool revert_endian=false);
 	DMDColor(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t alpha1 = 0);
 
-	bool matches(uint8_t r1, uint8_t g1, uint8_t b1);
-	bool matches(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t alpha1);
-	bool matches(DMDColor c, bool ignore_alpha = true);
+	bool matches(uint8_t r1, uint8_t g1, uint8_t b1) const;
+	bool matches(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t alpha1) const;
+	bool matches(DMDColor c, bool ignore_alpha = true) const;
 
-	uint32_t get_color_data();
+	uint32_t get_color_data() const;
 
-};
-
-class DMDPalette {
-
-public:
-	DMDColor* colors;
-	int size;
-	int bitsperpixel;
-	string name;
-
-	DMDPalette(int size, int bitsperpixel, string name="");
-	DMDPalette(uint32_t* colors, int size, int bitsperpixel, string name="");
-	~DMDPalette();
-
-	int find(uint32_t color, bool ignore_alpha=true);
-	int find(uint8_t r, uint8_t g, uint8_t b);
-
-	bool matches(RGBBuffer& buf);
+	static DMDColor fade(const DMDColor color, int fading);
 
 };
-
-DMDPalette* find_matching_palette(vector<DMDPalette*> palettes, RGBBuffer* buf);
-vector<DMDPalette*> default_palettes();

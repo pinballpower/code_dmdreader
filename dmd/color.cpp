@@ -9,7 +9,7 @@ using namespace std;
 
 DMDColor::DMDColor() {
 	c.value = 0;
-		
+
 }
 
 DMDColor::DMDColor(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t alpha1) {
@@ -24,22 +24,22 @@ DMDColor::DMDColor(uint32_t colors, bool revert_endian) {
 		c.cols.r = colors && 0xff;
 		c.cols.g = (colors >> 8) && 0xff;
 		c.cols.g = (colors >> 16) && 0xff;
-		c.cols.alpha= (colors >> 24) && 0xff;
+		c.cols.alpha = (colors >> 24) && 0xff;
 	}
 	else {
 		c.value = colors;
 	}
 }
 
-bool DMDColor::matches(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t alpha1) {
+bool DMDColor::matches(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t alpha1) const {
 	return ((r1 == c.cols.r) && (g1 == c.cols.g) && (b1 == c.cols.b) && (alpha1 == c.cols.alpha));
 }
 
-bool DMDColor::matches(uint8_t r1, uint8_t g1, uint8_t b1) {
+bool DMDColor::matches(uint8_t r1, uint8_t g1, uint8_t b1) const {
 	return ((r1 == c.cols.r) && (g1 == c.cols.g) && (b1 == c.cols.b));
 }
 
-bool DMDColor::matches(DMDColor color, bool ignore_alpha) {
+bool DMDColor::matches(DMDColor color, bool ignore_alpha) const {
 	if ((color.c.cols.r == c.cols.r) && (color.c.cols.g == c.cols.g) && (color.c.cols.b == c.cols.b)) {
 		if (ignore_alpha) {
 			return true;
@@ -51,103 +51,17 @@ bool DMDColor::matches(DMDColor color, bool ignore_alpha) {
 	return false;
 }
 
-uint32_t DMDColor::get_color_data()
+uint32_t DMDColor::get_color_data() const
 {
 	return c.value;
 }
 
-DMDPalette::DMDPalette(int size, int bitsperpixel, string name) {
-	assert(size >= (1 << bitsperpixel));
-
-	this->size = size;
-	this->bitsperpixel = bitsperpixel;
-	colors = new DMDColor[size];
-	this->name = name;
-}
-
-DMDPalette::DMDPalette(uint32_t* colors, int size, int bitsperpixel, string name1)
+DMDColor DMDColor::fade(const DMDColor color, int fading)
 {
-	assert(size >= (1 << bitsperpixel));
-
-	this->size = size;
-	this->colors = new DMDColor[size];
-	for (int i = 0; i < size; i++) {
-		this->colors[i].c.value = colors[i];
-	}
-
-	this->name = name;
+	int r = color.c.cols.r * fading / 256;
+	int g = color.c.cols.g * fading / 256;
+	int b = color.c.cols.b * fading / 256;
+	return DMDColor(r,g,b);
 }
 
-DMDPalette::~DMDPalette() {
-	delete colors;
-}
-
-int DMDPalette::find(uint32_t color, bool ignore_alpha) {
-	for (int i = 0; i < size; i++) {
-		if (colors[i].matches(color, ignore_alpha)) {
-			return i;
-		}
-	}
-	return -1;
-}
-
-int DMDPalette::find(uint8_t r, uint8_t g, uint8_t b) {
-	for (int i = 0; i < size; i++) {
-		if (colors[i].matches(r,g,b)) {
-			return i;
-		}
-	}
-	return -1;
-}
-
-bool DMDPalette::matches(RGBBuffer &buf) {
-	vector <uint8_t> data = buf.get_data();
-	for (int i = 0; i < data.size(); i += 3) {
-		uint8_t r = data[i];
-		uint8_t g = data[i+1];
-		uint8_t b = data[i+2];
-		bool color_found = false;
-
-		for (int ci = 0; ci < size; ci++) {
-			if (colors[ci].matches(r,g,b)) {
-				color_found = true;
-				break;
-			}
-		}
-
-		if (!(color_found)) {
-			return false;
-		}
-	}
-	return true;
-}
-
-
-
-DMDPalette* find_matching_palette(vector<DMDPalette*> palettes, RGBBuffer &buf)
-{
-	for (const auto& palette : palettes) {
-		if (palette->matches(buf)) {
-			return palette;
-		}
-	}
-
-	return NULL;
-}
-
-vector<DMDPalette*> default_palettes() {
-	vector<DMDPalette*> res = vector<DMDPalette*>();
-
-	uint32_t pd_4_orange_mask_data[] = {
-		0x00000000, 0x11050000, 0x22090000, 0x330e0000,
-		0x44120000, 0x55170000, 0x661C0000, 0x77200000,
-		0x88000000, 0x99000000, 0xaa000000, 0xbb000000,
-		0xcc370000, 0xdd3c0000, 0xee400000, 0xff450000,
-		0xfd00fd00 };
-	DMDPalette* pd_4_orange_mask = new DMDPalette(pd_4_orange_mask_data, 17, 4, "pd_4_orange_mask");
-
-	res.push_back(pd_4_orange_mask);
-
-	return res;
-}
 

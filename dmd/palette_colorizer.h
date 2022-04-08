@@ -4,5 +4,6 @@
 
 #include "color.h"
 #include "dmdframe.h"
+#include "palette.h"
 
-DMDFrame* color_frame(DMDFrame* frame, COLOR_VECTOR& colors);
+DMDFrame color_frame(const DMDFrame frame, const DMDPalette palette);

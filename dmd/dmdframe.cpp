@@ -20,7 +20,7 @@ DMDFrame::DMDFrame(int width, int height, int bitsperpixel, uint8_t* data)
 	pixel_mask = 0;
 	init_mem();
 	if (data != nullptr) {
-		this->copy_data(data, width*height*bytesperpixel());
+		this->copy_data(data, width * height * bytesperpixel());
 	}
 }
 
@@ -43,11 +43,11 @@ PIXVAL DMDFrame::getPixel(int x, int y) {
 	return (data[offset]);
 }
 
-bool DMDFrame::same_size(DMDFrame &f2) {
+bool DMDFrame::same_size(DMDFrame& f2) {
 	return ((width = f2.width) && (height = f2.height) && (bitsperpixel = f2.bitsperpixel));
 }
 
-bool DMDFrame::equals_fast(DMDFrame &f2) {
+bool DMDFrame::equals_fast(DMDFrame& f2) {
 	if (this->same_size(f2)) {
 		return checksum == f2.checksum;
 	}
@@ -83,16 +83,16 @@ void DMDFrame::add_pixel(uint8_t px)
 
 }
 
-int DMDFrame::bytesperpixel() {
+int DMDFrame::bytesperpixel() const {
 	return  (bitsperpixel + 7) / 8;
 }
 
-bool DMDFrame::is_null()
+bool DMDFrame::is_null() const
 {
 	return ((width == 0) && (height == 0));
 }
 
-bool DMDFrame::is_valid()
+bool DMDFrame::is_valid() const
 {
 	return data.size() == (width * height * bytesperpixel());
 
@@ -103,12 +103,13 @@ void DMDFrame::recalc_checksum() {
 }
 
 void DMDFrame::init_mem(int no_of_pixels) {
-	assert(((bitsperpixel <= 8) && (bitsperpixel >= 0)) || (bitsperpixel==24) || (bitsperpixel==32));
+	assert(((bitsperpixel <= 8) && (bitsperpixel >= 0)) || (bitsperpixel == 24) || (bitsperpixel == 32));
 
 	if (bitsperpixel <= 8) {
 		rowlen = width;
-	} else if (bitsperpixel == 24) {
-		rowlen = width * 3; 
+	}
+	else if (bitsperpixel == 24) {
+		rowlen = width * 3;
 	}
 	else if (bitsperpixel == 32) {
 		rowlen = width * 4;
@@ -141,7 +142,7 @@ void DMDFrame::calc_planes()
 	}
 	for (int i = 0; i < bitsperpixel; i++) {
 		vector<uint8_t> plane = vector<uint8_t>();
-		plane.reserve(width*height / 8);
+		plane.reserve(width * height / 8);
 		planes.push_back(plane);
 	}
 
@@ -154,7 +155,7 @@ void DMDFrame::calc_planes()
 				planes[i].push_back(0);
 			}
 		}
-		for (uint8_t i = 0, mask=1 ; i < bitsperpixel; i++, mask << 1) {
+		for (uint8_t i = 0, mask = 1; i < bitsperpixel; i++, mask << 1) {
 			if ((p & mask) != 0) {
 				planes[i].back() = (planes[i].back() << 1) | 1;
 			}
@@ -166,23 +167,23 @@ void DMDFrame::calc_planes()
 	}
 }
 
-int DMDFrame::get_width() {
+int DMDFrame::get_width() const {
 	return width;
 }
 
-int DMDFrame::get_height() {
+int DMDFrame::get_height() const {
 	return height;
 }
 
-const vector<uint8_t> DMDFrame::get_data() {
+const vector<uint8_t> DMDFrame::get_data() const {
 	return data;
 }
 
-uint8_t DMDFrame::get_pixelmask() {
+uint8_t DMDFrame::get_pixelmask() const {
 	return pixel_mask;
 }
 
-uint32_t DMDFrame::get_checksum()
+uint32_t DMDFrame::get_checksum() const
 {
 	return checksum;
 }
@@ -199,12 +200,12 @@ void DMDFrame::set_size(int width, int height, int bits_per_pixel)
 		return;
 	}
 
-	this->width=width;
-	this->height=height;
-	this->bitsperpixel=bits_per_pixel;
+	this->width = width;
+	this->height = height;
+	this->bitsperpixel = bits_per_pixel;
 	init_mem();
 }
 
-int DMDFrame::get_bitsperpixel() {
+int DMDFrame::get_bitsperpixel() const {
 	return bitsperpixel;
 }

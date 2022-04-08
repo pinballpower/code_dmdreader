@@ -13,16 +13,8 @@
 
 using namespace std;
 
-PubCapture::PubCapture() {
-    palette = NULL;
-}
-
-
-bool PubCapture::load_triggers(int bitsperpixel, string directory, DMDPalette* palette)
+bool PubCapture::load_triggers(int bitsperpixel, string directory, std::optional <DMDPalette> palette)
 {
-    this->palette = palette;
-    trigger_frames = map<int, MaskedDMDFrame*>();
-
     regex file_expr("([0-9]+).bmp");
 
     std::filesystem::path folder(directory);
@@ -64,30 +56,30 @@ bool PubCapture::load_triggers(int bitsperpixel, string directory, DMDPalette* p
     }
 
     // Find the correct palette for these if it's not given
-    if (!this->palette) {
-        vector<DMDPalette*> palettes = default_palettes();
-        for (const auto& p : palettes) {
+    if (! palette) {
+        vector<DMDPalette> palettes = default_palettes();
+        for (const auto p : palettes) {
 
-            BOOST_LOG_TRIVIAL(debug) << "Checking palette " << p->name;
+            BOOST_LOG_TRIVIAL(debug) << "Checking palette " << p.name;
             bool matches = true;
 
             map<int, RGBBuffer>::iterator itr;
             for (itr = rgbdata.begin(); itr != rgbdata.end(); ++itr) {
                 RGBBuffer buff = itr->second;
 
-                if (!p->matches(buff)) {
+                if (!p.matches(buff)) {
                     break;
                     matches = false;
                 }
             }
             if (matches) {
-                this->palette = p;
+                palette = p;
                 break;
             }
         }
     }
 
-    if (!this->palette) {
+    if (! palette) {
         BOOST_LOG_TRIVIAL(error) << "Couldn't find matching color palette for images in " << directory;
         return false;
     }
@@ -98,9 +90,9 @@ bool PubCapture::load_triggers(int bitsperpixel, string directory, DMDPalette* p
         int i = itr->first;
         RGBBuffer buf = itr->second;
 
-        MaskedDMDFrame *mf = new MaskedDMDFrame();
-        mf->read_from_rgbimage(buf, this->palette, bitsperpixel);
-        trigger_frames.insert(pair<int, MaskedDMDFrame*>(i, mf));
+        MaskedDMDFrame mf = MaskedDMDFrame();
+        mf.read_from_rgbimage(buf, palette.value(), bitsperpixel);
+        trigger_frames.insert(pair<int, MaskedDMDFrame>(i, mf));
     }
 
     BOOST_LOG_TRIVIAL(info) << "loaded files from " << directory << " configured triggers up to " << max_index;
@@ -120,23 +112,18 @@ bool PubCapture::configure_from_ptree(boost::property_tree::ptree pt_general, bo
         return false;
     }
 
-    return load_triggers(bitsperpixel, dir);
+    return load_triggers(bitsperpixel, dir, std::nullopt); // let the system find the correct palette
 }
 
-PubCapture::~PubCapture()
-{
-    trigger_frames.clear();
-}
-
-DMDFrame* PubCapture::process_frame(DMDFrame* f)
+DMDFrame PubCapture::process_frame(DMDFrame &f)
 {
     // check all maksedframes if one matches
-    map<int, MaskedDMDFrame*>::iterator itr;
-    for (itr = trigger_frames.begin(); itr != trigger_frames.end(); ++itr) {
-        int i = itr->first;
-        MaskedDMDFrame* mf = itr->second;
+    map<int, MaskedDMDFrame>::iterator itr;
+    for (auto p: trigger_frames) {
+        int i = p.first;
+        MaskedDMDFrame mf = p.second;
 
-        if (mf->matches(*f)) {
+        if (mf.matches(f)) {
             cout << "found pubcapture match: " << i << "\n";
         }
     }

@@ -21,21 +21,10 @@ void RaylibRenderer::set_display_parameters(int width, int height, int px_radius
 	this->height = height;
 	this->px_radius = px_radius;
     this->px_spacing = px_spacing;
-
-    palette_size = 1 << bitsperpixel;
-    palette = new Color[palette_size];
-    if (palette) {
-        for (int i = 0; i < palette_size; i++) {
-            palette[i]=Fade(RED, i*((float)1/(palette_size-1)));
-        }
-    }
 }
 
 RaylibRenderer::~RaylibRenderer() {
 	CloseWindow();
-    if (palette) {
-        delete[] palette;
-    }
 }
 
 
@@ -49,11 +38,6 @@ void RaylibRenderer::render_frame(DMDFrame &f) {
     // if the frame contains 32-bit data, these are already colored, no palette is needed anymore
     if ((bpp == 32) || (bpp == 24)) {
         use_palette = false;
-    }
-
-    if (use_palette && !(palette)) {
-        BOOST_LOG_TRIVIAL(error) << "can't render frame, no palette found";
-        return;
     }
 
     BeginDrawing();
@@ -74,25 +58,37 @@ void RaylibRenderer::render_frame(DMDFrame &f) {
 
         for (int c = 0; c < max_c; c++) {
 
+            Color raylibcolor;
+
             if (use_palette) {
                 uint8_t pv = *pxIter;
                 pxIter++;
-                assert(pv < palette_size);
-                DrawCircle(c_x, c_y, px_radius, palette[pv]);
+                if (pv < palette.size()) {
+                    DMDColor dmdc = palette.colors[pv];
+                    raylibcolor.r = dmdc.c.cols.r;
+                    raylibcolor.g = dmdc.c.cols.g;
+                    raylibcolor.b = dmdc.c.cols.b;
+                }
+                else {
+                    raylibcolor.r = 0;
+                    raylibcolor.g = 0;
+                    raylibcolor.b = 0;
+                }
             }
             else {
-                Color c;
-                c.r = *pxIter;
+                raylibcolor.r = *pxIter;
                 pxIter++;
-                c.g = *pxIter;
+                raylibcolor.g = *pxIter;
                 pxIter++;
-                c.b = *pxIter;
+                raylibcolor.b = *pxIter;
                 pxIter++;
                 if (has_alpha) {
                     pxIter++;
                 }
-                DrawCircle(c_x, c_y, px_radius, c);
             }
+
+            DrawCircle(c_x, c_y, px_radius, raylibcolor);
+
 
             c_x += 2 * px_radius + px_spacing;
         }
@@ -101,7 +97,12 @@ void RaylibRenderer::render_frame(DMDFrame &f) {
     }
 
     EndDrawing();
-};
+}
+void RaylibRenderer::set_palette(const DMDPalette p)
+{
+    this->palette = palette;
+}
+;
 
 void RaylibRenderer::start_display() {
     InitWindow(width, height, "DMD display");
