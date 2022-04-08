@@ -203,7 +203,7 @@ int main(int argc, char** argv)
 {
 	boost::log::core::get()->set_filter
 	(
-		boost::log::trivial::severity >= boost::log::trivial::trace
+		boost::log::trivial::severity > boost::log::trivial::trace
 	);
 
 	BOOST_LOG_TRIVIAL(trace) << "[dmdreader] cwd: " << filesystem::current_path();
@@ -215,13 +215,19 @@ int main(int argc, char** argv)
 	else {
 		config_file = "dmdreader.json";
 	}
+	std::time_t t1 = std::time(nullptr);
 
 	if (!read_config(config_file)) {
 		BOOST_LOG_TRIVIAL(error) << "[dmdreader]couldn't configure DMDReader, aborting";
 		exit(1);
 	}
 
+	std::time_t t2 = std::time(nullptr);
+	BOOST_LOG_TRIVIAL(debug) << "[dmdreader] looading took " << t2 - t1 << "seconds";
+
 	int frameno = 0;
+	t1 = std::time(nullptr);
+
 	while (!(source->finished())) {
 
 		BOOST_LOG_TRIVIAL(trace) << "[dmdreader] processing frame " << frameno;
@@ -242,6 +248,11 @@ int main(int argc, char** argv)
 
 		frameno++;
 	}
+
+	t2 = std::time(nullptr);
+	BOOST_LOG_TRIVIAL(debug) << "[dmdreader] processed " << frameno << " frames in " << t2 - t1 << "seconds, " << (float)frameno/(t2-t1) << "frames/s";
+
+
 
 	return 0;
 }
