@@ -12,8 +12,12 @@ set(Boost_USE_STATIC_LIBS ON)
 
 project ("DMDReader")
 
+if(WIN32)
+set(EXTRA_LIBS winmm.lib)
+endif()
+
 find_package(raylib CONFIG REQUIRED) # Requires at least version 4.0
-# SET(Boost_USE_STATIC_LIBS ON)
+SET(Boost_USE_STATIC_LIBS ON)
 find_package(Boost COMPONENTS log REQUIRED)
 
 #add_library(Boost STATIC IMPORTED)
@@ -24,7 +28,7 @@ if(EXISTS ${COLOR_CMAKE})
 add_subdirectory("colorize")
 endif()
 message(STATUS "color source files: ${color_sources}")
-add_executable (${PROJECT_NAME} "dmdreader.cpp" "dmdreader.h" "util/crc32.cpp" "util/crc32.h" "render/framerenderer.h" "render/raylibrenderer.h" "render/raylibrenderer.cpp"  "dmd/dmdframe.cpp" "dmd/dmdframe.h" "render/framerenderer.cpp" "util/bmp.h" "util/bmp.cpp"    "dmd/color.cpp" "util/endian.h" "util/endian.cpp" "dmd/pubcapture.cpp" "dmd/frameprocessor.h" "dmd/frameprocessor.cpp" "util/image.h" "util/image.cpp" "dmdsource/dmdsource.h" "dmdsource/dmdsource.cpp" "util/objectfactory.h" "util/objectfactory.cpp" "util/endian.cpp"  "dmdsource/datdmdsource.h" "dmdsource/datdmdsource.cpp" "dmdsource/txtdmdsource.h" "dmdsource/txtdmdsource.cpp" "dmd/frameinfologger.h" "dmd/frameinfologger.cpp" "dmd/palette_colorizer.h" "dmd/palette_colorizer.cpp"  "dmd/palette.h"     "dmd/maskeddmdframe.h" "dmd/maskedmdframe.cpp" "dmdsource/nullsource.cpp" "dmd/palette.cpp" "colorize/animationplane.cpp" ${color_sources} )
+add_executable (${PROJECT_NAME} "dmdreader.cpp" "util/crc32.cpp" "util/crc32.h" "render/framerenderer.h" "render/raylibrenderer.h" "render/raylibrenderer.cpp"  "dmd/dmdframe.cpp" "dmd/dmdframe.h" "render/framerenderer.cpp" "util/bmp.h" "util/bmp.cpp"    "dmd/color.cpp" "util/endian.h" "util/endian.cpp" "dmd/pubcapture.cpp" "dmd/frameprocessor.h" "dmd/frameprocessor.cpp" "util/image.h" "util/image.cpp" "dmdsource/dmdsource.h" "dmdsource/dmdsource.cpp" "util/objectfactory.h" "util/objectfactory.cpp" "util/endian.cpp"  "dmdsource/datdmdsource.h" "dmdsource/datdmdsource.cpp" "dmdsource/txtdmdsource.h" "dmdsource/txtdmdsource.cpp" "dmd/frameinfologger.h" "dmd/frameinfologger.cpp" "dmd/palette_colorizer.h" "dmd/palette_colorizer.cpp"  "dmd/palette.h"     "dmd/maskeddmdframe.h" "dmd/maskedmdframe.cpp" "dmdsource/nullsource.cpp" "dmd/palette.cpp" ${color_sources} )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${raylib_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${raylib_LIBRARIES} ${Boost_LIBRARIES} winmm.lib)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${raylib_LIBRARIES} ${Boost_LIBRARIES} ${EXTRA_LIBS})
