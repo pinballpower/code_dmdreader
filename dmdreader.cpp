@@ -17,16 +17,9 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
-#include "DMDReader.h"
 #include "dmd/dmdframe.h"
-#include "dmd/pubcapture.h"
 #include "dmdsource/dmdsource.h"
-#include "render/framerenderer.h"
-#include "render/raylibrenderer.h"
 #include "util/objectfactory.h"
-
-#include "colorize/palcoloring.h"
-#include "colorize/vnianimationset.h"
 
 using namespace std;
 
