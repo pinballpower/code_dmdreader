@@ -37,6 +37,19 @@ message(STATUS "not enabling raylib output module")
 endif()
 
 #
+# OpenGL (optional)
+#
+find_package(EGL QUIET)
+find_package(GLES2 QUIET)
+if (EGL_FOUND) 
+if (GLES_FUND)
+add_definitions(-DUSE_OPENGL)
+message(STATUS "enabling OpenGL output module")
+set(opengl_sources "render/openglrenderer.h" "render/opengllibrenderer.cpp")
+endif()
+endif()
+
+#
 # Boost
 #
 SET(Boost_USE_STATIC_LIBS ON)
