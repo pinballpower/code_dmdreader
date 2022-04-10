@@ -6,7 +6,9 @@
 #include "../dmd/frameprocessor.h"
 #include "../dmd/frameinfologger.h"
 #include "../render/framerenderer.h"
+#ifdef USE_RAYLIB
 #include "../render/raylibrenderer.h"
+#endif
 
 #if __has_include("../colorize/config.h")
 #include "../colorize/config.h"
