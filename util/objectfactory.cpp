@@ -13,6 +13,7 @@
 #include "../colorize/pin2dmdcolorisation.h"
 #endif
 
+
 DMDSource* createSource(string name) {
 
 	if (name == "dat") {
@@ -57,9 +58,14 @@ DMDFrameProcessor* createProcessor(string name) {
 
 
 FrameRenderer* createRenderer(string name) {
-	if (name == "raylib") {
+	if (name == "null") {
+		return new FrameRenderer();
+	} 
+#ifdef USE_RAYLIB
+	else if (name == "raylib") {
 		return (FrameRenderer*)(new RaylibRenderer());
 	}
+#endif
 	else {
 		BOOST_LOG_TRIVIAL(error) << "renderer name " << name << " unknown";
 		return NULL;
