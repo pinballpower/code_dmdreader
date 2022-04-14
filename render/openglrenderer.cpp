@@ -107,10 +107,6 @@ bool OpenGLRenderer::start_display()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-#ifdef __APPLE__
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-
 	// glfw window creation
 	// --------------------
 	window = glfwCreateWindow(width, height, "DMD", NULL, NULL);
@@ -121,6 +117,7 @@ bool OpenGLRenderer::start_display()
 		return false;
 	}
 	glfwMakeContextCurrent(window);
+
 
 	// glad: load all OpenGL function pointers
 	// ---------------------------------------
@@ -134,7 +131,7 @@ bool OpenGLRenderer::start_display()
 	// ------------------------------------
 	shader = OpenGLShader(vertexShader, fragmentShader192x64);
 
-
+	BOOST_LOG_TRIVIAL(info) << "[openglrenderer] OpenGL version: " << glGetString(GL_VERSION);
 
 	// texture 1
 	// ---------
