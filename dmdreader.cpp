@@ -34,6 +34,7 @@ bool read_config(string filename) {
 	boost::property_tree::ptree pt;
 	try {
 		boost::property_tree::json_parser::read_json(filename, pt);
+		BOOST_LOG_TRIVIAL(info) << "[readconfig] using configuration file " << filename;
 	}
 	catch (const boost::property_tree::json_parser::json_parser_error e) {
 		BOOST_LOG_TRIVIAL(fatal) << "[readconfig] couldn't parse JSON configuration file " << e.what() << ", aborting";
@@ -64,6 +65,7 @@ bool read_config(string filename) {
 
 	if (pt_general.get("cwd_to_configdir", false)) {
 		filesystem::current_path(filesystem::path(filename).parent_path());
+		BOOST_LOG_TRIVIAL(debug) << "[readconfig]  set working directory to " << filesystem::current_path();
 	}
 
 	//
@@ -175,6 +177,7 @@ bool read_config(string filename) {
 					renderers.push_back(renderer);
 				}
 				else {
+					BOOST_LOG_TRIVIAL(info) << "[readconfig] could not initialize renderer " << v.first << ", ignoring";
 					delete renderer;
 				}
 			}
@@ -244,8 +247,6 @@ int main(int argc, char** argv)
 
 	t2 = std::time(nullptr);
 	BOOST_LOG_TRIVIAL(debug) << "[dmdreader] processed " << frameno << " frames in " << t2 - t1 << "seconds, " << (float)frameno/(t2-t1) << "frames/s";
-
-
 
 	return 0;
 }

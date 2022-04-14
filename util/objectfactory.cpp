@@ -9,6 +9,9 @@
 #ifdef USE_RAYLIB
 #include "../render/raylibrenderer.h"
 #endif
+#ifdef USE_OPENGL
+#include "../render/openglrenderer.h"
+#endif
 
 #if __has_include("../colorize/config.h")
 #include "../colorize/config.h"
@@ -66,6 +69,11 @@ FrameRenderer* createRenderer(string name) {
 #ifdef USE_RAYLIB
 	else if (name == "raylib") {
 		return (FrameRenderer*)(new RaylibRenderer());
+	}
+#endif
+#ifdef USE_OPENGL
+	else if (name == "opengl") {
+		return (FrameRenderer*)(new OpenGLRenderer());
 	}
 #endif
 	else {
