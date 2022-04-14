@@ -22,6 +22,7 @@ OpenGLRenderer::~OpenGLRenderer()
 
 void OpenGLRenderer::render_frame(DMDFrame& f)
 {
+
 	const vector<uint8_t> data = f.get_data();
 
 	int tx_width, tx_height;
@@ -42,8 +43,6 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 		BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] resolution " << f.get_width() << "x" << f.get_height() << "not supported";
 		return;
 	}
-
-
 
 	glBindVertexArray(VAO);
 
@@ -77,7 +76,6 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tx_width, tx_height, 0, GL_RGBA, GL_UNSIGNED_BYTE,texturbuf);
 	}
 
-
 	// render
 	// ------
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -94,7 +92,6 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 	glUniform1i(glGetUniformLocation(shader.ID, "texture2"), 1);
 
 	// render container
-	shader.use();
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -189,6 +186,9 @@ bool OpenGLRenderer::start_display()
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
+
+	shader.use();
+
 
 	return true;
 }
