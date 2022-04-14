@@ -43,14 +43,7 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 		return;
 	}
 
-	unsigned int indices[] = {
-		0, 1, 3, // first triangle
-		1, 2, 3  // second triangle
-	};
-	unsigned int VBO, EBO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
+
 
 	glBindVertexArray(VAO);
 
@@ -64,8 +57,8 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 	// color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
+	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	//glEnableVertexAttribArray(1);
 	// texture coord attribute
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
@@ -192,6 +185,10 @@ bool OpenGLRenderer::start_display()
 		BOOST_LOG_TRIVIAL(error) << "[openglrenderer] Failed to load overlay_texture";
 	}
 	stbi_image_free(data);
+
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
 
 	return true;
 }
