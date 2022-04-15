@@ -170,7 +170,6 @@ bool OpenGLRenderer::initialize_display()
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		delete[] data;
 	}
-	glGenerateMipmap(GL_TEXTURE_2D);
 
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
