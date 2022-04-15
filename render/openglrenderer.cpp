@@ -25,23 +25,26 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 
 	const vector<uint8_t> data = f.get_data();
 
-	int tx_width, tx_height;
-	int tx_pixel_count;
-	if ((f.get_width() == 128) && f.get_height() == 32) {
-		tx_width = tx_height = 128;
-		tx_pixel_count = 128 * 32;
-		vertices[7] = vertices[15] = 0.25f;
+	// resolution changed, this usually only happens rendering the first frame 
+	if ((f.get_width() != frame_width) || (f.get_height() != frame_height)) {
+		frame_width = f.get_width();
+		frame_height = f.get_height();
+		if ((f.get_width() == 128) && f.get_height() == 32) {
+			tx_width = tx_height = 128;
+			tx_pixel_count = 128 * 32;
+			vertices[7] = vertices[15] = 0.25f;
 
-	}
-	else if ((f.get_width() == 192) && f.get_height() == 64) {
-		tx_width = tx_height = 192;
-		tx_pixel_count = 192 * 64;
-		vertices[15] = 0.33f;
-		vertices[23] = 0.33f;
-	}
-	else {
-		BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] resolution " << f.get_width() << "x" << f.get_height() << "not supported";
-		return;
+		}
+		else if ((f.get_width() == 192) && f.get_height() == 64) {
+			tx_width = tx_height = 192;
+			tx_pixel_count = 192 * 64;
+			vertices[15] = 0.33f;
+			vertices[23] = 0.33f;
+		}
+		else {
+			BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] resolution " << f.get_width() << "x" << f.get_height() << "not supported";
+			return;
+		}
 	}
 
 	glBindVertexArray(VAO);
@@ -61,8 +64,6 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 	// texture coord attribute
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
-
-
 
 	glBindTexture(GL_TEXTURE_2D, dmd_texture_id); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
 	if (f.get_bitsperpixel() == 24) {
@@ -140,9 +141,16 @@ bool OpenGLRenderer::initialize_display()
 	// No need for wrapping
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// This is
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	// texture scaling
+	if (scale_linear) {
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
+	else {
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	}
 
 
 	// texture 2 - the circle overlay
@@ -184,6 +192,8 @@ bool OpenGLRenderer::configure_from_ptree(boost::property_tree::ptree pt_general
 {
 	width = pt_renderer.get("width", 1280);
 	height = pt_renderer.get("height", 320);
+
+	scale_linear = pt_renderer.get("scale_linear", false);
 
 	overlay_texture_file = pt_renderer.get("overlay_texture", "img/circle_blurred.png");
 

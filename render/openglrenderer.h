@@ -25,10 +25,17 @@ public:
 private:
 	int width = 0;
 	int height = 0;
+	bool scale_linear = false;
+
+	int frame_width = 0, frame_height = 0;
+
+	// DMD texture data
+	int tx_width = 0, tx_height = 0;
+	int tx_pixel_count = 0;
 
 	GLFWwindow* window = nullptr;
 	OpenGLShader shader;
-	unsigned int VAO, VBO, EBO;
+	unsigned int VAO = 0, VBO = 0, EBO = 0;
 
 	unsigned int dmd_texture_id = 0;
 	unsigned int overlay_texture_id = 0;
@@ -47,7 +54,7 @@ private:
 		0, 1, 3, // first triangle
 		1, 2, 3  // second triangle
 	};
-	
+
 	string overlay_texture_file;
 
 	bool initialize_display();
