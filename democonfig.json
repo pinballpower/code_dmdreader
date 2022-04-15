@@ -19,6 +19,13 @@
     }
   },
   "renderer": {
+    "opengl": {
+      "width": 1920,
+      "height": 640,
+      "overlay_texture": "img/circle_blurred.png",
+      "scale_linear": false
+    },
+
     "raylib": {
       "row": 64,
       "colums": 192,

@@ -45,7 +45,7 @@ private:
 
 	uint8_t texturbuf[tx_buf_len];
 
-	float vertices[32] = {
+	float vertices[20] = {
 		// positions          // texture coords
 		 1.0f,  1.0f, 0.0f,   1.0f, 0.0f, // top right
 		 1.0f, -1.0f, 0.0f,   1.0f, 0.12345f, // bottom right
@@ -61,6 +61,7 @@ private:
 	string overlay_texture_file;
 
 	bool initialize_display();
+	void recalc_vertices();
 
 
 };

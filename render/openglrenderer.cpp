@@ -20,6 +20,34 @@ OpenGLRenderer::~OpenGLRenderer()
 {
 }
 
+void OpenGLRenderer::recalc_vertices() {
+
+	//vertices = {
+	//	// positions          // texture coords
+	//	 1.0f,  1.0f, 0.0f,   1.0f, 0.0f, // top right
+	//	 1.0f, -1.0f, 0.0f,   1.0f, 0.12345f, // bottom right
+	//	-1.0f, -1.0f, 0.0f,   0.0f, 0.12345f, // bottom left
+	//	-1.0f,  1.0f, 0.0f,   0.0f, 0.0f  // top left 
+	//};
+
+	float left, right, top, bottom, dmd_scale_y = 0;
+
+	top = .8;
+	right = 1;
+	bottom = -1;
+	left = -1;
+
+	top = 1.0f - (float)dmd_y / (float)height;
+	left = -1.0f + (float)dmd_x / (float)width;
+	bottom = -1.0f + (float)(height-dmd_y-dmd_height) / height;
+	right = 1.0f - (float)(width - dmd_x - dmd_width) / width;
+
+	vertices[0] = vertices[5] = right;
+	vertices[10] = vertices[15] = left;
+	vertices[1] = vertices[16] = top;
+	vertices[6] = vertices[11] = bottom;
+}
+
 void OpenGLRenderer::render_frame(DMDFrame& f)
 {
 
@@ -38,7 +66,7 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 		else if ((f.get_width() == 192) && f.get_height() == 64) {
 			tx_width = tx_height = 192;
 			tx_pixel_count = 192 * 64;
-			vertices[9] = vertices[14] = 0.33f;
+			vertices[9] = vertices[14] = 0.3333f;
 		}
 		else {
 			BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] resolution " << f.get_width() << "x" << f.get_height() << "not supported";
@@ -205,7 +233,8 @@ bool OpenGLRenderer::configure_from_ptree(boost::property_tree::ptree pt_general
 	}
 
 	overlay_texture_file = pt_renderer.get("overlay_texture", "img/circle_blurred.png");
-
 	initialize_display();
+	recalc_vertices();
+
 	return true;
 }
