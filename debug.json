@@ -16,7 +16,9 @@
     }
   },
   "renderer": {
-    "opengl": {},
+    "opengl": {
+      "overlay_texture" : "img/circle_blurred1.png"
+    },
     "raylib": {
       "width": 1920,
       "height": 640,
