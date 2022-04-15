@@ -195,6 +195,19 @@ bool OpenGLRenderer::configure_from_ptree(boost::property_tree::ptree pt_general
 
 	scale_linear = pt_renderer.get("scale_linear", false);
 
+	dmd_x = pt_renderer.get("dmd_x", 0 );
+	dmd_y = pt_renderer.get("dmd_y", 0);
+	dmd_width = pt_renderer.get("dmd_width", 0);
+	dmd_height = pt_renderer.get("dmd_height", 0);
+
+	if (dmd_width == 0) {
+		dmd_width = width;
+	}
+
+	if (dmd_height == 0) {
+		dmd_height = height;
+	}
+
 	overlay_texture_file = pt_renderer.get("overlay_texture", "img/circle_blurred.png");
 
 	initialize_display();

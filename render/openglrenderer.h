@@ -33,6 +33,9 @@ private:
 	int tx_width = 0, tx_height = 0;
 	int tx_pixel_count = 0;
 
+	// DMD position
+	int dmd_x = 0, dmd_y = 0, dmd_width = 0, dmd_height = 0;
+
 	GLFWwindow* window = nullptr;
 	OpenGLShader shader;
 	unsigned int VAO = 0, VBO = 0, EBO = 0;
