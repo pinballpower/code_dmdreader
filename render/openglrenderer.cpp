@@ -133,8 +133,8 @@ bool OpenGLRenderer::start_display()
 
 	BOOST_LOG_TRIVIAL(info) << "[openglrenderer] OpenGL version: " << glGetString(GL_VERSION);
 
-	// texture 1
-	// ---------
+	// texture 1  - the DMD dislay
+	// ---------------------------
 	glGenTextures(1, &dmd_texture_id);
 	glBindTexture(GL_TEXTURE_2D, dmd_texture_id); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
 	// No need for wrapping
@@ -144,22 +144,9 @@ bool OpenGLRenderer::start_display()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	// load image, create texture and generate mipmaps
-	int width, height, nrChannels;
-	unsigned char* data = stbi_load("img/dmd_sample.png", &width, &height, &nrChannels, 0);
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		BOOST_LOG_TRIVIAL(error) << "[openglrenderer] Failed to load texture1";
-	}
-	stbi_image_free(data);
 
-	// texture 2
-	// ---------
+	// texture 2 - the circle overlay
+	// ------------------------------
 	glGenTextures(1, &overlay_texture_id);
 	glBindTexture(GL_TEXTURE_2D, overlay_texture_id);
 	// set the texture wrapping parameters
@@ -168,7 +155,8 @@ bool OpenGLRenderer::start_display()
 	// set texture filtering parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	data = stbi_load("img/circle_blurred.png", &width, &height, &nrChannels, 4);
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load("img/circle_blurred.png", &width, &height, &nrChannels, 4);
 	if (data)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -185,7 +173,6 @@ bool OpenGLRenderer::start_display()
 	glGenBuffers(1, &EBO);
 
 	shader.use();
-
 
 	return true;
 }
