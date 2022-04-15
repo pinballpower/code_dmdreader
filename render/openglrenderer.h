@@ -47,10 +47,10 @@ private:
 
 	float vertices[32] = {
 		// positions          // texture coords
-		 1.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 0.0f, // top right
-		 1.0f, -1.0f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.12345f, // bottom right
-		-1.0f, -1.0f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.12345f, // bottom left
-		-1.0f,  1.0f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 0.0f  // top left 
+		 1.0f,  1.0f, 0.0f,   1.0f, 0.0f, // top right
+		 1.0f, -1.0f, 0.0f,   1.0f, 0.12345f, // bottom right
+		-1.0f, -1.0f, 0.0f,   0.0f, 0.12345f, // bottom left
+		-1.0f,  1.0f, 0.0f,   0.0f, 0.0f  // top left 
 	};
 
 	unsigned int indices[6] = {

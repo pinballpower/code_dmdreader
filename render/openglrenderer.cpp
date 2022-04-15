@@ -32,14 +32,13 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 		if ((f.get_width() == 128) && f.get_height() == 32) {
 			tx_width = tx_height = 128;
 			tx_pixel_count = 128 * 32;
-			vertices[7] = vertices[15] = 0.25f;
+			vertices[9] = vertices[14] = 0.25f;
 
 		}
 		else if ((f.get_width() == 192) && f.get_height() == 64) {
 			tx_width = tx_height = 192;
 			tx_pixel_count = 192 * 64;
-			vertices[15] = 0.33f;
-			vertices[23] = 0.33f;
+			vertices[9] = vertices[14] = 0.33f;
 		}
 		else {
 			BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] resolution " << f.get_width() << "x" << f.get_height() << "not supported";
@@ -56,13 +55,10 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	// color attribute
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	//glEnableVertexAttribArray(1);
 	// texture coord attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
 	glBindTexture(GL_TEXTURE_2D, dmd_texture_id); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
