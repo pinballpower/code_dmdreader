@@ -160,11 +160,12 @@ bool OpenGLRenderer::initialize_display()
 	if (data)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		BOOST_LOG_TRIVIAL(debug) << "[openglrenderer] loaded overlay_texture " << overlay_texture_file;
 		stbi_image_free(data);
 	}
 	else
 	{
-		BOOST_LOG_TRIVIAL(error) << "[openglrenderer] Failed to load overlay_texture";
+		BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] Failed to load overlay_texture " << overlay_texture_file << ", will use no overlay";
 		data = new unsigned char [4](255); // create a one-pixel texture that's completely transparent
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		delete[] data;
