@@ -20,7 +20,6 @@ public:
 	OpenGLRenderer();
 	~OpenGLRenderer();
 	virtual void render_frame(DMDFrame& f);
-	bool start_display();
 	virtual bool configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_renderer);
 
 private:
@@ -44,10 +43,14 @@ private:
 		-1.0f,  1.0f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 0.0f  // top left 
 	};
 
-
 	unsigned int indices[6] = {
 		0, 1, 3, // first triangle
 		1, 2, 3  // second triangle
 	};
+	
+	string overlay_texture_file;
+
+	bool initialize_display();
+
 
 };

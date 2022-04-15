@@ -98,7 +98,7 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 	glfwSwapBuffers(window);
 }
 
-bool OpenGLRenderer::start_display()
+bool OpenGLRenderer::initialize_display()
 {
 	// glfw: initialize and configure
 // ------------------------------
@@ -156,17 +156,20 @@ bool OpenGLRenderer::start_display()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load("img/circle_blurred.png", &width, &height, &nrChannels, 4);
+	unsigned char* data = stbi_load(overlay_texture_file.c_str(), &width, &height, &nrChannels, 4);
 	if (data)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
+		stbi_image_free(data);
 	}
 	else
 	{
 		BOOST_LOG_TRIVIAL(error) << "[openglrenderer] Failed to load overlay_texture";
+		data = new unsigned char [4](255); // create a one-pixel texture that's completely transparent
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		delete[] data;
 	}
-	stbi_image_free(data);
+	glGenerateMipmap(GL_TEXTURE_2D);
 
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
@@ -179,8 +182,11 @@ bool OpenGLRenderer::start_display()
 
 bool OpenGLRenderer::configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_renderer)
 {
-	width = 1920;
-	height = 640;
-	start_display();
+	width = pt_renderer.get("width", 1280);
+	height = pt_renderer.get("height", 320);
+
+	overlay_texture_file = pt_renderer.get("overlay_texture", "img/circle_blurred.png");
+
+	initialize_display();
 	return true;
 }
