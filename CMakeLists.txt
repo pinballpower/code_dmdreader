@@ -5,12 +5,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(VCPKG_TARGET_TRIPLET=x64-windows-static)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
-#include_directories("$ENV{INCLUDE_PATH}")
-#get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-#foreach(dir ${dirs})
-#  message(STATUS "dir='${dir}'")
-#endforeach()
-
 set(DISABLE_RAYLIB 1)
 
 add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING)
@@ -51,38 +45,31 @@ message(STATUS "not enabling raylib output module")
 endif()
 endif()
 
-#
-# OpenGL ES (optional)
-#
-find_package(EGL QUIET)
-find_package(GLES2 QUIET)
-if (EGL_FOUND) 
-if (GLES_FUND)
-add_definitions(-DUSE_OPENGLES)
-message(STATUS "enabling OpenGL ES output module")
-set(opengl_sources "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h")
-endif()
-endif()
+# Define the OpenGL source files
+set(OGL_FILES "render/openglrenderer.h" "render/openglrenderer.cpp" "render/ogl-pi4.cpp" "render/openglshader.h" "render/openglshader.cpp")
 
 #
 # OpenGL Pi4
 #
+message(STATUS "Checking for Raspberry Pi")
 if (RPI)
 message(STATUS "compiling OpenGL ES for Raspberry Pi")
 find_path(DRM_INCLUDE_DIR "drm.h")
 message(STATUS "drm.h found in ${DRM_INCLUDE_DIR}")
 find_package(glfw3 CONFIG QUIET)
 message(STATUS "glfw3 not found, disabling OpenGL")
-set(opengl_sources "render/openglrenderer.h" "render/openglrenderer.cpp" "render/ogl-pi4.cpp" "render/openglshader.h")
 add_definitions(-DUSE_OPENGL)
 # set (PI_INCLUDE_DIRS "/usr/include:/usr/include/stb:/usr/include/libdrm")
 set (PI_LIBS EGL drm glfw gbm GLESv2)
+set (opengl_sources "render/ogl-pi4.cpp" "render/openglshader.h" "render/openglshader.cpp")
 endif()
 
 
 #
-# OpenGL (optional)
+# OpenGL/GLAD
 #
+if (NOT(RPI))
+message(STATUS "Checking for OpenGL")
 set(OPENGL 1)
 set(OPENGL_GLAD 1)
 find_package(OpenGL QUIET)
@@ -127,11 +114,9 @@ set(OPENGL 0)
 set(OPENGL_GLAD 0)
 endif()
 
-
 if (OPENGL)
 add_definitions(-DUSE_OPENGL)
-message(STATUS "enabling OpenGL output module")
-set(opengl_sources "render/openglrenderer.h" "render/openglrenderer.cpp" "render/shader-definitions.h" "render/openglshader.h")
+set (opengl_sources "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h" "render/openglshader.cpp")
 set(OPENGL_LIBRARIES fmt::fmt
     fmt::fmt-header-only
     glfw
@@ -145,7 +130,8 @@ endif()
 
 if (OPENGL_GLAD) 
 add_definitions(-DUSE_GLAD)
-message(STATUS "enabling OpenGL output module")
+message(STATUS "enabling OpenGL/GLAD output module")
+endif()
 endif()
 
 #
