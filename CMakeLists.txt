@@ -5,6 +5,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(VCPKG_TARGET_TRIPLET=x64-windows-static)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
+#include_directories("$ENV{INCLUDE_PATH}")
+#get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+#foreach(dir ${dirs})
+#  message(STATUS "dir='${dir}'")
+#endforeach()
+
 set(DISABLE_RAYLIB 1)
 
 add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING)
@@ -15,7 +21,7 @@ project ("DMDReader")
 
 # detect Raspberry Pi
 include(CheckIncludeFile)
-CHECK_INCLUDE_FILE(/opt/vc/include/bcm_host.h RPI)
+CHECK_INCLUDE_FILE(bcm_host.h RPI)
 if (RPI)
 message(STATUS "compiling on Raspberry Pi")
 endif()
@@ -54,18 +60,34 @@ if (EGL_FOUND)
 if (GLES_FUND)
 add_definitions(-DUSE_OPENGLES)
 message(STATUS "enabling OpenGL ES output module")
-set(opengl_sources "render/openglrenderer.h" "render/openglrenderer.cpp")
+set(opengl_sources "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h")
 endif()
 endif()
+
+#
+# OpenGL Pi4
+#
+if (RPI)
+message(STATUS "compiling OpenGL ES for Raspberry Pi")
+find_path(DRM_INCLUDE_DIR "drm.h")
+message(STATUS "drm.h found in ${DRM_INCLUDE_DIR}")
+find_package(glfw3 CONFIG QUIET)
+message(STATUS "glfw3 not found, disabling OpenGL")
+set(opengl_sources "render/openglrenderer.h" "render/openglrenderer.cpp" "render/ogl-pi4.cpp" "render/openglshader.h")
+add_definitions(-DUSE_OPENGL)
+# set (PI_INCLUDE_DIRS "/usr/include:/usr/include/stb:/usr/include/libdrm")
+set (PI_LIBS EGL drm glfw gbm GLESv2)
+endif()
+
 
 #
 # OpenGL (optional)
 #
 set(OPENGL 1)
+set(OPENGL_GLAD 1)
 find_package(OpenGL QUIET)
 if (NOT OpenGL_FOUND)
 message(STATUS "Package OpenGL not found, disabling OpenGL")
-set(OPENGL 0)
 endif()
 
 find_package(glbinding CONFIG QUIET)
@@ -102,6 +124,7 @@ find_package(glad CONFIG QUIET)
 if (NOT glad_FOUND)
 message(STATUS "Package glad not found, disabling OpenGL")
 set(OPENGL 0)
+set(OPENGL_GLAD 0)
 endif()
 
 
@@ -118,6 +141,11 @@ set(OPENGL_LIBRARIES fmt::fmt
     GLEW::GLEW
     ${OPENGL_LIBRARIES}
     )
+endif()
+
+if (OPENGL_GLAD) 
+add_definitions(-DUSE_GLAD)
+message(STATUS "enabling OpenGL output module")
 endif()
 
 #
@@ -140,5 +168,5 @@ endif()
 
 add_executable (${PROJECT_NAME} "dmdreader.cpp" "util/crc32.cpp" "util/crc32.h" "render/framerenderer.h"  "dmd/dmdframe.cpp" "dmd/dmdframe.h" "render/framerenderer.cpp" "util/bmp.h" "util/bmp.cpp"  "dmd/color.cpp" "util/endian.h" "util/endian.cpp" "dmd/pubcapture.cpp" "dmd/frameprocessor.h" "dmd/frameprocessor.cpp" "util/image.h" "util/image.cpp" "dmdsource/dmdsource.h" "dmdsource/dmdsource.cpp" "util/objectfactory.h" "util/objectfactory.cpp" "util/endian.cpp"  "dmdsource/datdmdsource.h" "dmdsource/datdmdsource.cpp" "dmdsource/txtdmdsource.h" "dmdsource/txtdmdsource.cpp" "dmd/frameinfologger.h" "dmd/frameinfologger.cpp" "dmd/palette_colorizer.h" "dmd/palette_colorizer.cpp"  "dmd/palette.h"     "dmd/maskeddmdframe.h" "dmd/maskedmdframe.cpp" "dmdsource/nullsource.cpp" "dmd/palette.cpp" "util/bithelper.cpp" ${color_sources} ${raylib_sources} ${angle_sources} ${opengl_sources})
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${raylib_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${raylib_LIBRARIES} ${Boost_LIBRARIES} ${angle_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES})
+target_include_directories(${PROJECT_NAME} PRIVATE ${raylib_INCLUDE_DIRS} ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${raylib_LIBRARIES} ${Boost_LIBRARIES} ${angle_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBS})
