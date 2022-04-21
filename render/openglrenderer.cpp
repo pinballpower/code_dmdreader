@@ -89,15 +89,22 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
+	// range checking
+	assert(tx_buf_len >= tx_pixel_count * 4);
+	if (tx_buf_len < tx_pixel_count * 4) {
+		BOOST_LOG_TRIVIAL(error) << "[openglrenderer] buffer too small, aborting";
+		return;
+	}
+
 	glBindTexture(GL_TEXTURE_2D, dmd_texture_id); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
 	if (f.get_bitsperpixel() == 24) {
 		// copy data into texture buffer
-		memcpy_s(texturbuf, tx_buf_len, &data[0], tx_pixel_count * 3);
+		memcpy(texturbuf, &data[0], tx_pixel_count * 3);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tx_width, tx_height, 0, GL_RGB, GL_UNSIGNED_BYTE, texturbuf);
 	}
 	else if (f.get_bitsperpixel() == 24) {
 		// copy data into texture buffer
-		memcpy_s(texturbuf, tx_buf_len, &data[0], tx_pixel_count * 4);
+		memcpy(texturbuf, &data[0], tx_pixel_count * 4);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tx_width, tx_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturbuf);
 	}
 
