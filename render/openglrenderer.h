@@ -1,8 +1,9 @@
 #pragma once
 
 #define GLFW_INCLUDE_NONE
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#include <GLES2/gl2.h>
 
 #include "../dmd/color.h"
 #include "../dmd/palette.h"
@@ -61,6 +62,7 @@ private:
 	string overlay_texture_file;
 
 	bool initialize_display();
+	bool initialize_drawing();
 	void recalc_vertices();
 
 

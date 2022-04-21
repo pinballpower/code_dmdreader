@@ -1,10 +1,14 @@
 #pragma once
 
-#ifdef USE_OPENGL
+#if defined(USE_OPENGL) || defined(USE_OPENGLES)
 
 #include <string>
 
+#ifdef USE_GLAD
 #include <glad/glad.h>
+#else
+#include <GLES3/gl3.h>
+#endif
 
 #include <string>
 
