@@ -61,12 +61,17 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 			tx_width = tx_height = 128;
 			tx_pixel_count = 128 * 32;
 			vertices[9] = vertices[14] = 0.25f;
-
+			shader = OpenGLShader(vertexShader, fragmentShader128x32);
+			shader.use();
+			BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] initialzed 128x32 renderer";
 		}
 		else if ((f.get_width() == 192) && f.get_height() == 64) {
 			tx_width = tx_height = 192;
 			tx_pixel_count = 192 * 64;
 			vertices[9] = vertices[14] = 0.3333f;
+			shader = OpenGLShader(vertexShader, fragmentShader192x64);
+			shader.use();
+			BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] initialzed Sega 192x64 renderer";
 		}
 		else {
 			BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] resolution " << f.get_width() << "x" << f.get_height() << "not supported";
@@ -161,7 +166,7 @@ bool OpenGLRenderer::initialize_display()
 
 	// build and compile our shader zprogram
 	// ------------------------------------
-	shader = OpenGLShader(vertexShader, fragmentShader192x64);
+	shader = OpenGLShader(vertexShader, fragmentShader128x32);
 
 	BOOST_LOG_TRIVIAL(info) << "[openglrenderer] OpenGL version: " << glGetString(GL_VERSION);
 

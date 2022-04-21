@@ -62,5 +62,4 @@ private:
 	bool initialize_display();
 	void recalc_vertices();
 
-
 };
