@@ -1,7 +1,5 @@
 #pragma once
 
-#if defined(USE_OPENGL) || defined(USE_OPENGLES)
-
 #include <string>
 
 #ifdef USE_GLAD
@@ -45,4 +43,3 @@ private:
     void checkCompileErrors(unsigned int shader, std::string type); 
 };
 
-#endif
