@@ -13,6 +13,8 @@ set(Boost_USE_STATIC_LIBS ON)
 
 project ("DMDReader")
 
+message(STATUS "$ENV{CMAKE_INCLUDE_PATH}")
+
 # detect Raspberry Pi
 include(CheckIncludeFile)
 CHECK_INCLUDE_FILE(bcm_host.h RPI)
@@ -45,9 +47,6 @@ message(STATUS "not enabling raylib output module")
 endif()
 endif()
 
-# Define the OpenGL source files
-set(OGL_FILES "render/openglrenderer.h" "render/openglrenderer.cpp" "render/ogl-pi4.cpp" "render/openglshader.h" "render/openglshader.cpp")
-
 #
 # OpenGL Pi4
 #
@@ -57,11 +56,11 @@ message(STATUS "compiling OpenGL ES for Raspberry Pi")
 find_path(DRM_INCLUDE_DIR "drm.h")
 message(STATUS "drm.h found in ${DRM_INCLUDE_DIR}")
 find_package(glfw3 CONFIG QUIET)
-message(STATUS "glfw3 not found, disabling OpenGL")
-add_definitions(-DUSE_OPENGL)
+message(STATUS "glfw3 not found, aborting")
+add_definitions(-DUSE_OPENGLPI4)
 # set (PI_INCLUDE_DIRS "/usr/include:/usr/include/stb:/usr/include/libdrm")
 set (PI_LIBS EGL drm glfw gbm GLESv2)
-set (opengl_sources "render/ogl-pi4.cpp" "render/openglshader.h" "render/openglshader.cpp")
+set (opengl_sources "render/shader-definitions.h" "render/ogl-pi4.h" "render/ogl-pi4.cpp"  "render/pi4renderer.h" "render/pi4renderer.cpp" "render/openglshader.h" "render/openglshader.cpp")
 endif()
 
 
@@ -116,7 +115,7 @@ endif()
 
 if (OPENGL)
 add_definitions(-DUSE_OPENGL)
-set (opengl_sources "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h" "render/openglshader.cpp")
+set (opengl_sources "render/shader-definitions.h" "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h" "render/openglshader.cpp")
 set(OPENGL_LIBRARIES fmt::fmt
     fmt::fmt-header-only
     glfw

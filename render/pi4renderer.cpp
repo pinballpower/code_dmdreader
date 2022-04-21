@@ -6,6 +6,7 @@
 
 #include <boost/log/trivial.hpp>
 
+#include "ogl-pi4.h"
 #include "openglshader.h"
 #include "pi4renderer.h"
 #include "shader-definitions.h"
@@ -62,7 +63,7 @@ void Pi4Renderer::render_frame(DMDFrame& f)
 			vertices[9] = vertices[14] = 0.25f;
 			shader = OpenGLShader(vertexShader, fragmentShader128x32);
 			shader.use();
-			BOOST_LOG_TRIVIAL(warning) << "[Pi4Renderer] initialzed 128x32 renderer";
+			BOOST_LOG_TRIVIAL(warning) << "[Pi4Renderer] initialized 128x32 renderer";
 		}
 		else if ((f.get_width() == 192) && f.get_height() == 64) {
 			tx_width = tx_height = 192;
@@ -70,7 +71,7 @@ void Pi4Renderer::render_frame(DMDFrame& f)
 			vertices[9] = vertices[14] = 0.3333f;
 			shader = OpenGLShader(vertexShader, fragmentShader192x64);
 			shader.use();
-			BOOST_LOG_TRIVIAL(warning) << "[Pi4Renderer] initialzed Sega 192x64 renderer";
+			BOOST_LOG_TRIVIAL(warning) << "[Pi4Renderer] initialized Sega 192x64 renderer";
 		}
 		else {
 			BOOST_LOG_TRIVIAL(warning) << "[Pi4Renderer] resolution " << f.get_width() << "x" << f.get_height() << "not supported";
@@ -136,36 +137,12 @@ void Pi4Renderer::render_frame(DMDFrame& f)
 
 bool Pi4Renderer::initialize_display()
 {
-	// glfw: initialize and configure
-// ------------------------------
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	start_fullscreen_ogl();
 
-	// glfw window creation
-	// --------------------
-	window = glfwCreateWindow(width, height, "DMD", NULL, NULL);
-	if (window == nullptr)
-	{
-		BOOST_LOG_TRIVIAL(error) << "[Pi4Renderer] failed to create GLFW window";
-		glfwTerminate();
-		return false;
-	}
-	glfwMakeContextCurrent(window);
-
-
-	//// glad: load all OpenGL function pointers
-	//// ---------------------------------------
-	//if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-	//{
-	//	BOOST_LOG_TRIVIAL(error) << "[Pi4Renderer] failed to initialize GLAD";
-	//	return false;
-	//}
 
 	// build and compile our shader zprogram
 	// ------------------------------------
-	shader = OpenGLShader(vertexShader, fragmentShader128x32);
+	shader = OpenGLShader(vertexShaderEGL, fragmentShader128x32EGL);
 
 	BOOST_LOG_TRIVIAL(info) << "[Pi4Renderer] OpenGL version: " << glGetString(GL_VERSION);
 

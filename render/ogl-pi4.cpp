@@ -242,7 +242,7 @@ bool start_fullscreen_ogl()
     // Make sure that we can use OpenGL in this EGL app.
     eglBindAPI(EGL_OPENGL_API);
 
-    BOOST_LOG_TRIVIAL(info) << "[oglpi4] nitialized EGL version: " << major <<"."<< minor;
+    BOOST_LOG_TRIVIAL(info) << "[oglpi4] initialized EGL version: " << major <<"."<< minor;
 
     EGLint count;
     EGLint numConfigs;

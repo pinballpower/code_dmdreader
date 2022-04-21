@@ -66,3 +66,36 @@ void main()
 	TexCoord = vec2(aTexCoord.x, aTexCoord.y);
 }
 )""";
+
+const string fragmentShader128x32EGL = R"""(
+
+out vec4 FragColor;
+  
+in vec3 ourColor;
+in vec2 TexCoord;
+
+uniform sampler2D texture1;
+uniform sampler2D texture2; // the texture that will be rendered on top of the DMD
+
+void main()
+{
+	// Multiple pixel overlay
+	vec2 tc2;
+	tc2.x = TexCoord.x*128;
+	tc2.y = TexCoord.y*128;
+
+	vec4 alphaColor = texture(texture2, tc2);
+    FragColor = mix(texture(texture1, TexCoord), alphaColor, alphaColor.a);
+}
+
+)""";
+
+const string vertexShaderEGL = R"""(
+	
+attribute vec3 position;
+
+void main()
+{
+	gl_Position = vec4(position, 1.0);
+}
+)""";
