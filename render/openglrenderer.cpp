@@ -1,13 +1,6 @@
-#include <cstring>
-
 #define GLFW_INCLUDE_NONE
-#ifdef USE_GLAD
 #include <glad/glad.h>
-#else
-#include <GLES3/gl3.h>
-#endif
 #include <GLFW/glfw3.h>
-
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -46,7 +39,7 @@ void OpenGLRenderer::recalc_vertices() {
 
 	top = 1.0f - (float)dmd_y / (float)height;
 	left = -1.0f + (float)dmd_x / (float)width;
-	bottom = -1.0f + (float)(height-dmd_y-dmd_height) / height;
+	bottom = -1.0f + (float)(height - dmd_y - dmd_height) / height;
 	right = 1.0f - (float)(width - dmd_x - dmd_width) / width;
 
 	vertices[0] = vertices[5] = right;
@@ -97,22 +90,15 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 	glEnableVertexAttribArray(2);
 
 	glBindTexture(GL_TEXTURE_2D, dmd_texture_id); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-
-	// range checking
-	assert(tx_buf_len < tx_pixel_count * 4);
-	if (tx_buf_len < tx_pixel_count * 4) {
-		BOOST_LOG_TRIVIAL(error) << "[openglrenderer] buffer too small, aborting";
-		return;
-	}
-
 	if (f.get_bitsperpixel() == 24) {
-		memcpy(texturbuf, &data[0], tx_pixel_count * 3);
+		// copy data into texture buffer
+		memcpy_s(texturbuf, tx_buf_len, &data[0], tx_pixel_count * 3);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tx_width, tx_height, 0, GL_RGB, GL_UNSIGNED_BYTE, texturbuf);
 	}
 	else if (f.get_bitsperpixel() == 24) {
 		// copy data into texture buffer
-		memcpy(texturbuf, &data[0], tx_pixel_count * 4);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tx_width, tx_height, 0, GL_RGBA, GL_UNSIGNED_BYTE,texturbuf);
+		memcpy_s(texturbuf, tx_buf_len, &data[0], tx_pixel_count * 4);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tx_width, tx_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturbuf);
 	}
 
 	// render
@@ -137,11 +123,10 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 	glfwSwapBuffers(window);
 }
 
-#ifdef USE_GLAD
-bool OpenGLRenderer::initialize_display_glad()
+bool OpenGLRenderer::initialize_display()
 {
 	// glfw: initialize and configure
-    // ------------------------------
+// ------------------------------
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -167,16 +152,9 @@ bool OpenGLRenderer::initialize_display_glad()
 		return false;
 	}
 
-	return true;
-}
-#endif
-
-bool OpenGLRenderer::initialize_drawing() 
-{
-
 	// build and compile our shader zprogram
 	// ------------------------------------
-	shader = OpenGLShader(vertexShader, fragmentShader128x32);
+	shader = OpenGLShader(vertexShader, fragmentShader192x64);
 
 	BOOST_LOG_TRIVIAL(info) << "[openglrenderer] OpenGL version: " << glGetString(GL_VERSION);
 
@@ -220,7 +198,7 @@ bool OpenGLRenderer::initialize_drawing()
 	else
 	{
 		BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] Failed to load overlay_texture " << overlay_texture_file << ", will use no overlay";
-		data = new unsigned char [4] { 0xff, 0xff, 0xff, 0xff}; // create a one-pixel texture that's completely transparent
+		data = new unsigned char[4](255); // create a one-pixel texture that's completely transparent
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		delete[] data;
 	}
@@ -241,7 +219,7 @@ bool OpenGLRenderer::configure_from_ptree(boost::property_tree::ptree pt_general
 
 	scale_linear = pt_renderer.get("scale_linear", false);
 
-	dmd_x = pt_renderer.get("dmd_x", 0 );
+	dmd_x = pt_renderer.get("dmd_x", 0);
 	dmd_y = pt_renderer.get("dmd_y", 0);
 	dmd_width = pt_renderer.get("dmd_width", 0);
 	dmd_height = pt_renderer.get("dmd_height", 0);
@@ -255,9 +233,7 @@ bool OpenGLRenderer::configure_from_ptree(boost::property_tree::ptree pt_general
 	}
 
 	overlay_texture_file = pt_renderer.get("overlay_texture", "img/circle_blurred.png");
-#ifdef USE_GLAD
 	initialize_display();
-#endif
 	recalc_vertices();
 
 	return true;
