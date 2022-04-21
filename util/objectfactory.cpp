@@ -12,6 +12,9 @@
 #ifdef USE_OPENGL
 #include "../render/openglrenderer.h"
 #endif
+#ifdef USE_OPENGLPI4
+#include "../render/pi4renderer.h"
+#endif
 
 #if __has_include("../colorize/config.h")
 #include "../colorize/config.h"
@@ -74,6 +77,11 @@ FrameRenderer* createRenderer(string name) {
 #ifdef USE_OPENGL
 	else if (name == "opengl") {
 		return (FrameRenderer*)(new OpenGLRenderer());
+	}
+#endif
+#ifdef USE_OPENGLPI4
+	else if (name == "opengl") {
+		return (FrameRenderer*)(new Pi4Renderer());
 	}
 #endif
 	else {
