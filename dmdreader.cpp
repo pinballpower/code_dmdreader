@@ -219,7 +219,7 @@ int main(int argc, char** argv)
 	}
 
 	std::time_t t2 = std::time(nullptr);
-	BOOST_LOG_TRIVIAL(debug) << "[dmdreader] looading took " << t2 - t1 << "seconds";
+	BOOST_LOG_TRIVIAL(debug) << "[dmdreader] loading took " << t2 - t1 << "seconds";
 
 	int frameno = 0;
 	t1 = std::time(nullptr);
