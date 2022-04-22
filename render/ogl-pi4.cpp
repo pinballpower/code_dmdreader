@@ -119,7 +119,7 @@ static int matchConfigToVisual(EGLDisplay display, EGLint visualId, EGLConfig* c
 static struct gbm_bo* previousBo = NULL;
 static uint32_t previousFb;
 
-static void gbmSwapBuffers(EGLDisplay* display, EGLSurface* surface)
+void gbmSwapBuffers(EGLDisplay* display, EGLSurface* surface)
 {
     eglSwapBuffers(*display, *surface);
     struct gbm_bo* bo = gbm_surface_lock_front_buffer(gbmSurface);
@@ -136,6 +136,10 @@ static void gbmSwapBuffers(EGLDisplay* display, EGLSurface* surface)
     }
     previousBo = bo;
     previousFb = fb;
+}
+
+void gbmSwapBuffers() {
+    gbmSwapBuffers(&display, &surface);
 }
 
 static void gbmClean()
