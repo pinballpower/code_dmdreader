@@ -36,10 +36,10 @@ void OpenGLRenderer::recalc_vertices() {
 	bottom = -1;
 	left = -1;
 
-	top = 1.0f - (float)dmd_y / (float)height;
-	left = -1.0f + (float)dmd_x / (float)width;
-	bottom = -1.0f + (float)(height - dmd_y - dmd_height) / height;
-	right = 1.0f - (float)(width - dmd_x - dmd_width) / width;
+	top = 1.0f - 2.0f*((float)dmd_y / (float)height);
+	left = -1.0f + 2.0f*((float)dmd_x / (float)width);
+	bottom = -1.0f + 2.0f*((float)(height - dmd_y - dmd_height) / height);
+	right = 1.0f - 2.0f*((float)(width - dmd_x - dmd_width) / width);
 
 	vertices[0] = vertices[5] = right;
 	vertices[10] = vertices[15] = left;
@@ -195,6 +195,7 @@ bool OpenGLRenderer::initialize_display()
 
 bool OpenGLRenderer::configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_renderer)
 {
+	// A renderer might ignore these if the resolution is fixed
 	width = pt_renderer.get("width", 1280);
 	height = pt_renderer.get("height", 320);
 
@@ -223,6 +224,9 @@ bool OpenGLRenderer::configure_from_ptree(boost::property_tree::ptree pt_general
 
 	initialize_display();
 	initialize_opengl();
+
+	// width and height might have been changed here - depnding on the renderer (e.g. if the renderer is a fullscreen renderer)
+
 	load_shaders(vertex_shader, fragment_shader);
 	recalc_vertices();
 
