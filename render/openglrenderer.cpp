@@ -1,3 +1,5 @@
+#include <filesystem> 
+
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
@@ -49,10 +51,6 @@ void OpenGLRenderer::recalc_vertices() {
 
 void OpenGLRenderer::initialize_opengl()
 {
-	// build and compile our shader zprogram
-// ------------------------------------
-	shader = OpenGLShader(vertexShader, fragmentShader128x32);
-
 	BOOST_LOG_TRIVIAL(info) << "[openglrenderer] OpenGL version: " << glGetString(GL_VERSION);
 
 	// texture 1  - the DMD dislay
@@ -121,17 +119,11 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 			tx_width = tx_height = 128;
 			tx_pixel_count = 128 * 32;
 			vertices[9] = vertices[14] = 0.25f;
-			shader = OpenGLShader(vertexShader, fragmentShader128x32);
-			shader.use();
-			BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] initialzed 128x32 renderer";
 		}
 		else if ((f.get_width() == 192) && f.get_height() == 64) {
 			tx_width = tx_height = 192;
 			tx_pixel_count = 192 * 64;
 			vertices[9] = vertices[14] = 0.3333f;
-			shader = OpenGLShader(vertexShader, fragmentShader192x64);
-			shader.use();
-			BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] initialzed Sega 192x64 renderer";
 		}
 		else {
 			BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] resolution " << f.get_width() << "x" << f.get_height() << "not supported";
@@ -222,8 +214,13 @@ bool OpenGLRenderer::configure_from_ptree(boost::property_tree::ptree pt_general
 	}
 
 	overlay_texture_file = pt_renderer.get("overlay_texture", "img/circle_blurred.png");
+
+	fragment_shader = pt_renderer.get("fragment_shader", "shaders/"+shader_prefix + "-128x32.fs");
+	vertex_shader = pt_renderer.get("vertex_shader", "shaders/" + shader_prefix + ".vs");
+
 	initialize_display();
 	initialize_opengl();
+	load_shaders(vertex_shader, fragment_shader);
 	recalc_vertices();
 
 	return true;
@@ -233,3 +230,42 @@ void OpenGLRenderer::swap_buffers()
 {
 	BOOST_LOG_TRIVIAL(error) << "[openglrenderer] swapBuffers not implemented";
 }
+
+void OpenGLRenderer::load_shaders(string vs, string fs) {
+	string vs_code, fs_code;
+	if (std::filesystem::exists(vs)) {
+		std::ifstream vs_file(vs);
+		std::stringstream buffer;
+		buffer << vs_file.rdbuf();
+		vs_code = buffer.str();
+		BOOST_LOG_TRIVIAL(debug) << "[openglrenderer] loaded vertex shader";
+	}
+	else {
+		vs_code = vs;
+		BOOST_LOG_TRIVIAL(info) << "[openglrenderer] vertex shader is not a file, trying to use it directly";
+
+	}
+
+	if (std::filesystem::exists(fs)) {
+		std::ifstream fs_file(fs);
+		std::stringstream buffer;
+		buffer << fs_file.rdbuf();
+		fs_code = buffer.str();
+		BOOST_LOG_TRIVIAL(debug) << "[openglrenderer] loaded fragment shader";
+	}
+	else {
+		fs_code = fs;
+		BOOST_LOG_TRIVIAL(info) << "[openglrenderer] fragment shader is not a file, trying to use it directly";
+	}
+
+	shader = OpenGLShader();
+	if (!shader.compile_shaders(vs_code, fs_code)) {
+		BOOST_LOG_TRIVIAL(error) << "[openglrenderer] couldn't compile OpenGL shaders, output might be incorrect";
+	}
+	else {
+		BOOST_LOG_TRIVIAL(info) << "[openglrenderer] sucessfully compiled shaders";
+	}
+	shader.use();
+	
+}
+

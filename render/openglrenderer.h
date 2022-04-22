@@ -62,7 +62,12 @@ protected:
 
 	string overlay_texture_file;
 
+	string shader_prefix = "";
+	string vertex_shader;
+	string fragment_shader;
+
 	void recalc_vertices();
 	void initialize_opengl();
+	void load_shaders(string vs, string fs);
 
 };
