@@ -60,7 +60,7 @@ message(STATUS "glfw3 not found, aborting")
 add_definitions(-DUSE_OPENGLPI4)
 # set (PI_INCLUDE_DIRS "/usr/include:/usr/include/stb:/usr/include/libdrm")
 set (PI_LIBS EGL drm glfw gbm GLESv2)
-set (opengl_sources "render/shader-definitions.h" "render/ogl-pi4.h" "render/ogl-pi4.cpp"  "render/pi4renderer.h" "render/pi4renderer.cpp" "render/openglshader.h" "render/openglshader.cpp")
+set (opengl_sources "render/shader-definitions.h" "render/ogl-pi4.h" "render/ogl-pi4.cpp"  "render/pi4renderer.h" "render/pi4renderer.cpp" "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h" "render/openglshader.cpp")
 endif()
 
 
@@ -114,8 +114,8 @@ set(OPENGL_GLAD 0)
 endif()
 
 if (OPENGL)
-add_definitions(-DUSE_OPENGL)
-set (opengl_sources "render/shader-definitions.h" "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h" "render/openglshader.cpp")
+add_definitions(-DUSE_OPENGLGLAD)
+set (opengl_sources "render/shader-definitions.h" "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h" "render/openglshader.cpp" "render/gladopenglrenderer.h" "render/gladopenglrenderer.cpp")
 set(OPENGL_LIBRARIES fmt::fmt
     fmt::fmt-header-only
     glfw
