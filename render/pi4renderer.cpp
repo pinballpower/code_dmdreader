@@ -6,6 +6,9 @@
 #include "ogl-pi4.h"
 #include "pi4renderer.h"
 
+Pi4Renderer::Pi4Renderer() {
+	shader_prefix = "pi4";
+}
 
 void Pi4Renderer::swap_buffers() {
 	gbmSwapBuffers();

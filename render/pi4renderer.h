@@ -7,6 +7,9 @@
 
 class Pi4Renderer : public OpenGLRenderer
 {
+public:
+	Pi4Renderer();
+
 private:
 	virtual bool initialize_display();
 	virtual void swap_buffers();
