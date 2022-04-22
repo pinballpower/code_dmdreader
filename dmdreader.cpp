@@ -68,6 +68,27 @@ bool read_config(string filename) {
 		BOOST_LOG_TRIVIAL(debug) << "[readconfig]  set working directory to " << filesystem::current_path();
 	}
 
+	if (pt_general.get("log", "") == "debug") {
+		BOOST_LOG_TRIVIAL(debug) << "[readconfig] enabling debug logging";
+		boost::log::core::get()->set_filter
+		(
+			boost::log::trivial::severity >= boost::log::trivial::debug
+		);
+	}
+	else if (pt_general.get("log", "") == "trace") {
+		BOOST_LOG_TRIVIAL(debug) << "[readconfig] enabling trace logging";
+		boost::log::core::get()->set_filter
+		(
+			boost::log::trivial::severity >= boost::log::trivial::trace
+		);
+	}
+	else if (pt_general.get("log", "") == "quiet") {
+		boost::log::core::get()->set_filter
+		(
+			boost::log::trivial::severity > boost::log::trivial::error
+		);
+	}
+
 	//
 	// Sources
 	//
@@ -199,14 +220,14 @@ int main(int argc, char** argv)
 {
 	boost::log::core::get()->set_filter
 	(
-		boost::log::trivial::severity > boost::log::trivial::trace
+		boost::log::trivial::severity >= boost::log::trivial::info
 	);
 
 	BOOST_LOG_TRIVIAL(trace) << "[dmdreader] cwd: " << filesystem::current_path();
 
 	string config_file;
 	if (argc >= 2) {
-		config_file = argv[1]; 
+		config_file = argv[1];
 	}
 	else {
 		config_file = "dmdreader.json";
@@ -246,7 +267,7 @@ int main(int argc, char** argv)
 	}
 
 	t2 = std::time(nullptr);
-	BOOST_LOG_TRIVIAL(debug) << "[dmdreader] processed " << frameno << " frames in " << t2 - t1 << "seconds, " << (float)frameno/(t2-t1) << "frames/s";
+	BOOST_LOG_TRIVIAL(info) << "[dmdreader] processed " << frameno << " frames in " << t2 - t1 << "seconds, " << (float)frameno / (t2 - t1) << "frames/s";
 
 	return 0;
 }
