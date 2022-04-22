@@ -136,6 +136,7 @@ static uint32_t previousFb;
 void gbmSwapBuffers(EGLDisplay* display, EGLSurface* surface)
 {
     eglSwapBuffers(*display, *surface);
+
     struct gbm_bo* bo = gbm_surface_lock_front_buffer(gbmSurface);
     uint32_t handle = gbm_bo_get_handle(bo).u32;
     uint32_t pitch = gbm_bo_get_stride(bo);
@@ -226,7 +227,7 @@ static const char* eglGetErrorStr()
     return "Unknown error!";
 }
 
-bool start_fullscreen_ogl()
+bool start_ogl(int width=0, int height=0)
 {
     // You can try chaning this to "card0" if "card1" does not work.
     device = open("/dev/dri/card0", O_RDWR | O_CLOEXEC);
@@ -243,8 +244,15 @@ bool start_fullscreen_ogl()
     }
 
     // We will use the screen resolution as the desired width and height for the viewport.
-    int desiredWidth = mode.hdisplay;
-    int desiredHeight = mode.vdisplay;
+    int desiredWidth = width;
+    if (desiredWidth == 0) {
+        desiredWidth = mode.hdisplay;
+    }
+
+    int desiredHeight = height;
+    if (desiredHeight == 0) {
+        desiredHeight = mode.vdisplay;
+    }
 
     // Other variables we will need further down the code.
     int major, minor;
@@ -361,6 +369,6 @@ void Pi4Renderer::swap_buffers() {
 
 bool Pi4Renderer::initialize_display()
 {
-	start_fullscreen_ogl();
+	start_ogl(width, height);
 	return true;
 }
