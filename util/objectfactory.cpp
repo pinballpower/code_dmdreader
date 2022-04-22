@@ -9,8 +9,8 @@
 #ifdef USE_RAYLIB
 #include "../render/raylibrenderer.h"
 #endif
-#ifdef USE_OPENGL
-#include "../render/openglrenderer.h"
+#ifdef USE_OPENGLGLAD
+#include "../render/gladopenglrenderer.h"
 #endif
 #ifdef USE_OPENGLPI4
 #include "../render/pi4renderer.h"
@@ -74,9 +74,9 @@ FrameRenderer* createRenderer(string name) {
 		return (FrameRenderer*)(new RaylibRenderer());
 	}
 #endif
-#ifdef USE_OPENGL
+#ifdef USE_OPENGLGLAD
 	else if (name == "opengl") {
-		return (FrameRenderer*)(new OpenGLRenderer());
+		return (FrameRenderer*)(new GladOpenGLRenderer());
 	}
 #endif
 #ifdef USE_OPENGLPI4
