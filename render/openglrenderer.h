@@ -1,0 +1,68 @@
+#pragma once
+
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+
+#include "../dmd/color.h"
+#include "../dmd/palette.h"
+#include "framerenderer.h"
+
+#include "openglshader.h"
+
+static const int tx_buf_len = 256 * 256 * 4;
+
+class OpenGLRenderer : public FrameRenderer
+{
+public:
+
+
+	OpenGLRenderer();
+	~OpenGLRenderer();
+	virtual void render_frame(DMDFrame& f);
+	virtual bool configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_renderer);
+
+protected:
+
+	virtual void swap_buffers();
+	virtual bool initialize_display();
+
+	int width = 0;
+	int height = 0;
+	bool scale_linear = false;
+
+	int frame_width = 0, frame_height = 0;
+
+	// DMD texture data
+	int tx_width = 0, tx_height = 0;
+	int tx_pixel_count = 0;
+
+	// DMD position
+	int dmd_x = 0, dmd_y = 0, dmd_width = 0, dmd_height = 0;
+
+	OpenGLShader shader;
+	unsigned int VAO = 0, VBO = 0, EBO = 0;
+
+	unsigned int dmd_texture_id = 0;
+	unsigned int overlay_texture_id = 0;
+
+	uint8_t texturbuf[tx_buf_len];
+
+	float vertices[20] = {
+		// positions          // texture coords
+		 1.0f,  1.0f, 0.0f,   1.0f, 0.0f, // top right
+		 1.0f, -1.0f, 0.0f,   1.0f, 0.12345f, // bottom right
+		-1.0f, -1.0f, 0.0f,   0.0f, 0.12345f, // bottom left
+		-1.0f,  1.0f, 0.0f,   0.0f, 0.0f  // top left 
+	};
+
+	unsigned int indices[6] = {
+		0, 1, 3, // first triangle
+		1, 2, 3  // second triangle
+	};
+
+	string overlay_texture_file;
+
+	void recalc_vertices();
+	void initialize_opengl();
+
+};
