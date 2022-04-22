@@ -58,7 +58,7 @@ message(STATUS "drm.h found in ${DRM_INCLUDE_DIR}")
 add_definitions(-DUSE_OPENGLPI4)
 # set (PI_INCLUDE_DIRS "/usr/include:/usr/include/stb:/usr/include/libdrm")
 set (PI_LIBS EGL drm glfw gbm GLESv2)
-set (opengl_sources "render/ogl-pi4.h" "render/ogl-pi4.cpp"  "render/pi4renderer.h" "render/pi4renderer.cpp" "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h" "render/openglshader.cpp")
+set (opengl_sources "render/pi4renderer.h" "render/pi4renderer.cpp" "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h" "render/openglshader.cpp")
 endif()
 
 
