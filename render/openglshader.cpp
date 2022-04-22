@@ -11,7 +11,9 @@ OpenGLShader::OpenGLShader(const string vertexShader, const string fragmentShade
 	compile_shaders(vertexShader, fragmentShader);
 }
 
-void OpenGLShader::compile_shaders(const string vertexShader, const string fragmentShader) {
+bool OpenGLShader::compile_shaders(const string vertexShader, const string fragmentShader) {
+	shaders_ready = true;
+
 	const char* vShaderCode = vertexShader.c_str();
 	const char* fShaderCode = fragmentShader.c_str();
 	// 2. compile shaders
@@ -20,29 +22,38 @@ void OpenGLShader::compile_shaders(const string vertexShader, const string fragm
 	vertex = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertex, 1, &vShaderCode, NULL);
 	glCompileShader(vertex);
-	checkCompileErrors(vertex, "VERTEX");
+	if (!checkCompileErrors(vertex, "vertex")) {
+		shaders_ready = false;
+	}
 	// fragment Shader
 	fragment = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragment, 1, &fShaderCode, NULL);
 	glCompileShader(fragment);
-	checkCompileErrors(fragment, "FRAGMENT");
+	if (!checkCompileErrors(fragment, "fragment")) {
+		shaders_ready = true;
+	}
 	// shader Program
 	ID = glCreateProgram();
 	glAttachShader(ID, vertex);
 	glAttachShader(ID, fragment);
 	glLinkProgram(ID);
-	checkCompileErrors(ID, "PROGRAM");
+	if (!checkCompileErrors(ID, "program")) {
+		shaders_ready = true;
+	}
 	// delete the shaders as they're linked into our program now and no longer necessary
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
+
+	return shaders_ready;
 }
 
 
 // activate the shader
 // ------------------------------------------------------------------------
-void OpenGLShader::use()
+bool OpenGLShader::use()
 {
 	glUseProgram(ID);
+	return shaders_ready;
 }
 // utility uniform functions
 // ------------------------------------------------------------------------
@@ -63,17 +74,18 @@ void OpenGLShader::setFloat(const std::string& name, float value) const
 
 // utility function for checking shader compilation/linking errors.
 // ------------------------------------------------------------------------
-void OpenGLShader::checkCompileErrors(unsigned int shader, std::string type)
+bool OpenGLShader::checkCompileErrors(unsigned int shader, std::string type)
 {
 	int success;
 	char infoLog[1024];
-	if (type != "PROGRAM")
+	if (type != "program")
 	{
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 		if (!success)
 		{
 			glGetShaderInfoLog(shader, 1024, NULL, infoLog);
 			BOOST_LOG_TRIVIAL(error) << "[shader] compilation error of type " << type;
+			return false;
 		}
 	}
 	else
@@ -83,6 +95,8 @@ void OpenGLShader::checkCompileErrors(unsigned int shader, std::string type)
 		{
 			glGetProgramInfoLog(shader, 1024, NULL, infoLog);
 			BOOST_LOG_TRIVIAL(error) << "[shader] linking error of type " << type;
+			return false;
 		}
 	}
+	return true;
 }

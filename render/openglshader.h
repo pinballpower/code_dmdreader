@@ -20,12 +20,12 @@ public:
     OpenGLShader();
     OpenGLShader(const string vertexShader, const string fragmentShader);
 
-    void compile_shaders(const string vertexShader, const string fragmentShader);
+    bool compile_shaders(const string vertexShader, const string fragmentShader);
 
 
     // activate the shader
     // ------------------------------------------------------------------------
-    void use();
+    bool use();
 
     // utility uniform functions
     // ------------------------------------------------------------------------
@@ -40,6 +40,8 @@ public:
 private:
     // utility function for checking shader compilation/linking errors.
     // ------------------------------------------------------------------------
-    void checkCompileErrors(unsigned int shader, std::string type); 
+    bool checkCompileErrors(unsigned int shader, std::string type); 
+
+    bool shaders_ready = false;
 };
 
