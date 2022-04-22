@@ -2,6 +2,9 @@
 
 #include "gladopenglrenderer.h"
 
+GladOpenGLRenderer::GladOpenGLRenderer() {
+	shader_prefix = "ogl";
+}
 
 bool GladOpenGLRenderer::initialize_display()
 {
