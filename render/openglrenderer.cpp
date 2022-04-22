@@ -1,5 +1,4 @@
 #define GLFW_INCLUDE_NONE
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -96,7 +95,7 @@ void OpenGLRenderer::initialize_opengl()
 	else
 	{
 		BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] Failed to load overlay_texture " << overlay_texture_file << ", will use no overlay";
-		data = new unsigned char[4](255); // create a one-pixel texture that's completely transparent
+		data = new unsigned char[4]{ 0xff, 0xff, 0xff, 0xff }; // create a one-pixel texture that's completely transparent
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		delete[] data;
 	}
