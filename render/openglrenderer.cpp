@@ -182,7 +182,9 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-	this->swap_buffers();
+	if (!no_display) {
+		this->swap_buffers();
+	}
 }
 
 bool OpenGLRenderer::initialize_display()
@@ -215,6 +217,9 @@ bool OpenGLRenderer::configure_from_ptree(boost::property_tree::ptree pt_general
 
 	fragment_shader = pt_renderer.get("fragment_shader", "shaders/"+shader_prefix + "-128x32.fs");
 	vertex_shader = pt_renderer.get("vertex_shader", "shaders/" + shader_prefix + ".vs");
+
+	// allow to turn of display, e.g. to test the performance
+	no_display = ! pt_renderer.get("display", true);
 
 	initialize_display();
 	initialize_opengl();

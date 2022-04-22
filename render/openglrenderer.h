@@ -45,6 +45,11 @@ protected:
 	unsigned int dmd_texture_id = 0;
 	unsigned int overlay_texture_id = 0;
 
+	/// <summary>
+	/// disables swap_buffers, only rendering without displaying 
+	/// </summary>
+	bool no_display = false;
+
 	uint8_t texturbuf[tx_buf_len];
 
 	float vertices[20] = {
