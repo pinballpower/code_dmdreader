@@ -10,8 +10,6 @@
 
 #include "openglshader.h"
 #include "openglrenderer.h"
-#include "shader-definitions.h"
-
 
 OpenGLRenderer::OpenGLRenderer()
 {
