@@ -7,7 +7,7 @@
 */
 
 #include "../dmdsource/dmdsource.h"
-#include "../dmd/frameprocessor.h"
+#include "../processor/frameprocessor.h"
 #include "../render/framerenderer.h"
 
 DMDSource* createSource(string name);

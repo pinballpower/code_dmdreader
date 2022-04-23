@@ -2,9 +2,9 @@
 #include "../dmdsource/datdmdsource.h"
 #include "../dmdsource/txtdmdsource.h"
 #include "../dmdsource/nullsource.h"
-#include "../dmd/pubcapture.h"
-#include "../dmd/frameprocessor.h"
-#include "../dmd/frameinfologger.h"
+#include "../processor/pubcapture.h"
+#include "../processor/frameprocessor.h"
+#include "../processor/frameinfologger.h"
 #include "../render/framerenderer.h"
 #ifdef USE_RAYLIB
 #include "../render/raylibrenderer.h"
