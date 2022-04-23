@@ -31,12 +31,16 @@ bool PaletteColorizer::configure_from_ptree(boost::property_tree::ptree pt_gener
 {
     int numcolors = pt_source.get("colors", 16);
 
-	BOOST_LOG_TRIVIAL(info) << "[simplecolorizer] using " << numcolors << "colors";
+	BOOST_LOG_TRIVIAL(info) << "[palettecolorizer] using " << numcolors << "colors";
 
 	palette.clear();
 	palette.reserve(numcolors);
 
-	DMDColor mycolor = DMDColor(0xff, 0xc3, 0x00, 0x00);
+	uint8_t red = pt_source.get("red", 0xff);
+	uint8_t green = pt_source.get("green", 0xc3);
+	uint8_t blue = pt_source.get("blue", 0x00);
+
+	DMDColor mycolor = DMDColor(red, green, blue, 0);
 	int step = 256 / (numcolors-1);
 	int fade = 0;
 
