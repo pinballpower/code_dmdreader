@@ -8,6 +8,7 @@
 #include <thread>
 #include <filesystem>
 #include <map>
+#include <csignal>
 #include <stdlib.h>
 
 #include <boost/log/core.hpp>
@@ -219,9 +220,23 @@ bool read_config(string filename) {
 	return true;
 }
 
+volatile bool finished = false;
+
+void signal_handler(int sig)
+{
+	finished = true;
+}
+
 
 int main(int argc, char** argv)
 {
+	signal(SIGINT, signal_handler);
+	signal(SIGTERM, signal_handler);
+#ifdef SIGBREAK
+	signal(SIGBREAK, signal_handler);
+#endif
+
+
 	boost::log::core::get()->set_filter
 	(
 		boost::log::trivial::severity >= boost::log::trivial::info
@@ -251,7 +266,7 @@ int main(int argc, char** argv)
 
 	uint32_t checksum_last_frame = 0;
 
-	while (!(source->finished())) {
+	while ((!(source->finished()) && (! finished))) {
 
 		BOOST_LOG_TRIVIAL(trace) << "[dmdreader] processing frame " << frameno;
 
