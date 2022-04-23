@@ -2,6 +2,12 @@
 
 DMDFrame PaletteColorizer::process_frame(DMDFrame& f)
 {
+	if (f.get_bitsperpixel() > 8) {
+		BOOST_LOG_TRIVIAL(debug) << "[palettecolorizer] frame is already colored, doing nothing";
+
+		return std::move(f);
+	}
+
 	int width = f.get_width();
 	int height = f.get_height();
 	int len = width * height;
