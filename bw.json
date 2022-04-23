@@ -14,6 +14,9 @@
   "processor": {
     "pin2dmd": {
       "basename": "samples/baywatch"
+    },
+    "palette": {
+      "colors": 4
     }
   },
   "renderer": {

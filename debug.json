@@ -9,11 +9,14 @@
     }
   },
   "processor": {
+    "pin2dmd": {
+      "basename": "samples/ghostbusters"
+    },
     "palette": {
       "colors": 16,
       "red": 0,
       "green": 255,
-      "blue":  0
+      "blue": 0
     }
   },
   "renderer": {
