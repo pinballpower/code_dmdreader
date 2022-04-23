@@ -6,5 +6,5 @@ fi
 
 INCLUDE_PATH="/usr/include:/usr/include/stb:/usr/include/libdrm"
 export CMAKE_INCLUDE_PATH=$INCLUDE_PATH
-cmake -DCMAKE_BUILD_TYPE=Release .
+cmake -DCMAKE_BUILD_TYPE=Release -DMAX_LOG_LEVEL=info .
 make -j 4
