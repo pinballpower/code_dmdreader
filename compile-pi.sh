@@ -6,6 +6,5 @@ fi
 
 INCLUDE_PATH="/usr/include:/usr/include/stb:/usr/include/libdrm"
 export CMAKE_INCLUDE_PATH=$INCLUDE_PATH
-#export CPATH=$INCLUDE_PATH
-cmake .
+cmake -DCMAKE_BUILD_TYPE=Release .
 make -j 4
