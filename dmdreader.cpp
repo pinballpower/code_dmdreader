@@ -27,6 +27,8 @@ DMDSource* source = NULL;
 vector<DMDFrameProcessor*> processors = vector<DMDFrameProcessor*>();
 vector<FrameRenderer*> renderers = vector<FrameRenderer*>();
 
+bool skip_unmodified_frames = true;
+
 bool read_config(string filename) {
 
 	int i = 0;
@@ -62,6 +64,8 @@ bool read_config(string filename) {
 		pt_general.put("rows", 32);
 		pt_general.put("columns", 128);
 	}
+
+	skip_unmodified_frames = pt_general.get("skip_unmodified_frames", true);
 
 	if (pt_general.get("cwd_to_configdir", false)) {
 		filesystem::current_path(filesystem::path(filename).parent_path());
@@ -245,11 +249,20 @@ int main(int argc, char** argv)
 	int frameno = 0;
 	t1 = std::time(nullptr);
 
+	uint32_t checksum_last_frame = 0;
+
 	while (!(source->finished())) {
 
 		BOOST_LOG_TRIVIAL(trace) << "[dmdreader] processing frame " << frameno;
 
 		DMDFrame frame = source->next_frame();
+
+		if (skip_unmodified_frames) {
+			if (frame.get_checksum() == checksum_last_frame) {
+				continue;
+			}
+			checksum_last_frame = frame.get_checksum();
+		}
 
 		assert(frame.is_valid());
 
