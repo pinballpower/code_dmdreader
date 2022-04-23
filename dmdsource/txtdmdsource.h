@@ -28,7 +28,7 @@ private:
 	DMDFrame preloaded_frame;
 	ifstream is;
 
-	void read_next_frame();
+	void preload_next_frame();
 	bool open_file(string filename);
 
 	int bits = 0;
