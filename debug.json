@@ -1,35 +1,29 @@
 {
   "general": {
-    "cwd_to_configdir":  true
+    "cwd_to_configdir": true,
+    "log": ""
   },
   "source": {
-    "txt": {
-      "name": "samples/baywatch.txt",
-      "bitsperpixel": 2
-    },
-    "null": {
+    "dat": {
+      "name": "samples/spiimage-ghostbusters3.dat"
     }
   },
   "processor": {
-    "pin2dmd": {
-      "basename": "samples/baywatch"
+    "palette": {
+      "colors": 16
     }
   },
   "renderer": {
     "opengl": {
-      "width": 2120,
-      "height": 840,
-      "dmd_x": 100,
-      "dmd_y": 100,
-      "dmd_width": 1920,
-      "dmd_height": 640,
-      "overlay_texture": "img/circle_blurred.png",
-      "scale_linear": false
-    },
-    "raylib": {
       "width": 1920,
-      "height": 640,
-      "bitsperpixel": 2
+      "height": 1089,
+      "dmd_x": 0,
+      "dmd_y": 0,
+      "dmd_width": 1920,
+      "dmd_height": 480,
+      "overlay_texture": "img/circle_blurred.png",
+      "scale_linear": false,
+      "display": true
     }
   }
 }

@@ -5,6 +5,7 @@
 #include "../processor/pubcapture.h"
 #include "../processor/frameprocessor.h"
 #include "../processor/frameinfologger.h"
+#include "../processor/palettecolorizer.h"
 #include "../render/framerenderer.h"
 #ifdef USE_RAYLIB
 #include "../render/raylibrenderer.h"
@@ -56,6 +57,9 @@ DMDFrameProcessor* createProcessor(string name) {
 #endif
 	else if (name == "frameinfo") {
 		return (DMDFrameProcessor*)(new FrameInfoLogger());
+	}
+	else if (name == "palette") {
+		return (DMDFrameProcessor*)(new PaletteColorizer());
 	}
 	else {
 		BOOST_LOG_TRIVIAL(error) << "processor name " << name << " unknown";

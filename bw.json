@@ -1,27 +1,32 @@
 {
   "general": {
+    "cwd_to_configdir": true,
+    "log": ""
   },
   "source": {
     "txt": {
-      "name": "../../../samples/baywatch.txt",
-      "bitsperpixel": 2
-    },
-    "txt": {
-      "name": "../../../samples/baywatch-small.txt",
-      "bitsperpixel": 2
+      "name": "samples/baywatch.txt"
     },
     "vni": {
-      "basename": "../../../samples/baywatch"
+      "basename": "samples/baywatch"
     }
   },
   "processor": {
-    "frameinfo": {}
+    "vni": {
+      "basename": "samples/baywatch"
+    }
   },
   "renderer": {
-    "raylib": {
-      "width": 1920,
-      "height": 640,
-      "bitsperpixel":  2
-    }
+      "opengl": {
+        "width": 1920,
+        "height": 1089,
+        "dmd_x": 0,
+        "dmd_y": 0,
+        "dmd_width": 1640,
+        "dmd_height": 640,
+        "overlay_texture": "img/circle_blurred.png",
+        "scale_linear": false,
+        "display": true
+      }
   }
 }
