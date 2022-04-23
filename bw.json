@@ -12,21 +12,22 @@
     }
   },
   "processor": {
-    "vni": {
+    "pin2dmd": {
       "basename": "samples/baywatch"
     }
   },
   "renderer": {
       "opengl": {
         "width": 1920,
-        "height": 1089,
+        "height": 1080,
         "dmd_x": 0,
         "dmd_y": 0,
         "dmd_width": 1640,
         "dmd_height": 640,
         "overlay_texture": "img/circle_blurred.png",
         "scale_linear": false,
-        "display": true
+        "display": true,
+        "fragment_shader":  "shaders/pi4-192x64.fs"
       }
   }
 }
