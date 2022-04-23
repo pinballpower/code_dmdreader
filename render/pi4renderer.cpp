@@ -96,7 +96,7 @@ static int getDisplay(EGLDisplay* display)
 
     connectorId = connector->connector_id;
     mode = connector->modes[0];
-    printf("resolution: %ix%i\n", mode.hdisplay, mode.vdisplay);
+    BOOST_LOG_TRIVIAL(info) << "[pi4renderer] native resolution: " << mode.hdisplay << "x" << mode.vdisplay;
 
     drmModeEncoder* encoder = findEncoder(connector);
     if (encoder == NULL)
@@ -237,7 +237,7 @@ bool start_ogl(int width=0, int height=0)
         device = open("/dev/dri/card1", O_RDWR | O_CLOEXEC);
         if (getDisplay(&display) != 0)
         {
-            BOOST_LOG_TRIVIAL(error) << "[oglpi4] unable to get EGL display";
+            BOOST_LOG_TRIVIAL(error) << "[pi4renderer] unable to get EGL display";
             close(device);
             return false;
         }
@@ -259,7 +259,7 @@ bool start_ogl(int width=0, int height=0)
 
     if (eglInitialize(display, &major, &minor) == EGL_FALSE)
     {
-        BOOST_LOG_TRIVIAL(error) << "[oglpi4] failed to get EGL version! Error: " << eglGetErrorStr();
+        BOOST_LOG_TRIVIAL(error) << "[pi4renderer] failed to get EGL version! Error: " << eglGetErrorStr();
         eglTerminate(display);
         gbmClean();
         return false;
@@ -268,7 +268,7 @@ bool start_ogl(int width=0, int height=0)
     // Make sure that we can use OpenGL in this EGL app.
     eglBindAPI(EGL_OPENGL_API);
 
-    BOOST_LOG_TRIVIAL(info) << "[oglpi4] initialized EGL version: " << major << "." << minor;
+    BOOST_LOG_TRIVIAL(info) << "[pi4renderer] initialized EGL version: " << major << "." << minor;
 
     EGLint count;
     EGLint numConfigs;
@@ -277,7 +277,7 @@ bool start_ogl(int width=0, int height=0)
 
     if (!eglChooseConfig(display, configAttribs, configs, count, &numConfigs))
     {
-        BOOST_LOG_TRIVIAL(error) << "[oglpi4] failed to get EGL configs! Error: " << eglGetErrorStr();
+        BOOST_LOG_TRIVIAL(error) << "[pi4renderer] failed to get EGL configs! Error: " << eglGetErrorStr();
         eglTerminate(display);
         gbmClean();
         return false;
@@ -288,7 +288,7 @@ bool start_ogl(int width=0, int height=0)
     int configIndex = matchConfigToVisual(display, GBM_FORMAT_XRGB8888, configs, numConfigs);
     if (configIndex < 0)
     {
-        BOOST_LOG_TRIVIAL(error) << "[oglpi4] failed to find matching EGL config! Error: " << eglGetErrorStr();
+        BOOST_LOG_TRIVIAL(error) << "[pi4renderer] failed to find matching EGL config! Error: " << eglGetErrorStr();
         eglTerminate(display);
         gbm_surface_destroy(gbmSurface);
         gbm_device_destroy(gbmDevice);
@@ -299,7 +299,7 @@ bool start_ogl(int width=0, int height=0)
         eglCreateContext(display, configs[configIndex], EGL_NO_CONTEXT, contextAttribs);
     if (context == EGL_NO_CONTEXT)
     {
-        BOOST_LOG_TRIVIAL(error) << "[oglpi4] failed to create EGL context! Error: " << eglGetErrorStr();
+        BOOST_LOG_TRIVIAL(error) << "[pi4renderer] failed to create EGL context! Error: " << eglGetErrorStr();
         eglTerminate(display);
         gbmClean();
         return false;
@@ -309,7 +309,7 @@ bool start_ogl(int width=0, int height=0)
         eglCreateWindowSurface(display, configs[configIndex], gbmSurface, NULL);
     if (surface == EGL_NO_SURFACE)
     {
-        BOOST_LOG_TRIVIAL(error) << "[oglpi4] failed to create EGL surface! Error: " << eglGetErrorStr();
+        BOOST_LOG_TRIVIAL(error) << "[pi4renderer] failed to create EGL surface! Error: " << eglGetErrorStr();
         eglDestroyContext(display, context);
         eglTerminate(display);
         gbmClean();
@@ -327,11 +327,11 @@ bool start_ogl(int width=0, int height=0)
     glGetIntegerv(GL_VIEWPORT, viewport);
 
     // viewport[2] and viewport[3] are viewport width and height respectively
-    BOOST_LOG_TRIVIAL(debug) << "[oglpi4] GL Viewport size: " << viewport[2] << "x" << viewport[3];
+    BOOST_LOG_TRIVIAL(debug) << "[pi4renderer] GL Viewport size: " << viewport[2] << "x" << viewport[3];
 
     if (viewport[2] != desiredWidth || viewport[3] != desiredHeight)
     {
-        BOOST_LOG_TRIVIAL(error) << "[oglpi4] error: glViewport returned incorrect values, something is wrong!";
+        BOOST_LOG_TRIVIAL(error) << "[pi4renderer] error: glViewport returned incorrect values, something is wrong!";
         eglDestroyContext(display, context);
         eglDestroySurface(display, surface);
         eglTerminate(display);
