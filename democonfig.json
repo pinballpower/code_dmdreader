@@ -1,6 +1,7 @@
 {
   "general": {
-    "cwd_to_configdir":  true
+    "cwd_to_configdir": true,
+      "skip_unmodified_frames":  true
   },
   "source": {
     "vni": {
@@ -16,14 +17,25 @@
   "processor": {
     "pubcapture": {
       "directory": "../../../samples/gbpub/"
+    },
+    "palette": {
+      "colors": 16,
+      "red": 0,
+      "green": 255,
+      "blue": 0
     }
   },
   "renderer": {
     "opengl": {
       "width": 1920,
-      "height": 640,
+      "height": 1080,
+      "dmd_x": 0,
+      "dmd_y": 0,
+      "dmd_width": 1920,
+      "dmd_height": 480,
       "overlay_texture": "img/circle_blurred.png",
-      "scale_linear": false
+      "scale_linear": false,
+      "display": true
     },
 
     "raylib": {
