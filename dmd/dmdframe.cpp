@@ -99,10 +99,6 @@ bool DMDFrame::is_valid() const
 
 }
 
-void DMDFrame::recalc_checksum() {
-	checksum = crc32vect(data);
-}
-
 void DMDFrame::init_mem(int no_of_pixels) {
 	assert(((bitsperpixel <= 8) && (bitsperpixel >= 0)) || (bitsperpixel == 24) || (bitsperpixel == 32));
 
@@ -127,7 +123,7 @@ void DMDFrame::init_mem(int no_of_pixels) {
 	planes.clear();
 	planes.reserve(bitsperpixel);
 
-	checksum = 0;
+	checksum_valid = false;
 }
 
 void DMDFrame::copy_data(uint8_t* dat, int len) {
@@ -184,9 +180,17 @@ uint8_t DMDFrame::get_pixelmask() const {
 	return pixel_mask;
 }
 
-uint32_t DMDFrame::get_checksum() const
+uint32_t DMDFrame::get_checksum(bool recalc) const
 {
+	// In case of heavy concurrency, it might be better to use a mutex instead of an atomic checksum variable. 
+	// However, in this application no concurrent access to the checksum variable is expected. Therefore, atomic 
+	// is used as it is more lightweight
+	if (!(checksum_valid) || recalc) {
+		checksum = crc32vect(data);
+		checksum_valid = true;
+	}		
 	return checksum;
+
 }
 
 /// <summary>

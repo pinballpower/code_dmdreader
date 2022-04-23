@@ -43,7 +43,7 @@ public:
 	int get_height() const;
 	int get_bitsperpixel() const;
 	uint8_t get_pixelmask() const;
-	uint32_t get_checksum() const;
+	uint32_t get_checksum(bool recalc=false) const;
 
 	void set_size(int width, int height, int bits_per_pixel);
 
@@ -57,10 +57,8 @@ public:
 
 	string str();
 
-
 protected:
 
-	void recalc_checksum();
 	void init_mem(int no_of_pixels = 0);
 	void copy_data(uint8_t* dat, int len);
 	void calc_planes();
@@ -71,6 +69,11 @@ protected:
 	int datalen;
 	int rowlen;
 	uint8_t pixel_mask;
-	uint32_t checksum; // uses for fast equality check
+
+	mutable bool checksum_valid = false;
+
+private:
+	mutable uint32_t checksum;
+
 };
 

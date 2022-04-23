@@ -115,5 +115,5 @@ void MaskedDMDFrame::read_from_rgbimage(const RGBBuffer rgbdata, const DMDPalett
 		}
 	}
 
-	DMDFrame::recalc_checksum();
+	DMDFrame::get_checksum(true); // recalculate checksum
 }
