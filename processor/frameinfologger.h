@@ -3,7 +3,6 @@
 #include <map>
 
 #include <boost/property_tree/ptree.hpp>
-#include <boost/log/trivial.hpp>
 
 #include "../dmd/dmdframe.h"
 #include "frameprocessor.h"
