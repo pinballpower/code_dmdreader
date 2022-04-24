@@ -14,3 +14,4 @@ samples/*.txt
 /samples/bwsmall.txt.gz
 /samples/baywatch-small.txt.gz
 /CMakeFiles
+/output.txt
