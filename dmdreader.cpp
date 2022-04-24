@@ -299,5 +299,23 @@ int main(int argc, char** argv)
 		<< (float)frameno / (t2 - t1) << "frames/s, "
 		<< source->dropped_frames() << "frames dropped";
 
+	// Finishing
+	source->close();
+	delete(source);
+
+	for (DMDFrameProcessor* proc : processors) {
+		proc->close();
+		delete(proc);
+	}
+	processors.clear();
+
+	for (FrameRenderer* renderer : renderers) {
+		renderer->close();
+		delete renderer;
+	}
+	renderers.clear();
+
+	BOOST_LOG_TRIVIAL(info) << "[dmdreader] exiting";
+
 	return 0;
 }
