@@ -24,6 +24,10 @@ SourceProperties DMDSource::get_properties() {
 	throw std::logic_error("Function not yet implemented");	
 }
 
+void DMDSource::close()
+{
+}
+
 int DMDSource::dropped_frames()
 {
 	return 0;
