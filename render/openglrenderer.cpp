@@ -127,6 +127,15 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 		}
 	}
 
+	// start drawing
+	// -------------
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+
+	// render DMD
+	// ----------
+
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -161,11 +170,6 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tx_width, tx_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturbuf);
 	}
 
-	// render
-	// ------
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-
 	// bind Textures
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, dmd_texture_id);
@@ -179,6 +183,9 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 	// render container
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+
+
 
 	if (!no_display) {
 		this->swap_buffers();
