@@ -19,6 +19,8 @@ public:
 	virtual bool configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source);
 	virtual DMDFrame process_frame(DMDFrame &f);
 
+	virtual void close();
+
 private:
 
 	void write_to_file(DMDFrame& f);

@@ -6,9 +6,9 @@
 
 FrameStore::~FrameStore()
 {
-	outputfile.close();
-	BOOST_LOG_TRIVIAL(debug) << "[framestore] " << frameno << " frames written";
 }
+
+
 
 bool FrameStore::configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
 {
@@ -56,30 +56,49 @@ DMDFrame FrameStore::process_frame(DMDFrame& f)
 	return f;
 }
 
+void FrameStore::close()
+{
+	if (!frames_to_write.empty()) {
+		BOOST_LOG_TRIVIAL(info) << "[framestore] writing " << frames_to_write.size() << " frames";
+	}
+	while (!frames_to_write.empty()) {
+		auto frame = frames_to_write.front();
+		write_to_file(frame);
+		frames_to_write.pop();
+	}
+	outputfile.close();
+	BOOST_LOG_TRIVIAL(debug) << "[framestore] " << frameno << " frames written";
+}
+
 void FrameStore::write_to_file(DMDFrame& f)
 {
-	outputfile << "$" << std::hex << std::setw(8) << std::setfill('0') << frameno << "\r\n";
+	if (outputfile.is_open()) {
+		outputfile << "$" << std::hex << std::setw(8) << std::setfill('0') << frameno;
 
-	string line = "";
-	int col = 0;
-	for (auto px : f.get_data()) {
-		line.push_back('0' + (char)px);
+		string line = "";
+		int col = 0;
+		for (auto px : f.get_data()) {
+			line.push_back('0' + (char)px);
 
-		if (col == f.get_width() - 1) {
-			outputfile << line << "\r\n";
-			line = "";
-			col = 0;
+			if (col == f.get_width() - 1) {
+				outputfile << line;
+				line = "";
+				col = 0;
+			}
+			else {
+				col++;
+			}
 		}
-		else {
-			col++;
-		}
+
+		assert(col == 0); // there should be no pixel left
+
+		outputfile << "";
+
+		BOOST_LOG_TRIVIAL(trace) << "[framestore] frame " << frameno << " written";
+
+		frameno++;
 	}
-
-	assert(col == 0); // there should be no pixel left
-
-	outputfile << "\r\n";
-
-	BOOST_LOG_TRIVIAL(trace) << "[framestore] frame " << frameno << " written";
-
-	frameno++;
+	else {
+		BOOST_LOG_TRIVIAL(debug) << "[framestore] outut file closed, doing nothing";
+	}
 }
