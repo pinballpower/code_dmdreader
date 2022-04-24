@@ -12,7 +12,7 @@
     "store": {
       "filename": "output.txt",
       "ignore_duplicates": true,
-      "async":  true
+      "async":  false
     },
     "pin2dmd": {
       "basename": "samples/ghostbusters"
