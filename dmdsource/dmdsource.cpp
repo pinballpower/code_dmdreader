@@ -24,6 +24,11 @@ SourceProperties DMDSource::get_properties() {
 	throw std::logic_error("Function not yet implemented");	
 }
 
+int DMDSource::dropped_frames()
+{
+	return 0;
+}
+
 SourceProperties::SourceProperties(int width, int height, int bitsperpixel)
 {
 	this->width = width;

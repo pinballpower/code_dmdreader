@@ -15,6 +15,7 @@ public:
 
 	SourceProperties(int width = 0, int height = 0, int bitsperpixel = 0);
 	SourceProperties(DMDFrame &f);
+
 };
 
 class DMDSource {
@@ -26,4 +27,6 @@ public:
 	virtual bool configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source);
 
 	virtual SourceProperties get_properties();
+
+	virtual int dropped_frames();
 };
