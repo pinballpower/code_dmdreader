@@ -73,7 +73,7 @@ void FrameStore::close()
 void FrameStore::write_to_file(DMDFrame& f)
 {
 	if (outputfile.is_open()) {
-		outputfile << "$" << std::hex << std::setw(8) << std::setfill('0') << frameno;
+		outputfile << "$" << std::hex << std::setw(8) << std::setfill('0') << frameno << std::endl;
 
 		string line = "";
 		int col = 0;
@@ -81,7 +81,7 @@ void FrameStore::write_to_file(DMDFrame& f)
 			line.push_back('0' + (char)px);
 
 			if (col == f.get_width() - 1) {
-				outputfile << line;
+				outputfile << line << std::endl;
 				line = "";
 				col = 0;
 			}
@@ -92,7 +92,7 @@ void FrameStore::write_to_file(DMDFrame& f)
 
 		assert(col == 0); // there should be no pixel left
 
-		outputfile << "";
+		outputfile << std::endl;
 
 		BOOST_LOG_TRIVIAL(trace) << "[framestore] frame " << frameno << " written";
 
