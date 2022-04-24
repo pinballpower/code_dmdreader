@@ -295,7 +295,9 @@ int main(int argc, char** argv)
 	}
 
 	t2 = std::time(nullptr);
-	BOOST_LOG_TRIVIAL(info) << "[dmdreader] processed " << frameno << " frames in " << t2 - t1 << "seconds, " << (float)frameno / (t2 - t1) << "frames/s";
+	BOOST_LOG_TRIVIAL(info) << "[dmdreader] processed " << frameno << " frames in " << t2 - t1 << "seconds, " 
+		<< (float)frameno / (t2 - t1) << "frames/s"
+		<< source->dropped_frames() << "frames dropped";
 
 	return 0;
 }
