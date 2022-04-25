@@ -1,3 +1,5 @@
+#include <string>
+
 #include "../dmdsource/dmdsource.h"
 #include "../dmdsource/datdmdsource.h"
 #include "../dmdsource/txtdmdsource.h"
@@ -17,6 +19,9 @@
 #ifdef USE_OPENGLPI4
 #include "../render/pi4renderer.h"
 #endif
+#ifdef USE_SPI
+#include "../dmdsource/spisource.h"
+#endif
 
 #if __has_include("../colorize/config.h")
 #include "../colorize/config.h"
@@ -34,6 +39,11 @@ DMDSource* createSource(string name) {
 	else if (name == "null") {
 		return (DMDSource*)(new NullDMDSource());
 	}
+#ifdef USE_SPI
+	else if (name == "spi") {
+		return (DMDSource*)(new SPISource());
+	}
+#endif
 #ifdef VNICOLORING
 	else if (name == "vni") {
 		return (DMDSource*)(new Pin2DMDColorisation());
