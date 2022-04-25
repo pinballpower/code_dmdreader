@@ -10,6 +10,6 @@ sudo make install
 cd ..
 rm -rf cmake-3.23.0
 sudo apt-get install -y --no-install-recommends raspberrypi-ui-mods lxterminal gvfs
-sudo apt-get install -y libx11-dev libxcursor-dev libxinerama-dev libxrandr-dev libxi-dev libasound2-dev mesa-common-dev libgl1-mesa-dev 
-sudo apt-get install -y libstb-dev libglbinding-dev libglfw3-dev libglm-dev libfmt.dev libglew-dev libdrm-dev libboost-all-dev
+sudo apt-get install -y libx11-dev libxcursor-dev libxinerama-dev libxrandr-dev libxi-dev libasound2-dev mesa-common-dev libgl1-mesa-dev libgbm-dev 
+sudo apt-get install -y libstb-dev libglbinding-dev libglfw3-dev libglm-dev libfmt.dev libglew-dev libdrm-dev libboost-all-dev g++ libraspberrypi-dev raspberrypi-kernel-headers
 
