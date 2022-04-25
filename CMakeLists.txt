@@ -60,7 +60,7 @@ add_definitions(-DUSE_SPI)
 # set (PI_INCLUDE_DIRS "/usr/include:/usr/include/stb:/usr/include/libdrm")
 set (PI_LIBS EGL drm glfw gbm GLESv2)
 set (opengl_sources "render/pi4renderer.h" "render/pi4renderer.cpp" "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h" "render/openglshader.cpp")
-set (spi_sources "dmdsource/spisource.h" "dmdsource/spisource.cpp" "rpi/spihelper.h" "rpi/spihelper.cpp")
+set (spi_sources "dmdsource/spisource.h" "dmdsource/spisource.cpp" "rpi/spi.h" "rpi/spi.cpp")
 endif()
 
 

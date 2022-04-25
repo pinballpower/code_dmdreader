@@ -1,4 +1,4 @@
-#include "spihelper.h"
+#include "spi.h"
 
 #include <boost/log/trivial.hpp>
 
