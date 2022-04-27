@@ -15,7 +15,7 @@ public:
 
 	bool readFile(string filename);
 
-	virtual DMDFrame getNextFrame(bool blocking = true) override;
+	virtual DMDFrame getNextFrame() override;
 
 	virtual bool isFinished() override;
 	virtual bool isFrameReady() override;

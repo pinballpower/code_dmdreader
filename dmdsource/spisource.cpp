@@ -87,11 +87,10 @@ void SPISource::loopSPIRead() {
 				BOOST_LOG_TRIVIAL(trace) << "[spisource] resolution " << columns << "x" << rows << "x" << bitsperpixel << " unsupported, ignoring";
 				continue;
 			}
-			else {
-				BOOST_LOG_TRIVIAL(info) << "[spisource] got frame " << columns << "x" << rows << "x" << bitsperpixel;
-			}
 
-			// TODO: create frame
+			BOOST_LOG_TRIVIAL(info) << "[spisource] got frame " << columns << "x" << rows << "x" << bitsperpixel;
+			DMDFrame frame = DMDFrame(columns, rows, bitsperpixel, buf + 8);
+			queuedFrames.push(frame);
 		}
 		else {
 			BOOST_LOG_TRIVIAL(debug) << "[spisource] packet type " << packet_type << "unsupported, ignoring";
@@ -108,9 +107,8 @@ SPISource::SPISource()
 {
 }
 
-DMDFrame SPISource::getNextFrame(bool blocking)
+DMDFrame SPISource::getNextFrame()
 {
-	return DMDFrame();
 }
 
 bool SPISource::isFinished()
@@ -120,7 +118,7 @@ bool SPISource::isFinished()
 
 bool SPISource::isFrameReady()
 {
-	return false;
+	return ! queuedFrames.empty();
 }
 
 bool SPISource::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)

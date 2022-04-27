@@ -1,5 +1,7 @@
 #pragma once
 
+#include <queue>
+
 #include "dmdsource.h"
 
 #include "../rpi/gpio.h"
@@ -10,7 +12,7 @@ public:
 
 	SPISource();
 
-	virtual DMDFrame getNextFrame(bool blocking = true) override;
+	virtual DMDFrame getNextFrame() override;
 
 	virtual bool isFinished() override;
 	virtual bool isFrameReady() override;
@@ -26,5 +28,6 @@ private:
 	int notify_gpio = 0;
 
 	void loopSPIRead();
+	queue<DMDFrame> queuedFrames;
 
 };

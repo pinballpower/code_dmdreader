@@ -98,7 +98,7 @@ void TXTDMDSource::preloadNextFrame()
 	}
 }
 
-DMDFrame TXTDMDSource::getNextFrame(bool blocking)
+DMDFrame TXTDMDSource::getNextFrame()
 {
 	DMDFrame res = std::move(preloaded_frame);
 	preloadNextFrame();

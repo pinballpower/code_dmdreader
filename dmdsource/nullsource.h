@@ -5,7 +5,7 @@ public:
 
 	NullDMDSource();
 
-	virtual DMDFrame getNextFrame(bool blocking = true);
+	virtual DMDFrame getNextFrame();
 
 	virtual bool isFinished() override;
 	virtual bool isFrameReady() override;

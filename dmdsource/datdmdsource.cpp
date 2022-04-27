@@ -76,7 +76,7 @@ DMDFrame DATDMDSource::readFromDatFile(std::ifstream& fis)
 }
 
 
-DMDFrame DATDMDSource::getNextFrame(bool blocking)
+DMDFrame DATDMDSource::getNextFrame()
 {
 	DMDFrame res = frames.front();
 	frames.pop();

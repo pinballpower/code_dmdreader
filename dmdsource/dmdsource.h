@@ -21,7 +21,7 @@ public:
 class DMDSource {
 
 public:
-	virtual DMDFrame getNextFrame(bool blocking = true);
+	virtual DMDFrame getNextFrame();
 	virtual bool isFinished();
 	virtual bool isFrameReady();
 	virtual void close();

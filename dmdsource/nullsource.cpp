@@ -4,7 +4,7 @@ NullDMDSource::NullDMDSource()
 {
 }
 
-DMDFrame NullDMDSource::getNextFrame(bool blocking)
+DMDFrame NullDMDSource::getNextFrame()
 {
 	return DMDFrame(width, height, bitsperpixel);
 }
