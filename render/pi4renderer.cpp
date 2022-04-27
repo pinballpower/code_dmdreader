@@ -369,6 +369,5 @@ void Pi4Renderer::swapBuffers() {
 
 bool Pi4Renderer::initializeDisplay()
 {
-	start_ogl(width, height);
-	return true;
+	return start_ogl(width, height);
 }
