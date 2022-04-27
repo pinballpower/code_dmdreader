@@ -1,7 +1,7 @@
 #include "dmdsource.h"
 #include "../dmd/dmdframe.h"
 
-DMDFrame DMDSource::getNextFrame(bool blocking)
+DMDFrame DMDSource::getNextFrame()
 {
 	return DMDFrame();
 }
