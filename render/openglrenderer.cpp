@@ -36,10 +36,10 @@ void OpenGLRenderer::recalcVertices() {
 	bottom = -1;
 	left = -1;
 
-	top = 1.0f - 2.0f*((float)dmd_y / (float)height);
-	left = -1.0f + 2.0f*((float)dmd_x / (float)width);
-	bottom = -1.0f + 2.0f*((float)(height - dmd_y - dmd_height) / height);
-	right = 1.0f - 2.0f*((float)(width - dmd_x - dmd_width) / width);
+	top = 1.0f - 2.0f * ((float)dmd_y / (float)height);
+	left = -1.0f + 2.0f * ((float)dmd_x / (float)width);
+	bottom = -1.0f + 2.0f * ((float)(height - dmd_y - dmd_height) / height);
+	right = 1.0f - 2.0f * ((float)(width - dmd_x - dmd_width) / width);
 
 	vertices[0] = vertices[5] = right;
 	vertices[10] = vertices[15] = left;
@@ -221,13 +221,17 @@ bool OpenGLRenderer::configureFromPtree(boost::property_tree::ptree pt_general, 
 
 	overlay_texture_file = pt_renderer.get("overlay_texture", "img/circle_blurred.png");
 
-	fragment_shader = pt_renderer.get("fragment_shader", "shaders/"+shader_prefix + "-128x32.fs");
+	fragment_shader = pt_renderer.get("fragment_shader", "shaders/" + shader_prefix + "-128x32.fs");
 	vertex_shader = pt_renderer.get("vertex_shader", "shaders/" + shader_prefix + ".vs");
 
 	// allow to turn of display, e.g. to test the performance
-	no_display = ! pt_renderer.get("display", true);
+	no_display = !pt_renderer.get("display", true);
 
-	initializeDisplay();
+	if (!(initializeDisplay())) {
+		BOOST_LOG_TRIVIAL(error) << "[openglrenderer] couldn't initialize display, aborting";
+		return false;
+	}
+
 	initializeOpenGL();
 
 	// width and height might have been changed here - depnding on the renderer (e.g. if the renderer is a fullscreen renderer)
@@ -278,6 +282,6 @@ void OpenGLRenderer::loadShaders(string vs, string fs) {
 		BOOST_LOG_TRIVIAL(info) << "[openglrenderer] sucessfully compiled shaders";
 	}
 	shader.use();
-	
+
 }
 
