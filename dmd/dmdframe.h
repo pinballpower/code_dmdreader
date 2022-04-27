@@ -30,7 +30,7 @@ protected:
 
 public:
 
-	DMDFrame(int width = 0, int height = 0, int bitsperpixel = 0, uint8_t* data1 = NULL);
+	DMDFrame(int width = 0, int height = 0, int bitsperpixel = 0, uint8_t* data1 = nullptr);
 	DMDFrame(int width, int height, int bitsperpixel, vector <uint8_t> data1);
 	~DMDFrame();
 
