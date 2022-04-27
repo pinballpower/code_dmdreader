@@ -22,12 +22,12 @@ RGBBuffer::~RGBBuffer()
 {
 }
 
-const vector<uint8_t> RGBBuffer::get_data() const
+const vector<uint8_t> RGBBuffer::getData() const
 {
 	return data;
 }
 
-void RGBBuffer::set_pixel(int x, int y, rgb rgbdata)
+void RGBBuffer::setPixel(int x, int y, rgb rgbdata)
 {
 	int offset = (x + y * width) * 3;
 	data[offset] = rgbdata.r;
@@ -35,7 +35,7 @@ void RGBBuffer::set_pixel(int x, int y, rgb rgbdata)
 	data[offset+2] = rgbdata.b;
 }
 
-void RGBBuffer::set_pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b)
+void RGBBuffer::setPixel(int x, int y, uint8_t r, uint8_t g, uint8_t b)
 {
 	int offset = (x + y * width) * 3;
 	data[offset] = r;

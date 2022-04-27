@@ -10,7 +10,7 @@
 
 using namespace std;
 
-RGBBuffer read_BMP(std::string filename)
+RGBBuffer readBMP(std::string filename)
 {
     ifstream is;
     is.exceptions(ifstream::failbit | ifstream::badbit);
@@ -50,7 +50,7 @@ RGBBuffer read_BMP(std::string filename)
             uint8_t r = linedata[z + 2];
             uint8_t g = linedata[z + 1];
             uint8_t b = linedata[z];
-            buf.set_pixel(x, y, r, g, b);
+            buf.setPixel(x, y, r, g, b);
         }
     }
 

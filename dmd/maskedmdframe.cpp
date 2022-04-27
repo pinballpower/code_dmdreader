@@ -56,7 +56,7 @@ void MaskedDMDFrame::read_from_rgbimage(const RGBBuffer rgbdata, const DMDPalett
 	mask_y2 = -1;
 	mask.clear();
 
-	vector<uint8_t> rgb_src = rgbdata.get_data();
+	vector<uint8_t> rgb_src = rgbdata.getData();
 	int dst_bit = 32;
 
 	bool color_not_found = false;

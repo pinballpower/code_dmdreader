@@ -51,7 +51,7 @@ int DMDPalette::index_of(uint8_t r, uint8_t g, uint8_t b) const {
 
 bool DMDPalette::matches(const RGBBuffer& buf) const
 {
-	const vector <uint8_t> data = buf.get_data();
+	const vector <uint8_t> data = buf.getData();
 	for (int i = 0; i < data.size(); i += 3) {
 		uint8_t r = data[i];
 		uint8_t g = data[i + 1];

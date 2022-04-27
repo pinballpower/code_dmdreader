@@ -41,7 +41,7 @@ bool PubCapture::load_triggers(int bitsperpixel, string directory, std::optional
                 int i = stoi(match.str(1));
                 if (i > max_index) { max_index = i; };
 
-                RGBBuffer buff = read_BMP(full_name);
+                RGBBuffer buff = readBMP(full_name);
                 rgbdata.insert(pair<int, RGBBuffer>(i, buff));
 
                 BOOST_LOG_TRIVIAL(debug) << "loaded " << filename;
