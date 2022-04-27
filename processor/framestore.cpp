@@ -4,6 +4,12 @@
 
 #include "framestore.h"
 
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::seconds;
+using std::chrono::system_clock;
+
+
 FrameStore::~FrameStore()
 {
 }
@@ -23,6 +29,8 @@ bool FrameStore::configureFromPtree(boost::property_tree::ptree pt_general, boos
 
 	outputfile.open(name, ios::out);
 	isFinished = false;
+
+	startMillisec = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 
 	return true;
 
@@ -46,11 +54,14 @@ DMDFrame FrameStore::processFrame(DMDFrame& f)
 	}
 
 	if (!isFinished) {
+		unsigned long nowMillisec = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+		uint32_t timestamp = nowMillisec - startMillisec;
+
 		if (async) {
-			frames_to_write.push(f);
+			frames_to_write.push(make_pair(f, timestamp));
 		}
 		else {
-			writeFrameToFile(f);
+			writeFrameToFile(f, timestamp);
 		}
 	}
 	return f;
@@ -62,18 +73,18 @@ void FrameStore::close()
 		BOOST_LOG_TRIVIAL(info) << "[framestore] writing " << frames_to_write.size() << " frames";
 	}
 	while (!frames_to_write.empty()) {
-		auto frame = frames_to_write.front();
-		writeFrameToFile(frame);
+		auto nextFrame = frames_to_write.front();
+		writeFrameToFile(nextFrame.first, nextFrame.second);
 		frames_to_write.pop();
 	}
 	outputfile.close();
 	BOOST_LOG_TRIVIAL(debug) << "[framestore] " << frameno << " frames written";
 }
 
-void FrameStore::writeFrameToFile(DMDFrame& f)
+void FrameStore::writeFrameToFile(DMDFrame& f, uint32_t timestamp)
 {
 	if (outputfile.is_open()) {
-		outputfile << "$" << std::hex << std::setw(8) << std::setfill('0') << frameno << std::endl;
+		outputfile << "$" << std::hex << std::setw(8) << std::setfill('0') << timestamp << std::endl;
 
 		string line = "";
 		int col = 0;
