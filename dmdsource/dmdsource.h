@@ -15,7 +15,6 @@ public:
 
 	SourceProperties(int width = 0, int height = 0, int bitsperpixel = 0);
 	SourceProperties(DMDFrame &f);
-
 };
 
 class DMDSource {
