@@ -75,7 +75,7 @@ void SPISource::loopSPIRead() {
 			BOOST_LOG_TRIVIAL(debug) << "[spisource] got frame " << columns << "x" << rows << "x" << bitsperpixel;
 			int queueLen = queuedFrames.size();
 			if (queueLen < MAX_QUEUED_FRAMES) {
-				DMDFrame frame = DMDFrame(columns, rows, bitsperpixel, buf + 8);
+				DMDFrame frame = DMDFrame(columns, rows, bitsperpixel, buf + 8, true);
 				queuedFrames.push(frame);
 				frameSemaphore.post();
 			} else {
