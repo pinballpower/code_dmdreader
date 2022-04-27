@@ -25,7 +25,7 @@ public:
 
 private:
 
-	DMDFrame preloaded_frame;
+	DMDFrame preloadedFrame;
 	ifstream is;
 
 	void preloadNextFrame();

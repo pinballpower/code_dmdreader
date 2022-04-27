@@ -2,6 +2,7 @@
 #include <regex>
 #include <string>
 #include <vector>
+#include <filesystem>
 
 #include <boost/log/trivial.hpp>
 
@@ -28,7 +29,6 @@ TXTDMDSource::TXTDMDSource(string filename)
 
 TXTDMDSource::~TXTDMDSource()
 {
-	is.close();
 }
 
 bool TXTDMDSource::openFile(string filename)
@@ -36,7 +36,8 @@ bool TXTDMDSource::openFile(string filename)
 	is.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	try {
 		is.open(filename);
-	} catch (std::ios_base::failure e) {
+	}
+	catch (std::ios_base::failure e) {
 		BOOST_LOG_TRIVIAL(error) << "[txtdmdsource] can't open file " << filename << ": " << e.what();
 		eof = true;
 		return false;
@@ -52,9 +53,16 @@ void TXTDMDSource::preloadNextFrame()
 		// Look for checksum
 		bool timestamp_found = false;
 		string line;
-		regex timestamp_regex("0x[0-9a-fA-F]{8}.*");
+		regex timestamp_regex("(0x|\\$)[0-9a-fA-F]{8}.*");
 		while (!timestamp_found) {
-			std::getline(is, line);
+			if (!std::getline(is, line)) {
+				if (std::cin.eof()) {
+					eof = true;
+				}
+				else {
+					throw std::ios_base::failure("couldn't read file");
+				}
+			}
 			rtrim(line);
 
 			if (regex_match(line, timestamp_regex)) {
@@ -67,7 +75,14 @@ void TXTDMDSource::preloadNextFrame()
 		int width = 0;
 		int len = 1;
 		while (len) {
-			std::getline(is, line);
+			if (!std::getline(is, line)) {
+				if (std::cin.eof()) {
+					eof = true;
+				}
+				else {
+					throw std::ios_base::failure("couldn't read file");
+				}
+			}
 			rtrim(line);
 			len = line.length();
 			if (len > width) {
@@ -79,12 +94,12 @@ void TXTDMDSource::preloadNextFrame()
 		int height = frametxt.size() - 1;
 
 		// Initialize frame
-		preloaded_frame = DMDFrame(width, height, bits);
+		preloadedFrame = DMDFrame(width, height, bits);
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				uint8_t pv = frametxt[y][x] - '0';
-				preloaded_frame.appendPixel(pv);
+				preloadedFrame.appendPixel(pv);
 			}
 		}
 	}
@@ -94,13 +109,12 @@ void TXTDMDSource::preloadNextFrame()
 		}
 
 		eof = true;
-		is.close();
 	}
 }
 
 DMDFrame TXTDMDSource::getNextFrame()
 {
-	DMDFrame res = std::move(preloaded_frame);
+	DMDFrame res = std::move(preloadedFrame);
 	preloadNextFrame();
 	return res;
 }
@@ -117,11 +131,11 @@ bool TXTDMDSource::isFrameReady()
 
 
 SourceProperties TXTDMDSource::getProperties() {
-	return SourceProperties(preloaded_frame);
+	return SourceProperties(preloadedFrame);
 }
 
 bool TXTDMDSource::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {
-	bits = pt_source.get("bitsperpixel", 2);
+	bits = pt_source.get("bitsperpixel", 4);
 	bool res=openFile(pt_source.get("name", ""));
 	if (res) preloadNextFrame();
 	return res;
