@@ -3,6 +3,7 @@
 #include "dmdsource.h"
 
 #include "../rpi/gpio.h"
+#include "../rpi/spi.h"
 
 class SPISource : public DMDSource {
 public:
@@ -21,6 +22,7 @@ public:
 private:
 
 	GPIO gpio;
+	SPI spi;
 	int notify_gpio = 0;
 
 	void loopSPIRead();

@@ -1,64 +1,67 @@
 #include "spi.h"
 
+#include <ios>
+
 #include <boost/log/trivial.hpp>
 
 
-void openDevice(string spi_device, unsigned int spi_flags)
+void SPI::openDevice(const string spiDevice, unsigned int spiSpeed, unsigned int spiFlags)
 {
     int i;
-    char  spi_mode;
-    char  spi_bits = 8;
+    char  spiMode;
+    char  spiBits = 8;
     char dev[32];
 
-    spi_mode = spi_flags & 3;
+    spiMode = spiFlags & 3;
 
-    if ((spi_fd = open(spi_device.c_str(), O_RDWR)) < 0)
+    if ((fileDescriptor = open(spiDevice.c_str(), O_RDWR)) < 0)
     {
-        throw SPIException("couldn't open SPI device " + spi_device);
+        throw SPIException("couldn't open SPI device " + spiDevice);
     }
 
-    if (ioctl(spi_fd, SPI_IOC_WR_MODE, &spi_mode) < 0)
+    if (ioctl(fileDescriptor, SPI_IOC_WR_MODE, &spiMode) < 0)
     {
-        close(spi_fd);
+        closeDevice();
         throw SPIException("couldn't set SPI mode");
     }
 
-    if (ioctl(spi_fd, SPI_IOC_WR_BITS_PER_WORD, &spi_bits) < 0)
+    if (ioctl(fileDescriptor, SPI_IOC_WR_BITS_PER_WORD, &spiBits) < 0)
     {
-        close(spi_fd);
+        closeDevice();
         throw SPIException("couldn't set SPI bits/word");
     }
 
-    if (ioctl(spi_fd, SPI_IOC_WR_MAX_SPEED_HZ, &spi_speed) < 0)
+    if (ioctl(fileDescriptor, SPI_IOC_WR_MAX_SPEED_HZ, &spiSpeed) < 0)
     {
-        close(spi_fd);
+        closeDevice();
         throw SPIException("couldn't set SPI speed");
     }
 
-    memset(&spi_transfer, 0, sizeof(spi_transfer));
+    speed = spiSpeed;
+}
 
+void SPI::closeDevice()
+{
+    close(fileDescriptor);
+    fileDescriptor = 0;
+}
+
+void SPI::readData(uint8_t *buf, unsigned int count) const
+{
+    if (fileDescriptor <= 0) {
+        throw SPIException("SPI not ready");
+    }
+
+    static  struct spi_ioc_transfer spi_transfer;
+    memset(&spi_transfer, 0, sizeof(spi_transfer));
     spi_transfer.tx_buf = 0;
-    spi_transfer.rx_buf = (__u64)spi_buffer;
+    spi_transfer.rx_buf = 0;
     spi_transfer.len = 0;
-    spi_transfer.speed_hz = spi_speed;
+    spi_transfer.speed_hz = this->speed;
     spi_transfer.delay_usecs = 0;
     spi_transfer.bits_per_word = 8;
     spi_transfer.cs_change = 0;
-}
 
-void closeDevice()
-{
-    close(spi_fd);
-}
-
-void readData(unsigned int count, uint8_t* buf)
-{
-    if (buf == nullptr) {
-        buf = spi_buffer;
-        if (count > spi_buffer_len) {
-            count = spi_buffer_len;
-        }
-    }
 
     // Count might be longer than the maximal SPI transfer size. In this case, split into chunks
     while (count > 0) {
@@ -73,7 +76,7 @@ void readData(unsigned int count, uint8_t* buf)
         }
         spi_transfer.rx_buf = (__u64)buf;
 
-        int res = ioctl(spi_fd, SPI_IOC_MESSAGE(1), &spi_transfer);
+        int res = ioctl(fileDescriptor, SPI_IOC_MESSAGE(1), &spi_transfer);
         if (res < 0) {
             int err = errno;
             BOOST_LOG_TRIVIAL(error) << "[spisource] SPI ioctl error: " << err;

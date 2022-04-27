@@ -1,4 +1,4 @@
-#pragma "once"
+#pragma once
 
 #include <string>
 #include <cstdint>
@@ -9,7 +9,6 @@
 
 using namespace std;
 
-
 class SPIException : public exception {
 
 public:
@@ -19,18 +18,17 @@ public:
     string msg;
 };
 
-static unsigned int spi_speed = 10000000;
-static int spi_kernel_bufsize = 4096; // can be read from /sys/module/spidev/parameters/bufsiz, but hardcoded now for simplicity
+// can be read from /sys/module/spidev/parameters/bufsiz, but hardcoded now for simplicity
+constexpr int spi_kernel_bufsize = 4096; 
 
-// SPI data transfer buffer
-const int spi_buffer_len = 16384; // our SPI packets can't be bigger than 16kB
-static uint8_t spi_buffer[spi_buffer_len];
+class SPI {
 
-static int spi_fd = 0;
-static bool spi_finished = false;
+public:
+    void openDevice(const string spiDevice, unsigned int spiSpeed, unsigned int spiFlags = 0);
+    void closeDevice();
+    void readData(uint8_t* buf, unsigned int count) const;
 
-static  struct spi_ioc_transfer spi_transfer;
-
-void openDevice(string spi_device, unsigned int spi_flags = 0);
-void closeDevice();
-void readData(unsigned int count, uint8_t *buf = nullptr);
+private:
+    unsigned int speed;
+    int fileDescriptor = 0;
+};

@@ -16,7 +16,7 @@ void SPISource::loopSPIRead() {
 
 	int frames = 0;
 
-	uint8_t buf[10000];;
+	uint8_t buf[10000];
 
 
 	while (true) {
@@ -32,13 +32,13 @@ void SPISource::loopSPIRead() {
 		// If there is no edge detected, just do some dummy reads, we might just be within a frame
 		if (!edge_detected) {
 			BOOST_LOG_TRIVIAL(error) << "[spisource] dummy SPI read as no edge was detected";
-			spi_read(256);
+			spi.readData(buf, 256);
 			continue;
 		}
 
 		// Read 4 byte header
 		try {
-			spi_read(4, buf);
+			spi.readData(buf, 4);
 		}
 		catch (std::ios::failure e) {
 			BOOST_LOG_TRIVIAL(error) << "[spisource] IO error " << e.what();
@@ -52,6 +52,14 @@ void SPISource::loopSPIRead() {
 			bool y = true;
 		}
 
+		if ((packet_type == 0xcc33) || (packet_type == 0xcc33)) {
+			bool y = true;
+			x = true;
+		}
+		else {
+			x = false;
+		}
+
 		// Check if the header is valid
 		if (length < 4) {
 			BOOST_LOG_TRIVIAL(trace) << "[spisource] received invalid packet length " << length << ", ignoring";
@@ -62,21 +70,25 @@ void SPISource::loopSPIRead() {
 			continue;
 		}
 
-  		spi_read(length - 4, buf);
+  		spi.readData(buf, length - 4);
+
+		if (x) {
+			bool y = false;
+		}
 
 		if (packet_type == 0xcc33) {
-			columns = parse_u16(buf + 0);
-			rows = parse_u16(buf + 2);
+			rows = parse_u16(buf + 0);
+			columns = parse_u16(buf + 2);
 			bitsperpixel = parse_u16(buf + 6);
 
 			if (((columns != 128) && (columns != 192)) ||
 				((rows != 32) && (rows != 64)) ||
 				((bitsperpixel != 2) && (bitsperpixel != 4))) {
-				BOOST_LOG_TRIVIAL(trace) << "[spisource] resolution " << rows << "x" << columns << "x" << bitsperpixel << " unsupported, ignoring";
+				BOOST_LOG_TRIVIAL(trace) << "[spisource] resolution " << columns << "x" << rows << "x" << bitsperpixel << " unsupported, ignoring";
 				continue;
 			}
 			else {
-				BOOST_LOG_TRIVIAL(trace) << "[spisource] got frame " << rows << "x" << columns << "x" << bitsperpixel;
+				BOOST_LOG_TRIVIAL(info) << "[spisource] got frame " << columns << "x" << rows << "x" << bitsperpixel;
 			}
 
 			// TODO: create frame
@@ -114,14 +126,14 @@ bool SPISource::isFrameReady()
 bool SPISource::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
 {
 	string device_name = pt_source.get("device", "/dev/spidev1.0");
-	spi_speed = pt_source.get("speed", 1000000);
+	unsigned int spi_speed = pt_source.get("speed", 1000000);
 	notify_gpio = pt_source.get("notify_gpio", 7);
 
 	//
 	// Setup SPI
 	//
 	try {
-		spi_open(device_name);
+		spi.openDevice(device_name, spi_speed);
 	}
 	catch (SPIException e) {
 		BOOST_LOG_TRIVIAL(error) << "[spisource] failed to initialize SPI source: " << e.msg;
