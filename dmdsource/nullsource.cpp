@@ -4,22 +4,22 @@ NullDMDSource::NullDMDSource()
 {
 }
 
-DMDFrame NullDMDSource::next_frame(bool blocking)
+DMDFrame NullDMDSource::getNextFrame(bool blocking)
 {
 	return DMDFrame(width, height, bitsperpixel);
 }
 
-bool NullDMDSource::finished()
+bool NullDMDSource::isFinished()
 {
 	return false;
 }
 
-bool NullDMDSource::frame_ready()
+bool NullDMDSource::isFrameReady()
 {
 	return true;
 }
 
-bool NullDMDSource::configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
+bool NullDMDSource::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
 {
 	bitsperpixel = pt_source.get("bitsperpixel", 2);
 	width = pt_source.get("width", 128);
@@ -27,7 +27,7 @@ bool NullDMDSource::configure_from_ptree(boost::property_tree::ptree pt_general,
 	return true;
 }
 
-SourceProperties NullDMDSource::get_properties()
+SourceProperties NullDMDSource::getProperties()
 {
 	return SourceProperties(width, height, bitsperpixel);
 }

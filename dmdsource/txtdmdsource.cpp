@@ -23,7 +23,7 @@ TXTDMDSource::TXTDMDSource()
 
 TXTDMDSource::TXTDMDSource(string filename)
 {
-	open_file(filename);
+	openFile(filename);
 }
 
 TXTDMDSource::~TXTDMDSource()
@@ -31,7 +31,7 @@ TXTDMDSource::~TXTDMDSource()
 	is.close();
 }
 
-bool TXTDMDSource::open_file(string filename)
+bool TXTDMDSource::openFile(string filename)
 {
 	is.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	try {
@@ -46,7 +46,7 @@ bool TXTDMDSource::open_file(string filename)
 	return true;
 }
 
-void TXTDMDSource::preload_next_frame()
+void TXTDMDSource::preloadNextFrame()
 {
 	try {
 		// Look for checksum
@@ -98,31 +98,31 @@ void TXTDMDSource::preload_next_frame()
 	}
 }
 
-DMDFrame TXTDMDSource::next_frame(bool blocking)
+DMDFrame TXTDMDSource::getNextFrame(bool blocking)
 {
 	DMDFrame res = std::move(preloaded_frame);
-	preload_next_frame();
+	preloadNextFrame();
 	return res;
 }
 
-bool TXTDMDSource::finished()
+bool TXTDMDSource::isFinished()
 {
 	return eof;
 }
 
-bool TXTDMDSource::frame_ready()
+bool TXTDMDSource::isFrameReady()
 {
 	return (!eof);
 }
 
 
-SourceProperties TXTDMDSource::get_properties() {
+SourceProperties TXTDMDSource::getProperties() {
 	return SourceProperties(preloaded_frame);
 }
 
-bool TXTDMDSource::configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {
+bool TXTDMDSource::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {
 	bits = pt_source.get("bitsperpixel", 2);
-	bool res=open_file(pt_source.get("name", ""));
-	if (res) preload_next_frame();
+	bool res=openFile(pt_source.get("name", ""));
+	if (res) preloadNextFrame();
 	return res;
 }

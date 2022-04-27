@@ -22,7 +22,7 @@ bool FrameStore::configureFromPtree(boost::property_tree::ptree pt_general, boos
 	async = pt_source.get("async", true);
 
 	outputfile.open(name, ios::out);
-	finished = false;
+	isFinished = false;
 
 	return true;
 
@@ -45,7 +45,7 @@ DMDFrame FrameStore::processFrame(DMDFrame& f)
 		seen.insert(checksum);
 	}
 
-	if (!finished) {
+	if (!isFinished) {
 		if (async) {
 			frames_to_write.push(f);
 		}

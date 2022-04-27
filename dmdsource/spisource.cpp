@@ -10,7 +10,7 @@ uint16_t parse_u16(uint8_t* buf) {
 /// <summary>
 /// A loop that simply reads endlessly from SPI
 /// </summary>
-void SPISource::spi_read_loop() {
+void SPISource::loopSPIRead() {
 	int length, packet_type;
 	int rows, columns, bitsperpixel;
 
@@ -96,22 +96,22 @@ SPISource::SPISource()
 {
 }
 
-DMDFrame SPISource::next_frame(bool blocking)
+DMDFrame SPISource::getNextFrame(bool blocking)
 {
 	return DMDFrame();
 }
 
-bool SPISource::finished()
+bool SPISource::isFinished()
 {
 	return false;
 }
 
-bool SPISource::frame_ready()
+bool SPISource::isFrameReady()
 {
 	return false;
 }
 
-bool SPISource::configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
+bool SPISource::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
 {
 	string device_name = pt_source.get("device", "/dev/spidev1.0");
 	spi_speed = pt_source.get("speed", 1000000);
@@ -140,12 +140,12 @@ bool SPISource::configure_from_ptree(boost::property_tree::ptree pt_general, boo
 		return false;
 	}
 
-	spi_read_loop();
+	loopSPIRead();
 
 	return true;
 }
 
-SourceProperties SPISource::get_properties()
+SourceProperties SPISource::getProperties()
 {
 	return SourceProperties();
 }

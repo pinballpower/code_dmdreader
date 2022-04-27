@@ -21,13 +21,13 @@ public:
 class DMDSource {
 
 public:
-	virtual DMDFrame next_frame(bool blocking = true);
-	virtual bool finished();
-	virtual bool frame_ready();
+	virtual DMDFrame getNextFrame(bool blocking = true);
+	virtual bool isFinished();
+	virtual bool isFrameReady();
 	virtual void close();
-	virtual bool configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source);
+	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source);
 
-	virtual SourceProperties get_properties();
+	virtual SourceProperties getProperties();
 
-	virtual int dropped_frames();
+	virtual int getDroppedFrames();
 };

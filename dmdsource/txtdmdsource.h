@@ -14,22 +14,22 @@ public:
 	~TXTDMDSource();
 
 
-	virtual DMDFrame next_frame(bool blocking = true);
+	virtual DMDFrame getNextFrame(bool blocking = true) override;
 
-	virtual bool finished();
-	virtual bool frame_ready();
+	virtual bool isFinished() override;
+	virtual bool isFrameReady() override;
 
-	virtual bool configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source);
+	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) override;
 
-	virtual SourceProperties get_properties();
+	virtual SourceProperties getProperties() override;
 
 private:
 
 	DMDFrame preloaded_frame;
 	ifstream is;
 
-	void preload_next_frame();
-	bool open_file(string filename);
+	void preloadNextFrame();
+	bool openFile(string filename);
 
 	int bits = 0;
 	bool eof = false;

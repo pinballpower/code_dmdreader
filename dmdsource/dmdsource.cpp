@@ -1,26 +1,26 @@
 #include "dmdsource.h"
 #include "../dmd/dmdframe.h"
 
-DMDFrame DMDSource::next_frame(bool blocking)
+DMDFrame DMDSource::getNextFrame(bool blocking)
 {
 	return DMDFrame();
 }
 
-bool DMDSource::finished()
+bool DMDSource::isFinished()
 {
 	return true;
 }
 
-bool DMDSource::frame_ready()
+bool DMDSource::isFrameReady()
 {
 	return false;
 }
 
-bool DMDSource::configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {
+bool DMDSource::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {
 	return false;
 }
 
-SourceProperties DMDSource::get_properties() {
+SourceProperties DMDSource::getProperties() {
 	throw std::logic_error("Function not yet implemented");	
 }
 
@@ -28,7 +28,7 @@ void DMDSource::close()
 {
 }
 
-int DMDSource::dropped_frames()
+int DMDSource::getDroppedFrames()
 {
 	return 0;
 }

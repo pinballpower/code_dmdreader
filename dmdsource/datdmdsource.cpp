@@ -8,14 +8,14 @@ DATDMDSource::DATDMDSource()
 
 DATDMDSource::DATDMDSource(string filename)
 {
-	read_file(filename);
+	readFile(filename);
 }
 
 DATDMDSource::~DATDMDSource()
 {
 }
 
-bool DATDMDSource::read_file(string filename)
+bool DATDMDSource::readFile(string filename)
 {
 	ifstream df(filename.c_str(), ios::in | ios::binary);
 	if (!df) {
@@ -27,7 +27,7 @@ bool DATDMDSource::read_file(string filename)
 
 	while (true) {
 		try {
-			DMDFrame frame = read_from_dat(df);
+			DMDFrame frame = readFromDatFile(df);
 			frames.push(frame);
 		} catch (std::ios_base::failure e) {
 			break;
@@ -39,7 +39,7 @@ bool DATDMDSource::read_file(string filename)
 	return true;
 }
 
-DMDFrame DATDMDSource::read_from_dat(std::ifstream& fis)
+DMDFrame DATDMDSource::readFromDatFile(std::ifstream& fis)
 {
 	DMDFrame res = DMDFrame();
 	if ((!fis.good()) || fis.eof()) {
@@ -76,29 +76,29 @@ DMDFrame DATDMDSource::read_from_dat(std::ifstream& fis)
 }
 
 
-DMDFrame DATDMDSource::next_frame(bool blocking)
+DMDFrame DATDMDSource::getNextFrame(bool blocking)
 {
 	DMDFrame res = frames.front();
 	frames.pop();
 	return DMDFrame(res);
 }
 
-bool DATDMDSource::finished()
+bool DATDMDSource::isFinished()
 {
 	return frames.empty();
 }
 
-bool DATDMDSource::frame_ready()
+bool DATDMDSource::isFrameReady()
 {
-	return (!finished());
+	return (!isFinished());
 }
 
 
-SourceProperties DATDMDSource::get_properties() {
+SourceProperties DATDMDSource::getProperties() {
 	DMDFrame frame = frames.front();
 	return SourceProperties(frame.get_width(), frame.get_height(), frame.get_bitsperpixel());
 }
 
-bool DATDMDSource::configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {
-	return read_file(pt_source.get("name", ""));
+bool DATDMDSource::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {
+	return readFile(pt_source.get("name", ""));
 }

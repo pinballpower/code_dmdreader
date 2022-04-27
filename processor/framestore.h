@@ -26,7 +26,7 @@ private:
 	void write_to_file(DMDFrame& f);
 
 	ofstream outputfile;
-	bool finished = true;
+	bool isFinished = true;
 	bool ignore_duplicates = true;
 	bool async = false;
 

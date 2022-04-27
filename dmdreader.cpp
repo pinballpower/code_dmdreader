@@ -106,7 +106,7 @@ bool read_config(string filename) {
 			else {
 				source = createSource(v.first);
 				if (source) {
-					if (source->configure_from_ptree(pt_general, v.second)) {
+					if (source->configureFromPtree(pt_general, v.second)) {
 						BOOST_LOG_TRIVIAL(info) << "[readconfig] successfully initialized input type " << v.first;
 						source_configured = true;
 					}
@@ -131,7 +131,7 @@ bool read_config(string filename) {
 	// Sanity checks
 	//
 	int bpp_configured = pt_general.get("bitsperpixel", 0);
-	SourceProperties sourceprop = source->get_properties();
+	SourceProperties sourceprop = source->getProperties();
 
 	if (!(bpp_configured)) {
 		pt_general.put("bitsperpixel", sourceprop.bitsperpixel);
@@ -220,11 +220,11 @@ bool read_config(string filename) {
 	return true;
 }
 
-volatile bool finished = false;
+volatile bool isFinished = false;
 
 void signal_handler(int sig)
 {
-	finished = true;
+	isFinished = true;
 }
 
 
@@ -266,11 +266,11 @@ int main(int argc, char** argv)
 
 	uint32_t checksum_last_frame = 0;
 
-	while ((!(source->finished()) && (! finished))) {
+	while ((!(source->isFinished()) && (! isFinished))) {
 
 		BOOST_LOG_TRIVIAL(trace) << "[dmdreader] processing frame " << frameno;
 
-		DMDFrame frame = source->next_frame();
+		DMDFrame frame = source->getNextFrame();
 
 		if (skip_unmodified_frames) {
 			if (frame.get_checksum() == checksum_last_frame) {
@@ -297,7 +297,7 @@ int main(int argc, char** argv)
 	t2 = std::time(nullptr);
 	BOOST_LOG_TRIVIAL(info) << "[dmdreader] processed " << frameno << " frames in " << t2 - t1 << "seconds, " 
 		<< (float)frameno / (t2 - t1) << "frames/s, "
-		<< source->dropped_frames() << "frames dropped";
+		<< source->getDroppedFrames() << "frames dropped";
 
 	// Finishing
 	source->close();
