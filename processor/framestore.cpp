@@ -59,7 +59,7 @@ DMDFrame FrameStore::processFrame(DMDFrame& f)
 void FrameStore::close()
 {
 	if (!frames_to_write.empty()) {
-		BOOST_LOG_TRIVIAL(info) << "[framestore] writing " << frames_to_write.getSize() << " frames";
+		BOOST_LOG_TRIVIAL(info) << "[framestore] writing " << frames_to_write.size() << " frames";
 	}
 	while (!frames_to_write.empty()) {
 		auto frame = frames_to_write.front();

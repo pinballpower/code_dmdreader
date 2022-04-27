@@ -63,7 +63,7 @@ void RaylibRenderer::renderFrame(DMDFrame &f) {
             if (use_palette) {
                 uint8_t pv = *pxIter;
                 pxIter++;
-                if (pv < palette.getSize()) {
+                if (pv < palette.size()) {
                     DMDColor dmdc = palette.colors[pv];
                     raylibcolor.r = dmdc.c.cols.r;
                     raylibcolor.g = dmdc.c.cols.g;

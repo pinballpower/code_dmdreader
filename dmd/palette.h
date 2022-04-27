@@ -19,7 +19,7 @@ public:
 
 	bool matchesImage(const RGBBuffer& buf) const;
 
-	int getSize() const;
+	int size() const;
 };
 
 const std::optional<DMDPalette> find_matching_palette(const vector<DMDPalette> palettes, const RGBBuffer buf);

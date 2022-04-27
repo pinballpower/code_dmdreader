@@ -70,7 +70,7 @@ std::string DMDFrame::asString() {
 /// <returns></returns>
 const vector<uint8_t> DMDFrame::getPlaneData(int bitno)
 {
-	if (planes.getSize() < bitsperpixel) {
+	if (planes.size() < bitsperpixel) {
 		calculatePlanes();
 	}
 	return planes[bitno];
@@ -95,7 +95,7 @@ bool DMDFrame::isNull() const
 
 bool DMDFrame::isValid() const
 {
-	return data.getSize() == (width * height * getBytesPerPixel());
+	return data.size() == (width * height * getBytesPerPixel());
 
 }
 
@@ -134,7 +134,7 @@ void DMDFrame::copyPixelData(uint8_t* dat, int len) {
 
 void DMDFrame::calculatePlanes()
 {
-	if (planes.getSize() > 0) {
+	if (planes.size() > 0) {
 		planes.clear();
 	}
 	for (int i = 0; i < bitsperpixel; i++) {

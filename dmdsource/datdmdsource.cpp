@@ -34,7 +34,7 @@ bool DATDMDSource::readFile(string filename)
 		}
 	}
 
-	BOOST_LOG_TRIVIAL(info) << "successfully loaded " << frames.getSize() << " from " << filename;
+	BOOST_LOG_TRIVIAL(info) << "successfully loaded " << frames.size() << " from " << filename;
 
 	return true;
 }

@@ -76,7 +76,7 @@ void TXTDMDSource::preloadNextFrame()
 			frametxt.push_back(line);
 		}
 
-		int height = frametxt.getSize() - 1;
+		int height = frametxt.size() - 1;
 
 		// Initialize frame
 		preloaded_frame = DMDFrame(width, height, bits);

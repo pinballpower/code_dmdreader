@@ -18,9 +18,9 @@ DMDFrame PaletteColorizer::processFrame(DMDFrame& f)
 	DMDColor c;
 	DMDFrame result = DMDFrame(width, height, 24);
 	for (auto px : f.getPixelData()) {
-		if (px > palette.getSize()) {
+		if (px > palette.size()) {
 			c = DMDColor(0);
-			BOOST_LOG_TRIVIAL(warning) << "[palettecolorizer] pixel value " << px << " larger than palette (" << palette.getSize() << ")";
+			BOOST_LOG_TRIVIAL(warning) << "[palettecolorizer] pixel value " << px << " larger than palette (" << palette.size() << ")";
 		}
 		else {
 			c = palette[px];

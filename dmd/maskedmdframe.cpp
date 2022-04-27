@@ -11,7 +11,7 @@ MaskedDMDFrame::~MaskedDMDFrame() {
 
 bool MaskedDMDFrame::matchesImage(const DMDFrame frame) const {
 
-	if (frame.getPixelData().getSize() != data.getSize()) {
+	if (frame.getPixelData().size() != data.size()) {
 		return false;
 	}
 

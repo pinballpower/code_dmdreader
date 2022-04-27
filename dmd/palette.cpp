@@ -20,7 +20,7 @@ DMDPalette::DMDPalette(const DMDColor end_color, int bitsperpixel, string name)
 
 DMDPalette::DMDPalette(vector<uint32_t> colors, int bitsperpixel, string name1)
 {
-	assert(colors.getSize() >= (int(1) << bitsperpixel));
+	assert(colors.size() >= (int(1) << bitsperpixel));
 
 	this->colors.clear();
 	for (const auto c : colors) {
@@ -32,7 +32,7 @@ DMDPalette::DMDPalette(vector<uint32_t> colors, int bitsperpixel, string name1)
 }
 
 int DMDPalette::getIndexOf(uint32_t color, bool ignore_alpha) const {
-	for (int i = 0; i < colors.getSize(); i++) {
+	for (int i = 0; i < colors.size(); i++) {
 		if (colors[i].matchesImage(color, ignore_alpha)) {
 			return i;
 		}
@@ -41,7 +41,7 @@ int DMDPalette::getIndexOf(uint32_t color, bool ignore_alpha) const {
 }
 
 int DMDPalette::getIndexOf(uint8_t r, uint8_t g, uint8_t b) const {
-	for (int i = 0; i < colors.getSize(); i++) {
+	for (int i = 0; i < colors.size(); i++) {
 		if (colors[i].matchesImage(r, g, b)) {
 			return i;
 		}
@@ -52,7 +52,7 @@ int DMDPalette::getIndexOf(uint8_t r, uint8_t g, uint8_t b) const {
 bool DMDPalette::matchesImage(const RGBBuffer& buf) const
 {
 	const vector <uint8_t> data = buf.getData();
-	for (int i = 0; i < data.getSize(); i += 3) {
+	for (int i = 0; i < data.size(); i += 3) {
 		uint8_t r = data[i];
 		uint8_t g = data[i + 1];
 		uint8_t b = data[i + 2];
@@ -72,9 +72,9 @@ bool DMDPalette::matchesImage(const RGBBuffer& buf) const
 	return true;
 }
 
-int DMDPalette::getSize() const
+int DMDPalette::size() const
 {
-	return colors.getSize();
+	return colors.size();
 }
 
 
