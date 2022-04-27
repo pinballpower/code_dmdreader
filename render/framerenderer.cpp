@@ -6,7 +6,7 @@ FrameRenderer::FrameRenderer() {
 FrameRenderer::~FrameRenderer() {
 }
 
-void FrameRenderer::render_frame(DMDFrame &f) {
+void FrameRenderer::renderFrame(DMDFrame &f) {
 
 }
 
@@ -14,6 +14,6 @@ void FrameRenderer::close()
 {
 }
 
-bool FrameRenderer::configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_renderer) {
+bool FrameRenderer::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_renderer) {
 	return false;
 }

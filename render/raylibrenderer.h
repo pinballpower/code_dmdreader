@@ -11,12 +11,12 @@ public:
 
 	RaylibRenderer();
 	~RaylibRenderer();
-	virtual void render_frame(DMDFrame &f);
-	void set_palette(const DMDPalette p);
+	virtual void renderFrame(DMDFrame &f) override;
+	void setPalette(const DMDPalette p);
 
-	void set_display_parameters(int width, int height, int px_radius, int px_spacing, int bitsperpixel);
-	void start_display();
-	virtual bool configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_renderer);
+	void setDisplayParameters(int width, int height, int px_radius, int px_spacing, int bitsperpixel);
+	void startDisplay();
+	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_renderer) override;
 
 private:
 

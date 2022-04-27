@@ -363,11 +363,11 @@ Pi4Renderer::Pi4Renderer() {
 	shader_prefix = "pi4";
 }
 
-void Pi4Renderer::swap_buffers() {
+void Pi4Renderer::swapBuffers() {
 	gbmSwapBuffers();
 }
 
-bool Pi4Renderer::initialize_display()
+bool Pi4Renderer::initializeDisplay()
 {
 	start_ogl(width, height);
 	return true;

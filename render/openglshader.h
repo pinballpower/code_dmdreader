@@ -20,7 +20,7 @@ public:
     OpenGLShader();
     OpenGLShader(const string vertexShader, const string fragmentShader);
 
-    bool compile_shaders(const string vertexShader, const string fragmentShader);
+    bool compileShaders(const string vertexShader, const string fragmentShader);
 
 
     // activate the shader

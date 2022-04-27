@@ -13,7 +13,7 @@ RaylibRenderer::RaylibRenderer() {
     width = height = px_radius = px_spacing = 0;
 }
 
-void RaylibRenderer::set_display_parameters(int width, int height, int px_radius, int px_spacing, int bitsperpixel) {
+void RaylibRenderer::setDisplayParameters(int width, int height, int px_radius, int px_spacing, int bitsperpixel) {
 
     assert((bitsperpixel > 0) && (bitsperpixel <= 8));
 
@@ -28,7 +28,7 @@ RaylibRenderer::~RaylibRenderer() {
 }
 
 
-void RaylibRenderer::render_frame(DMDFrame &f) {
+void RaylibRenderer::renderFrame(DMDFrame &f) {
 
     bool use_palette = true;
 
@@ -98,18 +98,18 @@ void RaylibRenderer::render_frame(DMDFrame &f) {
 
     EndDrawing();
 }
-void RaylibRenderer::set_palette(const DMDPalette p)
+void RaylibRenderer::setPalette(const DMDPalette p)
 {
     this->palette = palette;
 }
 ;
 
-void RaylibRenderer::start_display() {
+void RaylibRenderer::startDisplay() {
     InitWindow(width, height, "DMD display");
 }
 
 
-bool RaylibRenderer::configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_renderer) {
+bool RaylibRenderer::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_renderer) {
 
     int bitsperpixel = pt_renderer.get("bitsperpixel", 0);
     if (!bitsperpixel) {
@@ -132,9 +132,9 @@ bool RaylibRenderer::configure_from_ptree(boost::property_tree::ptree pt_general
     int px_spacing = pt_renderer.get("spacing", 2);
     int radius = ((width / columns) - px_spacing) / 2;
 
-    set_display_parameters(width, height, radius, px_spacing, bitsperpixel);
+    setDisplayParameters(width, height, radius, px_spacing, bitsperpixel);
 
-    start_display();
+    startDisplay();
 
     return true;
 }

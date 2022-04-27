@@ -6,7 +6,7 @@ GladOpenGLRenderer::GladOpenGLRenderer() {
 	shader_prefix = "ogl";
 }
 
-bool GladOpenGLRenderer::initialize_display()
+bool GladOpenGLRenderer::initializeDisplay()
 {
 	// glfw: initialize and configure
 // ------------------------------
@@ -40,7 +40,7 @@ bool GladOpenGLRenderer::initialize_display()
 	return true;
 }
 
-void GladOpenGLRenderer::swap_buffers()
+void GladOpenGLRenderer::swapBuffers()
 {
 	glfwSwapBuffers(window);
 }

@@ -18,13 +18,13 @@ public:
 
 	OpenGLRenderer();
 	~OpenGLRenderer();
-	virtual void render_frame(DMDFrame& f);
-	virtual bool configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_renderer);
+	virtual void renderFrame(DMDFrame& f) override;
+	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_renderer) override;
 
 protected:
 
-	virtual void swap_buffers();
-	virtual bool initialize_display();
+	virtual void swapBuffers();
+	virtual bool initializeDisplay();
 
 	int width = 0;
 	int height = 0;
@@ -71,8 +71,8 @@ protected:
 	string vertex_shader;
 	string fragment_shader;
 
-	void recalc_vertices();
-	void initialize_opengl();
-	void load_shaders(string vs, string fs);
+	void recalcVertices();
+	void initializeOpenGL();
+	void loadShaders(string vs, string fs);
 
 };

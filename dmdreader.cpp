@@ -198,7 +198,7 @@ bool read_config(string filename) {
 		BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("renderer")) {
 			FrameRenderer* renderer = createRenderer(v.first);
 			if (renderer) {
-				if (renderer->configure_from_ptree(pt_general, v.second)) {
+				if (renderer->configureFromPtree(pt_general, v.second)) {
 					BOOST_LOG_TRIVIAL(info) << "[readconfig] successfully initialized renderer " << v.first;
 					renderers.push_back(renderer);
 				}
@@ -287,7 +287,7 @@ int main(int argc, char** argv)
 		}
 
 		for (FrameRenderer* renderer : renderers) {
-			renderer->render_frame(frame);
+			renderer->renderFrame(frame);
 			assert(frame.is_valid());
 		}
 

@@ -11,6 +11,6 @@ public:
 	Pi4Renderer();
 
 private:
-	virtual bool initialize_display();
-	virtual void swap_buffers();
+	virtual bool initializeDisplay() override;
+	virtual void swapBuffers() override;
 };

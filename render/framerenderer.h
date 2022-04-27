@@ -12,8 +12,8 @@ public:
 	FrameRenderer();
 	~FrameRenderer();
 
-	virtual void render_frame(DMDFrame &f);
+	virtual void renderFrame(DMDFrame &f);
 	virtual void close();
 
-	virtual bool configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_renderer);
+	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_renderer);
 };

@@ -8,10 +8,10 @@ OpenGLShader::OpenGLShader() {
 
 OpenGLShader::OpenGLShader(const string vertexShader, const string fragmentShader)
 {
-	compile_shaders(vertexShader, fragmentShader);
+	compileShaders(vertexShader, fragmentShader);
 }
 
-bool OpenGLShader::compile_shaders(const string vertexShader, const string fragmentShader) {
+bool OpenGLShader::compileShaders(const string vertexShader, const string fragmentShader) {
 	shaders_ready = true;
 
 	const char* vShaderCode = vertexShader.c_str();

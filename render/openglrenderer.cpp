@@ -19,7 +19,7 @@ OpenGLRenderer::~OpenGLRenderer()
 {
 }
 
-void OpenGLRenderer::recalc_vertices() {
+void OpenGLRenderer::recalcVertices() {
 
 	//vertices = {
 	//	// positions          // texture coords
@@ -47,7 +47,7 @@ void OpenGLRenderer::recalc_vertices() {
 	vertices[6] = vertices[11] = bottom;
 }
 
-void OpenGLRenderer::initialize_opengl()
+void OpenGLRenderer::initializeOpenGL()
 {
 	BOOST_LOG_TRIVIAL(info) << "[openglrenderer] OpenGL version: " << glGetString(GL_VERSION);
 
@@ -102,7 +102,7 @@ void OpenGLRenderer::initialize_opengl()
 
 }
 
-void OpenGLRenderer::render_frame(DMDFrame& f)
+void OpenGLRenderer::renderFrame(DMDFrame& f)
 {
 
 	const vector<uint8_t> data = f.get_data();
@@ -188,17 +188,17 @@ void OpenGLRenderer::render_frame(DMDFrame& f)
 
 
 	if (!no_display) {
-		this->swap_buffers();
+		this->swapBuffers();
 	}
 }
 
-bool OpenGLRenderer::initialize_display()
+bool OpenGLRenderer::initializeDisplay()
 {
 	BOOST_LOG_TRIVIAL(error) << "[openglrenderer] initialize_display not implemented";
 	return false;
 }
 
-bool OpenGLRenderer::configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_renderer)
+bool OpenGLRenderer::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_renderer)
 {
 	// A renderer might ignore these if the resolution is fixed
 	width = pt_renderer.get("width", 1280);
@@ -227,23 +227,23 @@ bool OpenGLRenderer::configure_from_ptree(boost::property_tree::ptree pt_general
 	// allow to turn of display, e.g. to test the performance
 	no_display = ! pt_renderer.get("display", true);
 
-	initialize_display();
-	initialize_opengl();
+	initializeDisplay();
+	initializeOpenGL();
 
 	// width and height might have been changed here - depnding on the renderer (e.g. if the renderer is a fullscreen renderer)
 
-	load_shaders(vertex_shader, fragment_shader);
-	recalc_vertices();
+	loadShaders(vertex_shader, fragment_shader);
+	recalcVertices();
 
 	return true;
 }
 
-void OpenGLRenderer::swap_buffers()
+void OpenGLRenderer::swapBuffers()
 {
 	BOOST_LOG_TRIVIAL(error) << "[openglrenderer] swapBuffers not implemented";
 }
 
-void OpenGLRenderer::load_shaders(string vs, string fs) {
+void OpenGLRenderer::loadShaders(string vs, string fs) {
 	string vs_code, fs_code;
 	if (std::filesystem::exists(vs)) {
 		std::ifstream vs_file(vs);
@@ -271,7 +271,7 @@ void OpenGLRenderer::load_shaders(string vs, string fs) {
 	}
 
 	shader = OpenGLShader();
-	if (!shader.compile_shaders(vs_code, fs_code)) {
+	if (!shader.compileShaders(vs_code, fs_code)) {
 		BOOST_LOG_TRIVIAL(error) << "[openglrenderer] couldn't compile OpenGL shaders, output might be incorrect";
 	}
 	else {
