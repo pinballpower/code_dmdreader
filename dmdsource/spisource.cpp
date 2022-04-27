@@ -1,3 +1,5 @@
+#include <thread>
+
 #include <boost/log/trivial.hpp>
 
 #include "spisource.h"
@@ -19,12 +21,11 @@ void SPISource::loopSPIRead() {
 	uint8_t buf[10000];
 
 
-	while (true) {
+	while (active) {
 
 		bool edge_detected = true;
 		bool x = false;
 		if (!gpio.getValue(notify_gpio)) {
-			BOOST_LOG_TRIVIAL(error) << "*";
 			x = true;
 			edge_detected = gpio.waitForEdge(notify_gpio, 500);
 		}
@@ -36,47 +37,30 @@ void SPISource::loopSPIRead() {
 			continue;
 		}
 
-		// Read 4 byte header
 		try {
+			// Read 4 byte header
 			spi.readData(buf, 4);
+
+			length = parse_u16(buf);
+			packet_type = parse_u16(buf + 2);
+
+			// Check if the header is valid
+			if (length < 4) {
+				BOOST_LOG_TRIVIAL(trace) << "[spisource] received invalid packet length " << length << ", ignoring";
+				continue;
+			}
+
+			// Read the remainder of the packet
+			spi.readData(buf, length - 4);
 		}
 		catch (std::ios::failure e) {
-			BOOST_LOG_TRIVIAL(error) << "[spisource] IO error " << e.what();
+			BOOST_LOG_TRIVIAL(error) << "[spisource] IO error " << e.what() << ", aborting";
+			active = false;
 			continue;
 		}
 
-		length = parse_u16(buf);
-		packet_type = parse_u16(buf + 2);
 
-		if (x) {
-			bool y = true;
-		}
-
-		if ((packet_type == 0xcc33) || (packet_type == 0xcc33)) {
-			bool y = true;
-			x = true;
-		}
-		else {
-			x = false;
-		}
-
-		// Check if the header is valid
-		if (length < 4) {
-			BOOST_LOG_TRIVIAL(trace) << "[spisource] received invalid packet length " << length << ", ignoring";
-			continue;
-		}
-
-		if (packet_type == 0) {
-			continue;
-		}
-
-  		spi.readData(buf, length - 4);
-
-		if (x) {
-			bool y = false;
-		}
-
-		if (packet_type == 0xcc33) {
+		if (packet_type == FRAME_ID) {
 			rows = parse_u16(buf + 0);
 			columns = parse_u16(buf + 2);
 			bitsperpixel = parse_u16(buf + 6);
@@ -88,9 +72,16 @@ void SPISource::loopSPIRead() {
 				continue;
 			}
 
-			BOOST_LOG_TRIVIAL(info) << "[spisource] got frame " << columns << "x" << rows << "x" << bitsperpixel;
-			DMDFrame frame = DMDFrame(columns, rows, bitsperpixel, buf + 8);
-			queuedFrames.push(frame);
+			BOOST_LOG_TRIVIAL(debug) << "[spisource] got frame " << columns << "x" << rows << "x" << bitsperpixel;
+			int queueLen = queuedFrames.size();
+			if (queueLen < MAX_QUEUED_FRAMES) {
+				DMDFrame frame = DMDFrame(columns, rows, bitsperpixel, buf + 8);
+				queuedFrames.push(frame);
+				frameSemaphore.post();
+			} else {
+				BOOST_LOG_TRIVIAL(debug) << "[spisource] frame queue is full (" << queueLen << "), dropping frame";
+				droppedFrames++;
+			}
 		}
 		else {
 			BOOST_LOG_TRIVIAL(debug) << "[spisource] packet type " << packet_type << "unsupported, ignoring";
@@ -107,18 +98,34 @@ SPISource::SPISource()
 {
 }
 
+SPISource::~SPISource()
+{
+	// gracefully terminate background poller thread
+	active = false;
+	pollerThread.join();
+}
+
 DMDFrame SPISource::getNextFrame()
 {
+	frameSemaphore.wait();
+	DMDFrame frame = queuedFrames.front();
+	queuedFrames.pop();
+	return frame;
 }
 
 bool SPISource::isFinished()
 {
-	return false;
+	return !active;
 }
 
 bool SPISource::isFrameReady()
 {
-	return ! queuedFrames.empty();
+	return !queuedFrames.empty();
+}
+
+int SPISource::getDroppedFrames()
+{
+	return droppedFrames;
 }
 
 bool SPISource::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
@@ -150,7 +157,8 @@ bool SPISource::configureFromPtree(boost::property_tree::ptree pt_general, boost
 		return false;
 	}
 
-	loopSPIRead();
+	active = true;
+	pollerThread = std::thread([this] { this->loopSPIRead(); });
 
 	return true;
 }
