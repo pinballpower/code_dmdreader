@@ -11,7 +11,7 @@
 
 #include "dmdframe.h"
 
-DMDFrame::DMDFrame(int width, int height, int bitsperpixel, uint8_t* data)
+DMDFrame::DMDFrame(int width, int height, int bitsperpixel, uint8_t* data, bool packed)
 {
 	this->width = width;
 	this->height = height;
@@ -20,7 +20,12 @@ DMDFrame::DMDFrame(int width, int height, int bitsperpixel, uint8_t* data)
 	pixel_mask = 0;
 	initMemory();
 	if (data != nullptr) {
-		this->copyPixelData(data, width * height * getBytesPerPixel());
+		if (packed) {
+			this->copyPackedPixelData(data, width * height * getBytesPerPixel(),bitsperpixel);
+		}
+		else {
+			this->copyPixelData(data, width * height * getBytesPerPixel());
+		}
 	}
 }
 
@@ -129,6 +134,34 @@ void DMDFrame::initMemory(int no_of_pixels) {
 void DMDFrame::copyPixelData(uint8_t* dat, int len) {
 	for (int i = 0; i < len; i++, dat++) {
 		data.push_back(*dat);
+	}
+}
+
+/// <summary>
+/// Initialize a DMDFrame from packed data. 
+/// </summary>
+/// <param name="packedData">A pointer to an array of bytes. Length should be numPixels / 8 * bitsPerPixel</param>
+/// <param name="numPixels">The number of pixels</param>
+/// <param name="bitsperpixel"></param>
+void DMDFrame::copyPackedPixelData(uint8_t* packedData, int numPixels, int bitsperpixel)
+{
+	assert((bitsperpixel >= 1) && (bitsperpixel <= 8));
+
+	uint8_t bitmask = (1 << bitsperpixel) - 1;
+
+	int currentBit = 8;
+	for (int i = 0; i < numPixels; i++) {
+		uint8_t px;
+		currentBit -= bitsperpixel;
+
+		if (currentBit < 0) {
+			currentBit += 8;
+			packedData++;
+		}
+
+		px = (*packedData >> currentBit)& bitmask;
+
+		data.push_back(px);
 	}
 }
 

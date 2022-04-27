@@ -30,7 +30,7 @@ protected:
 
 public:
 
-	DMDFrame(int width = 0, int height = 0, int bitsperpixel = 0, uint8_t* data1 = nullptr);
+	DMDFrame(int width = 0, int height = 0, int bitsperpixel = 0, uint8_t* data1 = nullptr, bool packed = false);
 	DMDFrame(int width, int height, int bitsperpixel, vector <uint8_t> data1);
 	~DMDFrame();
 
@@ -61,6 +61,7 @@ protected:
 
 	void initMemory(int no_of_pixels = 0);
 	void copyPixelData(uint8_t* dat, int len);
+	void copyPackedPixelData(uint8_t* packedData, int numPixels, int bitsperpixel);
 	void calculatePlanes();
 
 	int getBytesPerPixel() const;
