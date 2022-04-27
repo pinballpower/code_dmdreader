@@ -1,0 +1,21 @@
+{
+  "general": {
+    "cwd_to_configdir": true,
+    "log": ""
+  },
+  "source": {
+    "spi": {
+      "notify_gpio": 7,
+      "speed": 4000000
+    }
+  },
+  "processor": {
+    "store": {
+      "filename": "../output.txt",
+      "ignore_duplicates": true,
+      "async": true
+    }
+  },
+  "renderer": {
+  }
+}
