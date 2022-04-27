@@ -35,20 +35,6 @@ find_path(STB_INCLUDE_DIRS "stb.h")
 include_directories(${STB_INCLUDE_DIRS})
 
 #
-# Raylib (optional)
-#
-if (NOT(DISABLE_RAYLIB))
-find_package(raylib CONFIG QUIET)
-if (raylib_FOUND)
-add_definitions(-DUSE_RAYLIB)
-message(STATUS "enabling raylib output module")
-set(raylib_sources "render/raylibrenderer.h" "render/raylibrenderer.cpp")
-else()
-message(STATUS "not enabling raylib output module")
-endif()
-endif()
-
-#
 # Pi4
 #
 if (RPI)
@@ -60,7 +46,7 @@ add_definitions(-DUSE_SPI)
 # set (PI_INCLUDE_DIRS "/usr/include:/usr/include/stb:/usr/include/libdrm")
 set (PI_LIBS EGL drm glfw gbm GLESv2)
 set (opengl_sources "render/pi4renderer.h" "render/pi4renderer.cpp" "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h" "render/openglshader.cpp")
-set (spi_sources "dmdsource/spisource.h" "dmdsource/spisource.cpp" "rpi/spi.h" "rpi/spi.cpp")
+set (spi_sources "dmdsource/spisource.h" "dmdsource/spisource.cpp" "rpi/spi.h" "rpi/spi.cpp" "rpi/gpio.h" "rpi/gpio.cpp")
 endif()
 
 
@@ -151,7 +137,7 @@ message(STATUS "not enabling colorisation module")
 endif()
 
 
-add_executable (${PROJECT_NAME} "dmdreader.cpp" "util/crc32.cpp" "util/crc32.h" "render/framerenderer.h"  "dmd/dmdframe.cpp" "dmd/dmdframe.h" "render/framerenderer.cpp" "util/bmp.h" "util/bmp.cpp"  "dmd/color.cpp" "util/endian.h" "util/endian.cpp" "processor/pubcapture.cpp" "processor/frameprocessor.h" "processor/frameprocessor.cpp" "util/image.h" "util/image.cpp" "dmdsource/dmdsource.h" "dmdsource/dmdsource.cpp" "util/objectfactory.h" "util/objectfactory.cpp" "util/endian.cpp"  "dmdsource/datdmdsource.h" "dmdsource/datdmdsource.cpp" "dmdsource/txtdmdsource.h" "dmdsource/txtdmdsource.cpp" "processor/frameinfologger.h" "processor/frameinfologger.cpp"    "dmd/palette.h"     "dmd/maskeddmdframe.h" "dmd/maskedmdframe.cpp" "dmdsource/nullsource.cpp" "dmd/palette.cpp" "util/bithelper.cpp" "processor/palettecolorizer.h" "processor/palettecolorizer.cpp" "processor/framestore.h" "processor/framestore.cpp" ${color_sources} ${raylib_sources} ${angle_sources} ${opengl_sources} ${spi_sources})
+add_executable (${PROJECT_NAME} "dmdreader.cpp" "util/crc32.cpp" "util/crc32.h" "render/framerenderer.h"  "dmd/dmdframe.cpp" "dmd/dmdframe.h" "render/framerenderer.cpp" "util/bmp.h" "util/bmp.cpp"  "dmd/color.cpp" "util/endian.h" "util/endian.cpp" "processor/pubcapture.cpp" "processor/frameprocessor.h" "processor/frameprocessor.cpp" "util/image.h" "util/image.cpp" "dmdsource/dmdsource.h" "dmdsource/dmdsource.cpp" "util/objectfactory.h" "util/objectfactory.cpp" "util/endian.cpp"  "dmdsource/datdmdsource.h" "dmdsource/datdmdsource.cpp" "dmdsource/txtdmdsource.h" "dmdsource/txtdmdsource.cpp" "processor/frameinfologger.h" "processor/frameinfologger.cpp"    "dmd/palette.h"     "dmd/maskeddmdframe.h" "dmd/maskedmdframe.cpp" "dmdsource/nullsource.cpp" "dmd/palette.cpp" "util/bithelper.cpp" "processor/palettecolorizer.h" "processor/palettecolorizer.cpp" "processor/framestore.h" "processor/framestore.cpp" ${color_sources} ${opengl_sources} ${spi_sources})
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${raylib_INCLUDE_DIRS} ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${raylib_LIBRARIES} ${Boost_LIBRARIES} ${angle_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBS})
+target_include_directories(${PROJECT_NAME} PRIVATE ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBS})
