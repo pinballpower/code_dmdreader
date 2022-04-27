@@ -31,6 +31,6 @@ static bool spi_finished = false;
 
 static  struct spi_ioc_transfer spi_transfer;
 
-void spi_open(string spi_device, unsigned int spi_flags = 0);
-void spi_close();
-void spi_read(unsigned int count, uint8_t *buf = nullptr);
+void openDevice(string spi_device, unsigned int spi_flags = 0);
+void closeDevice();
+void readData(unsigned int count, uint8_t *buf = nullptr);

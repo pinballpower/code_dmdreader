@@ -23,10 +23,10 @@ void SPISource::loopSPIRead() {
 
 		bool edge_detected = true;
 		bool x = false;
-		if (!gpio.get_value(notify_gpio)) {
+		if (!gpio.getValue(notify_gpio)) {
 			BOOST_LOG_TRIVIAL(error) << "*";
 			x = true;
-			edge_detected = gpio.wait_for_edge(notify_gpio, 500);
+			edge_detected = gpio.waitForEdge(notify_gpio, 500);
 		}
 
 		// If there is no edge detected, just do some dummy reads, we might just be within a frame
@@ -133,7 +133,7 @@ bool SPISource::configureFromPtree(boost::property_tree::ptree pt_general, boost
 	// Setup GPIO
 	//
 	try {
-		gpio.setup_gpio(notify_gpio, false, GPIOEdge::raising);
+		gpio.setupGPIO(notify_gpio, false, GPIOEdge::raising);
 	}
 	catch (GPIOException e) {
 		BOOST_LOG_TRIVIAL(info) << "[spisource] failed to configure edge detection on " << notify_gpio << ": " << e.msg;

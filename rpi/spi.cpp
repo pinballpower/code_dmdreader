@@ -3,7 +3,7 @@
 #include <boost/log/trivial.hpp>
 
 
-void spi_open(string spi_device, unsigned int spi_flags)
+void openDevice(string spi_device, unsigned int spi_flags)
 {
     int i;
     char  spi_mode;
@@ -46,12 +46,12 @@ void spi_open(string spi_device, unsigned int spi_flags)
     spi_transfer.cs_change = 0;
 }
 
-void spi_close()
+void closeDevice()
 {
     close(spi_fd);
 }
 
-void spi_read(unsigned int count, uint8_t* buf)
+void readData(unsigned int count, uint8_t* buf)
 {
     if (buf == nullptr) {
         buf = spi_buffer;

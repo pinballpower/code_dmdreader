@@ -26,7 +26,7 @@ GPIOException::~GPIOException()
 {
 }
 
-string GPIO::edge_str(GPIOEdge e)
+string GPIO::asEdgeStr(GPIOEdge e)
 {
 	switch (e) {
 	case raising:
@@ -39,7 +39,7 @@ string GPIO::edge_str(GPIOEdge e)
 	return "";
 }
 
-void GPIO::setup_gpio(int gpiono, bool output, GPIOEdge edge) {
+void GPIO::setupGPIO(int gpiono, bool output, GPIOEdge edge) {
 
 	string gpios = std::to_string(gpiono);
 
@@ -74,7 +74,7 @@ void GPIO::setup_gpio(int gpiono, bool output, GPIOEdge edge) {
 	}
 
 	// Set edge detection
-	string edge_detect = GPIO::edge_str(edge);
+	string edge_detect = GPIO::asEdgeStr(edge);
 	if (edge_detect != "") {
 
 		string edgename = "/sys/class/gpio/gpio" + gpios + "/edge";
@@ -90,7 +90,7 @@ void GPIO::setup_gpio(int gpiono, bool output, GPIOEdge edge) {
 	}
 }
 
-int GPIO::get_value_fd(int gpiono) {
+int GPIO::getValueFd(int gpiono) {
 	if (value_fd.count(gpiono) > 0) {
 		return value_fd.at(gpiono);
 	}
@@ -118,9 +118,9 @@ GPIO::~GPIO()
 }
 
 
-bool GPIO::get_value(int gpiono)
+bool GPIO::getValue(int gpiono)
 {
-	int fd = get_value_fd(gpiono);
+	int fd = getValueFd(gpiono);
 
 	if (fd <= 0) {
 		BOOST_LOG_TRIVIAL(error) << "[gpio] error reading GPIO " << gpiono << " value";
@@ -143,11 +143,11 @@ bool GPIO::get_value(int gpiono)
 	return false;
 }
 
-bool GPIO::wait_for_edge(int gpiono, int timeout)
+bool GPIO::waitForEdge(int gpiono, int timeout)
 {
 	assert(timeout != 0);
 
-	int fd = get_value_fd(gpiono);
+	int fd = getValueFd(gpiono);
 
 	if (fd <= 0) {
 		throw GPIOException("error opening GPIO value file", gpiono);
