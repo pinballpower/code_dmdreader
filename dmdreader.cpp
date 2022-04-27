@@ -265,6 +265,7 @@ int main(int argc, char** argv)
 	t1 = std::time(nullptr);
 
 	uint32_t checksum_last_frame = 0;
+	int skippedFrames = 0;
 
 	while ((!(source->isFinished()) && (! isFinished))) {
 
@@ -274,6 +275,7 @@ int main(int argc, char** argv)
 
 		if (skip_unmodified_frames) {
 			if (frame.getChecksum() == checksum_last_frame) {
+				skippedFrames++;
 				continue;
 			}
 			checksum_last_frame = frame.getChecksum();
@@ -295,9 +297,10 @@ int main(int argc, char** argv)
 	}
 
 	t2 = std::time(nullptr);
-	BOOST_LOG_TRIVIAL(info) << "[dmdreader] processed " << frameno << " frames in " << t2 - t1 << "seconds, " 
-		<< (float)frameno / (t2 - t1) << "frames/s, "
-		<< source->getDroppedFrames() << "frames dropped";
+	BOOST_LOG_TRIVIAL(info) << "[dmdreader] processed " << frameno << " frames in " << t2 - t1 << " seconds, " 
+		<< (float)frameno / (t2 - t1) << " frames/s, "
+		<< source->getDroppedFrames() << " frames dropped, "
+		<< skippedFrames << " duplicated frames skipped";
 
 	// Finishing
 	source->close();
