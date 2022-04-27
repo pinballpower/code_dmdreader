@@ -13,10 +13,10 @@ class PubCapture : public DMDFrameProcessor {
 
 public:
 
-	virtual bool configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source);
-	bool load_triggers(int bitsperpixel, string directory, std::optional <DMDPalette> palette);
+	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source);
+	bool loadTriggers(int bitsperpixel, string directory, std::optional <DMDPalette> palette);
 
-	virtual DMDFrame process_frame(DMDFrame& f);
+	virtual DMDFrame processFrame(DMDFrame& f);
 
 private:
 	DMDPalette palette;

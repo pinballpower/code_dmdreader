@@ -5,7 +5,7 @@ DMDFrameProcessor::~DMDFrameProcessor()
 	close();
 }
 
-DMDFrame DMDFrameProcessor::process_frame(DMDFrame& f)
+DMDFrame DMDFrameProcessor::processFrame(DMDFrame& f)
 {
 	return f;
 }
@@ -14,6 +14,6 @@ void DMDFrameProcessor::close()
 {
 }
 
-bool DMDFrameProcessor::configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {
+bool DMDFrameProcessor::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {
 	return false;
 };

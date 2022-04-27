@@ -1,6 +1,6 @@
 #include "palettecolorizer.h"
 
-DMDFrame PaletteColorizer::process_frame(DMDFrame& f)
+DMDFrame PaletteColorizer::processFrame(DMDFrame& f)
 {
 	if (f.get_bitsperpixel() > 8) {
 		BOOST_LOG_TRIVIAL(debug) << "[palettecolorizer] frame is already colored, doing nothing";
@@ -33,7 +33,7 @@ DMDFrame PaletteColorizer::process_frame(DMDFrame& f)
 	return result;
 }
 
-bool PaletteColorizer::configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
+bool PaletteColorizer::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
 {
     int numcolors = pt_source.get("colors", 16);
 

@@ -16,8 +16,8 @@ public:
 
 	~FrameStore();
 
-	virtual bool configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source);
-	virtual DMDFrame process_frame(DMDFrame &f);
+	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source);
+	virtual DMDFrame processFrame(DMDFrame &f);
 
 	virtual void close();
 

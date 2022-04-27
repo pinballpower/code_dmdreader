@@ -10,7 +10,7 @@ FrameStore::~FrameStore()
 
 
 
-bool FrameStore::configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
+bool FrameStore::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
 {
 	string name = pt_source.get("filename", "");
 	if (name == "") {
@@ -29,7 +29,7 @@ bool FrameStore::configure_from_ptree(boost::property_tree::ptree pt_general, bo
 }
 
 
-DMDFrame FrameStore::process_frame(DMDFrame& f)
+DMDFrame FrameStore::processFrame(DMDFrame& f)
 {
 	if (f.get_bitsperpixel() > 8) {
 		BOOST_LOG_TRIVIAL(debug) << "[framestore] storing colored frames not supported";

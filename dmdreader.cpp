@@ -173,7 +173,7 @@ bool read_config(string filename) {
 		BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("processor")) {
 			DMDFrameProcessor* proc = createProcessor(v.first);
 			if (proc) {
-				if (proc->configure_from_ptree(pt_general, v.second)) {
+				if (proc->configureFromPtree(pt_general, v.second)) {
 					BOOST_LOG_TRIVIAL(info) << "[readconfig] successfully initialized processor " << v.first;
 					processors.push_back(proc);
 				}
@@ -282,7 +282,7 @@ int main(int argc, char** argv)
 		assert(frame.is_valid());
 
 		for (DMDFrameProcessor* proc : processors) {
-			frame = proc->process_frame(frame);
+			frame = proc->processFrame(frame);
 			assert(frame.is_valid());
 		}
 

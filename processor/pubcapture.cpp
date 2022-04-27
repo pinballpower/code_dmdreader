@@ -13,7 +13,7 @@
 
 using namespace std;
 
-bool PubCapture::load_triggers(int bitsperpixel, string directory, std::optional <DMDPalette> palette)
+bool PubCapture::loadTriggers(int bitsperpixel, string directory, std::optional <DMDPalette> palette)
 {
     regex file_expr("([0-9]+).bmp");
 
@@ -99,7 +99,7 @@ bool PubCapture::load_triggers(int bitsperpixel, string directory, std::optional
     return true;
 }
 
-bool PubCapture::configure_from_ptree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {
+bool PubCapture::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {
     string dir = pt_source.get("directory", "");
     if (dir == "") {
         BOOST_LOG_TRIVIAL(error) << "pubcapture directory has not been configured";
@@ -112,10 +112,10 @@ bool PubCapture::configure_from_ptree(boost::property_tree::ptree pt_general, bo
         return false;
     }
 
-    return load_triggers(bitsperpixel, dir, std::nullopt); // let the system find the correct palette
+    return loadTriggers(bitsperpixel, dir, std::nullopt); // let the system find the correct palette
 }
 
-DMDFrame PubCapture::process_frame(DMDFrame &f)
+DMDFrame PubCapture::processFrame(DMDFrame &f)
 {
     // check all maksedframes if one matches
     map<int, MaskedDMDFrame>::iterator itr;
