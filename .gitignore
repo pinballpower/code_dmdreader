@@ -16,3 +16,4 @@ samples/*.txt
 /CMakeFiles
 /output.txt
 /debug.json
+/samples/gb1.txt.gz
