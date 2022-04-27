@@ -273,22 +273,22 @@ int main(int argc, char** argv)
 		DMDFrame frame = source->getNextFrame();
 
 		if (skip_unmodified_frames) {
-			if (frame.get_checksum() == checksum_last_frame) {
+			if (frame.getChecksum() == checksum_last_frame) {
 				continue;
 			}
-			checksum_last_frame = frame.get_checksum();
+			checksum_last_frame = frame.getChecksum();
 		}
 
-		assert(frame.is_valid());
+		assert(frame.isValid());
 
 		for (DMDFrameProcessor* proc : processors) {
 			frame = proc->processFrame(frame);
-			assert(frame.is_valid());
+			assert(frame.isValid());
 		}
 
 		for (FrameRenderer* renderer : renderers) {
 			renderer->renderFrame(frame);
-			assert(frame.is_valid());
+			assert(frame.isValid());
 		}
 
 		frameno++;

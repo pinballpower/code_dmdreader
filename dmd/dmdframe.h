@@ -36,34 +36,34 @@ public:
 
 	PIXVAL getPixel(int x, int y);
 
-	bool same_size(DMDFrame &f2);
-	bool equals_fast(DMDFrame &f2);
+	bool hasSameSize(const DMDFrame &f2) const;
+	bool hasSameSizeAndChecksum(const DMDFrame &f2) const;
 
-	int get_width() const;
-	int get_height() const;
-	int get_bitsperpixel() const;
-	uint8_t get_pixelmask() const;
-	uint32_t get_checksum(bool recalc=false) const;
+	int getWidth() const;
+	int getHeight() const;
+	int getBitsPerPixel() const;
+	uint8_t getPixelMask() const;
+	uint32_t getChecksum(bool recalc=false) const;
 
-	void set_size(int width, int height, int bits_per_pixel);
+	void setSize(int width, int height, int bits_per_pixel);
 
-	const vector<uint8_t> get_data() const;
-	const vector<uint8_t> get_plane(int bitno);
+	const vector<uint8_t> getPixelData() const;
+	const vector<uint8_t> getPlaneData(int bitno);
 
-	void add_pixel(uint8_t px);
+	void appendPixel(uint8_t px);
 
-	bool is_null() const;
-	bool is_valid() const;
+	bool isNull() const;
+	bool isValid() const;
 
-	string str();
+	string asString();
 
 protected:
 
-	void init_mem(int no_of_pixels = 0);
-	void copy_data(uint8_t* dat, int len);
-	void calc_planes();
+	void initMemory(int no_of_pixels = 0);
+	void copyPixelData(uint8_t* dat, int len);
+	void calculatePlanes();
 
-	int bytesperpixel() const;
+	int getBytesPerPixel() const;
 
 	// cache some stuff
 	int datalen;

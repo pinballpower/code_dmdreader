@@ -20,7 +20,7 @@ DMDPalette::DMDPalette(const DMDColor end_color, int bitsperpixel, string name)
 
 DMDPalette::DMDPalette(vector<uint32_t> colors, int bitsperpixel, string name1)
 {
-	assert(colors.size() >= (int(1) << bitsperpixel));
+	assert(colors.getSize() >= (int(1) << bitsperpixel));
 
 	this->colors.clear();
 	for (const auto c : colors) {
@@ -31,35 +31,35 @@ DMDPalette::DMDPalette(vector<uint32_t> colors, int bitsperpixel, string name1)
 	this->name = name;
 }
 
-int DMDPalette::index_of(uint32_t color, bool ignore_alpha) const {
-	for (int i = 0; i < colors.size(); i++) {
-		if (colors[i].matches(color, ignore_alpha)) {
+int DMDPalette::getIndexOf(uint32_t color, bool ignore_alpha) const {
+	for (int i = 0; i < colors.getSize(); i++) {
+		if (colors[i].matchesImage(color, ignore_alpha)) {
 			return i;
 		}
 	}
 	return -1;
 }
 
-int DMDPalette::index_of(uint8_t r, uint8_t g, uint8_t b) const {
-	for (int i = 0; i < colors.size(); i++) {
-		if (colors[i].matches(r, g, b)) {
+int DMDPalette::getIndexOf(uint8_t r, uint8_t g, uint8_t b) const {
+	for (int i = 0; i < colors.getSize(); i++) {
+		if (colors[i].matchesImage(r, g, b)) {
 			return i;
 		}
 	}
 	return -1;
 }
 
-bool DMDPalette::matches(const RGBBuffer& buf) const
+bool DMDPalette::matchesImage(const RGBBuffer& buf) const
 {
 	const vector <uint8_t> data = buf.getData();
-	for (int i = 0; i < data.size(); i += 3) {
+	for (int i = 0; i < data.getSize(); i += 3) {
 		uint8_t r = data[i];
 		uint8_t g = data[i + 1];
 		uint8_t b = data[i + 2];
 		bool color_found = false;
 
 		for (const auto c : colors) {
-			if (c.matches(r, g, b)) {
+			if (c.matchesImage(r, g, b)) {
 				color_found = true;
 				break;
 			}
@@ -72,9 +72,9 @@ bool DMDPalette::matches(const RGBBuffer& buf) const
 	return true;
 }
 
-int DMDPalette::size() const
+int DMDPalette::getSize() const
 {
-	return colors.size();
+	return colors.getSize();
 }
 
 
@@ -82,7 +82,7 @@ int DMDPalette::size() const
 const std::optional<DMDPalette> find_matching_palette(const vector<DMDPalette> palettes, const RGBBuffer buf)
 {
 	for (const auto palette : palettes) {
-		if (palette.matches(buf)) {
+		if (palette.matchesImage(buf)) {
 			return palette;
 		}
 	}

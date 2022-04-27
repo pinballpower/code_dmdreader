@@ -2,14 +2,14 @@
 
 DMDFrame PaletteColorizer::processFrame(DMDFrame& f)
 {
-	if (f.get_bitsperpixel() > 8) {
+	if (f.getBitsPerPixel() > 8) {
 		BOOST_LOG_TRIVIAL(debug) << "[palettecolorizer] frame is already colored, doing nothing";
 
 		return std::move(f);
 	}
 
-	int width = f.get_width();
-	int height = f.get_height();
+	int width = f.getWidth();
+	int height = f.getHeight();
 	int len = width * height;
 
 	uint8_t* colordata = new uint8_t[len * 3];
@@ -17,17 +17,17 @@ DMDFrame PaletteColorizer::processFrame(DMDFrame& f)
 
 	DMDColor c;
 	DMDFrame result = DMDFrame(width, height, 24);
-	for (auto px : f.get_data()) {
-		if (px > palette.size()) {
+	for (auto px : f.getPixelData()) {
+		if (px > palette.getSize()) {
 			c = DMDColor(0);
-			BOOST_LOG_TRIVIAL(warning) << "[palettecolorizer] pixel value " << px << " larger than palette (" << palette.size() << ")";
+			BOOST_LOG_TRIVIAL(warning) << "[palettecolorizer] pixel value " << px << " larger than palette (" << palette.getSize() << ")";
 		}
 		else {
 			c = palette[px];
 		}
-		result.add_pixel(c.c.cols.r);
-		result.add_pixel(c.c.cols.g);
-		result.add_pixel(c.c.cols.b);
+		result.appendPixel(c.c.cols.r);
+		result.appendPixel(c.c.cols.g);
+		result.appendPixel(c.c.cols.b);
 	}
 
 	return result;

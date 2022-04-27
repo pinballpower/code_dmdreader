@@ -105,24 +105,24 @@ void OpenGLRenderer::initializeOpenGL()
 void OpenGLRenderer::renderFrame(DMDFrame& f)
 {
 
-	const vector<uint8_t> data = f.get_data();
+	const vector<uint8_t> data = f.getPixelData();
 
 	// resolution changed, this usually only happens rendering the first frame 
-	if ((f.get_width() != frame_width) || (f.get_height() != frame_height)) {
-		frame_width = f.get_width();
-		frame_height = f.get_height();
-		if ((f.get_width() == 128) && f.get_height() == 32) {
+	if ((f.getWidth() != frame_width) || (f.getHeight() != frame_height)) {
+		frame_width = f.getWidth();
+		frame_height = f.getHeight();
+		if ((f.getWidth() == 128) && f.getHeight() == 32) {
 			tx_width = tx_height = 128;
 			tx_pixel_count = 128 * 32;
 			vertices[9] = vertices[14] = 0.25f;
 		}
-		else if ((f.get_width() == 192) && f.get_height() == 64) {
+		else if ((f.getWidth() == 192) && f.getHeight() == 64) {
 			tx_width = tx_height = 192;
 			tx_pixel_count = 192 * 64;
 			vertices[9] = vertices[14] = 0.3333f;
 		}
 		else {
-			BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] resolution " << f.get_width() << "x" << f.get_height() << "not supported";
+			BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] resolution " << f.getWidth() << "x" << f.getHeight() << "not supported";
 			return;
 		}
 	}
@@ -159,12 +159,12 @@ void OpenGLRenderer::renderFrame(DMDFrame& f)
 	}
 
 	glBindTexture(GL_TEXTURE_2D, dmd_texture_id); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-	if (f.get_bitsperpixel() == 24) {
+	if (f.getBitsPerPixel() == 24) {
 		// copy data into texture buffer
 		memcpy(texturbuf, &data[0], tx_pixel_count * 3);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tx_width, tx_height, 0, GL_RGB, GL_UNSIGNED_BYTE, texturbuf);
 	}
-	else if (f.get_bitsperpixel() == 24) {
+	else if (f.getBitsPerPixel() == 24) {
 		// copy data into texture buffer
 		memcpy(texturbuf, &data[0], tx_pixel_count * 4);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tx_width, tx_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturbuf);

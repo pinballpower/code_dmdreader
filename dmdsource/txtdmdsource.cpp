@@ -76,7 +76,7 @@ void TXTDMDSource::preloadNextFrame()
 			frametxt.push_back(line);
 		}
 
-		int height = frametxt.size() - 1;
+		int height = frametxt.getSize() - 1;
 
 		// Initialize frame
 		preloaded_frame = DMDFrame(width, height, bits);
@@ -84,7 +84,7 @@ void TXTDMDSource::preloadNextFrame()
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				uint8_t pv = frametxt[y][x] - '0';
-				preloaded_frame.add_pixel(pv);
+				preloaded_frame.appendPixel(pv);
 			}
 		}
 	}

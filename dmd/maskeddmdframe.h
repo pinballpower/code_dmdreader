@@ -10,9 +10,9 @@ public:
 	MaskedDMDFrame();
 	~MaskedDMDFrame();
 
-	bool matches(const DMDFrame frame) const;
+	bool matchesImage(const DMDFrame frame) const;
 
-	void read_from_rgbimage(const RGBBuffer rgbdata, const DMDPalette palette, int bitsperpixel);
+	void readFromRGBImage(const RGBBuffer rgbdata, const DMDPalette palette, int bitsperpixel);
 
 protected:
 

@@ -34,7 +34,7 @@ bool DATDMDSource::readFile(string filename)
 		}
 	}
 
-	BOOST_LOG_TRIVIAL(info) << "successfully loaded " << frames.size() << " from " << filename;
+	BOOST_LOG_TRIVIAL(info) << "successfully loaded " << frames.getSize() << " from " << filename;
 
 	return true;
 }
@@ -57,7 +57,7 @@ DMDFrame DATDMDSource::readFromDatFile(std::ifstream& fis)
 	int datalen = rows * columns * bitsperpixel / 8;
 	int px_per_byte = 8 / bitsperpixel;
 
-	res.set_size(columns, rows, bitsperpixel);
+	res.setSize(columns, rows, bitsperpixel);
 
 	char* buf = new char[rows * columns * bitsperpixel / 8];
 	uint8_t* current_px = (uint8_t*)buf;
@@ -66,8 +66,8 @@ DMDFrame DATDMDSource::readFromDatFile(std::ifstream& fis)
 	for (int i = 0; i < datalen; i++, current_px++) {
 		uint8_t px = *current_px;
 		for (int bit = 8 - bitsperpixel; bit >= 0; bit -= bitsperpixel) {
-			uint8_t pv = (px >> bit) & res.get_pixelmask();
-			res.add_pixel(pv);
+			uint8_t pv = (px >> bit) & res.getPixelMask();
+			res.appendPixel(pv);
 		}
 	}
 	delete[] buf;
@@ -96,7 +96,7 @@ bool DATDMDSource::isFrameReady()
 
 SourceProperties DATDMDSource::getProperties() {
 	DMDFrame frame = frames.front();
-	return SourceProperties(frame.get_width(), frame.get_height(), frame.get_bitsperpixel());
+	return SourceProperties(frame.getWidth(), frame.getHeight(), frame.getBitsPerPixel());
 }
 
 bool DATDMDSource::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {

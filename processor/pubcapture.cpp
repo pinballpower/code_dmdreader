@@ -61,18 +61,18 @@ bool PubCapture::loadTriggers(int bitsperpixel, string directory, std::optional 
         for (const auto p : palettes) {
 
             BOOST_LOG_TRIVIAL(debug) << "Checking palette " << p.name;
-            bool matches = true;
+            bool matchesImage = true;
 
             map<int, RGBBuffer>::iterator itr;
             for (itr = rgbdata.begin(); itr != rgbdata.end(); ++itr) {
                 RGBBuffer buff = itr->second;
 
-                if (!p.matches(buff)) {
+                if (!p.matchesImage(buff)) {
                     break;
-                    matches = false;
+                    matchesImage = false;
                 }
             }
-            if (matches) {
+            if (matchesImage) {
                 palette = p;
                 break;
             }
@@ -91,7 +91,7 @@ bool PubCapture::loadTriggers(int bitsperpixel, string directory, std::optional 
         RGBBuffer buf = itr->second;
 
         MaskedDMDFrame mf = MaskedDMDFrame();
-        mf.read_from_rgbimage(buf, palette.value(), bitsperpixel);
+        mf.readFromRGBImage(buf, palette.value(), bitsperpixel);
         trigger_frames.insert(pair<int, MaskedDMDFrame>(i, mf));
     }
 
@@ -123,7 +123,7 @@ DMDFrame PubCapture::processFrame(DMDFrame &f)
         int i = p.first;
         MaskedDMDFrame mf = p.second;
 
-        if (mf.matches(f)) {
+        if (mf.matchesImage(f)) {
             cout << "found pubcapture match: " << i << "\n";
         }
     }

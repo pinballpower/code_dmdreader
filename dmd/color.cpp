@@ -31,15 +31,15 @@ DMDColor::DMDColor(uint32_t colors, bool revert_endian) {
 	}
 }
 
-bool DMDColor::matches(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t alpha1) const {
+bool DMDColor::matchesImage(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t alpha1) const {
 	return ((r1 == c.cols.r) && (g1 == c.cols.g) && (b1 == c.cols.b) && (alpha1 == c.cols.alpha));
 }
 
-bool DMDColor::matches(uint8_t r1, uint8_t g1, uint8_t b1) const {
+bool DMDColor::matchesImage(uint8_t r1, uint8_t g1, uint8_t b1) const {
 	return ((r1 == c.cols.r) && (g1 == c.cols.g) && (b1 == c.cols.b));
 }
 
-bool DMDColor::matches(DMDColor color, bool ignore_alpha) const {
+bool DMDColor::matchesImage(DMDColor color, bool ignore_alpha) const {
 	if ((color.c.cols.r == c.cols.r) && (color.c.cols.g == c.cols.g) && (color.c.cols.b == c.cols.b)) {
 		if (ignore_alpha) {
 			return true;
@@ -51,7 +51,7 @@ bool DMDColor::matches(DMDColor color, bool ignore_alpha) const {
 	return false;
 }
 
-uint32_t DMDColor::get_color_data() const
+uint32_t DMDColor::getColorData() const
 {
 	return c.value;
 }

@@ -42,7 +42,7 @@ SourceProperties::SourceProperties(int width, int height, int bitsperpixel)
 
 SourceProperties::SourceProperties(DMDFrame& f)
 {
-	width = f.get_width();
-	height = f.get_height();
-	bitsperpixel = f.get_bitsperpixel();
+	width = f.getWidth();
+	height = f.getHeight();
+	bitsperpixel = f.getBitsPerPixel();
 }

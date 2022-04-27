@@ -18,9 +18,9 @@ DMDFrame::DMDFrame(int width, int height, int bitsperpixel, uint8_t* data)
 	this->bitsperpixel = bitsperpixel;
 	checksum = 0;
 	pixel_mask = 0;
-	init_mem();
+	initMemory();
 	if (data != nullptr) {
-		this->copy_data(data, width * height * bytesperpixel());
+		this->copyPixelData(data, width * height * getBytesPerPixel());
 	}
 }
 
@@ -31,7 +31,7 @@ DMDFrame::DMDFrame(int columns, int rows, int bitsperpixel, vector<uint8_t> data
 	this->bitsperpixel = bitsperpixel;
 	checksum = 0;
 	pixel_mask = 0;
-	init_mem();
+	initMemory();
 	this->data = std::move(data);
 }
 
@@ -44,12 +44,12 @@ PIXVAL DMDFrame::getPixel(int x, int y) {
 	return (data[offset]);
 }
 
-bool DMDFrame::same_size(DMDFrame& f2) {
-	return ((width = f2.width) && (height = f2.height) && (bitsperpixel = f2.bitsperpixel));
+bool DMDFrame::hasSameSize(const DMDFrame& f2) const{
+	return ((width == f2.width) && (height == f2.height) && (bitsperpixel == f2.bitsperpixel));
 }
 
-bool DMDFrame::equals_fast(DMDFrame& f2) {
-	if (this->same_size(f2)) {
+bool DMDFrame::hasSameSizeAndChecksum(const DMDFrame& f2) const {
+	if (this->hasSameSize(f2)) {
 		return checksum == f2.checksum;
 	}
 	else {
@@ -57,7 +57,7 @@ bool DMDFrame::equals_fast(DMDFrame& f2) {
 	}
 }
 
-std::string DMDFrame::str() {
+std::string DMDFrame::asString() {
 	char cs[8];
 	snprintf(cs, sizeof(cs), "%08x", checksum);
 	return "DMDFrame(" + std::to_string(width) + "x" + std::to_string(height) + "," + std::to_string(bitsperpixel) + "bpp, checksum=" + cs + ")";
@@ -68,15 +68,15 @@ std::string DMDFrame::str() {
 /// </summary>
 /// <param name="bitno">The plane number 0: LSB</param>
 /// <returns></returns>
-const vector<uint8_t> DMDFrame::get_plane(int bitno)
+const vector<uint8_t> DMDFrame::getPlaneData(int bitno)
 {
-	if (planes.size() < bitsperpixel) {
-		calc_planes();
+	if (planes.getSize() < bitsperpixel) {
+		calculatePlanes();
 	}
 	return planes[bitno];
 }
 
-void DMDFrame::add_pixel(uint8_t px)
+void DMDFrame::appendPixel(uint8_t px)
 {
 	data.push_back(px);
 	// invalidate checksum, but don't recalculate now, there might be more pixels coming
@@ -84,22 +84,22 @@ void DMDFrame::add_pixel(uint8_t px)
 
 }
 
-int DMDFrame::bytesperpixel() const {
+int DMDFrame::getBytesPerPixel() const {
 	return  (bitsperpixel + 7) / 8;
 }
 
-bool DMDFrame::is_null() const
+bool DMDFrame::isNull() const
 {
 	return ((width == 0) && (height == 0));
 }
 
-bool DMDFrame::is_valid() const
+bool DMDFrame::isValid() const
 {
-	return data.size() == (width * height * bytesperpixel());
+	return data.getSize() == (width * height * getBytesPerPixel());
 
 }
 
-void DMDFrame::init_mem(int no_of_pixels) {
+void DMDFrame::initMemory(int no_of_pixels) {
 	assert(((bitsperpixel <= 8) && (bitsperpixel >= 0)) || (bitsperpixel == 24) || (bitsperpixel == 32));
 
 	if (bitsperpixel <= 8) {
@@ -126,15 +126,15 @@ void DMDFrame::init_mem(int no_of_pixels) {
 	checksum_valid = false;
 }
 
-void DMDFrame::copy_data(uint8_t* dat, int len) {
+void DMDFrame::copyPixelData(uint8_t* dat, int len) {
 	for (int i = 0; i < len; i++, dat++) {
 		data.push_back(*dat);
 	}
 }
 
-void DMDFrame::calc_planes()
+void DMDFrame::calculatePlanes()
 {
-	if (planes.size() > 0) {
+	if (planes.getSize() > 0) {
 		planes.clear();
 	}
 	for (int i = 0; i < bitsperpixel; i++) {
@@ -164,23 +164,23 @@ void DMDFrame::calc_planes()
 	}
 }
 
-int DMDFrame::get_width() const {
+int DMDFrame::getWidth() const {
 	return width;
 }
 
-int DMDFrame::get_height() const {
+int DMDFrame::getHeight() const {
 	return height;
 }
 
-const vector<uint8_t> DMDFrame::get_data() const {
+const vector<uint8_t> DMDFrame::getPixelData() const {
 	return data;
 }
 
-uint8_t DMDFrame::get_pixelmask() const {
+uint8_t DMDFrame::getPixelMask() const {
 	return pixel_mask;
 }
 
-uint32_t DMDFrame::get_checksum(bool recalc) const
+uint32_t DMDFrame::getChecksum(bool recalc) const
 {
 	// In case of heavy concurrency, it might be better to use a mutex instead of an atomic checksum variable. 
 	// However, in this application no concurrent access to the checksum variable is expected. Therefore, atomic 
@@ -199,7 +199,7 @@ uint32_t DMDFrame::get_checksum(bool recalc) const
 /// <param name="width"></param>
 /// <param name="height"></param>
 /// <param name="bits_per_pixel"></param>
-void DMDFrame::set_size(int width, int height, int bits_per_pixel)
+void DMDFrame::setSize(int width, int height, int bits_per_pixel)
 {
 	if ((this->width == width) && (this->height == height) && (this->bitsperpixel == bits_per_pixel)) {
 		return;
@@ -208,9 +208,9 @@ void DMDFrame::set_size(int width, int height, int bits_per_pixel)
 	this->width = width;
 	this->height = height;
 	this->bitsperpixel = bits_per_pixel;
-	init_mem();
+	initMemory();
 }
 
-int DMDFrame::get_bitsperpixel() const {
+int DMDFrame::getBitsPerPixel() const {
 	return bitsperpixel;
 }

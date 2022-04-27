@@ -27,11 +27,11 @@ public:
 	DMDColor(uint32_t colors, bool revert_endian=false);
 	DMDColor(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t alpha1 = 0);
 
-	bool matches(uint8_t r1, uint8_t g1, uint8_t b1) const;
-	bool matches(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t alpha1) const;
-	bool matches(DMDColor c, bool ignore_alpha = true) const;
+	bool matchesImage(uint8_t r1, uint8_t g1, uint8_t b1) const;
+	bool matchesImage(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t alpha1) const;
+	bool matchesImage(DMDColor c, bool ignore_alpha = true) const;
 
-	uint32_t get_color_data() const;
+	uint32_t getColorData() const;
 
 	static DMDColor fade(const DMDColor color, int fading);
 

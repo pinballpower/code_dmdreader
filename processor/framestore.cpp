@@ -31,13 +31,13 @@ bool FrameStore::configureFromPtree(boost::property_tree::ptree pt_general, boos
 
 DMDFrame FrameStore::processFrame(DMDFrame& f)
 {
-	if (f.get_bitsperpixel() > 8) {
+	if (f.getBitsPerPixel() > 8) {
 		BOOST_LOG_TRIVIAL(debug) << "[framestore] storing colored frames not supported";
 		return f;
 	}
 
 	if (!ignore_duplicates) {
-		uint32_t checksum = f.get_checksum();
+		uint32_t checksum = f.getChecksum();
 		if (seen.contains(checksum)) {
 			BOOST_LOG_TRIVIAL(trace) << "[framestore] frame seen before, ignoring";
 			return f;
@@ -59,7 +59,7 @@ DMDFrame FrameStore::processFrame(DMDFrame& f)
 void FrameStore::close()
 {
 	if (!frames_to_write.empty()) {
-		BOOST_LOG_TRIVIAL(info) << "[framestore] writing " << frames_to_write.size() << " frames";
+		BOOST_LOG_TRIVIAL(info) << "[framestore] writing " << frames_to_write.getSize() << " frames";
 	}
 	while (!frames_to_write.empty()) {
 		auto frame = frames_to_write.front();
@@ -77,10 +77,10 @@ void FrameStore::write_to_file(DMDFrame& f)
 
 		string line = "";
 		int col = 0;
-		for (auto px : f.get_data()) {
+		for (auto px : f.getPixelData()) {
 			line.push_back('0' + (char)px);
 
-			if (col == f.get_width() - 1) {
+			if (col == f.getWidth() - 1) {
 				outputfile << line << std::endl;
 				line = "";
 				col = 0;
