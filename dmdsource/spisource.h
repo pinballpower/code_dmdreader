@@ -2,6 +2,8 @@
 
 #include "dmdsource.h"
 
+#include "../rpi/gpio.h"
+
 class SPISource : public DMDSource {
 public:
 
@@ -17,5 +19,10 @@ public:
 	virtual SourceProperties get_properties();
 
 private:
+
+	GPIO gpio;
+	int notify_gpio = 0;
+
+	void spi_read_loop();
 
 };

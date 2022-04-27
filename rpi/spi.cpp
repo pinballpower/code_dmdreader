@@ -2,7 +2,8 @@
 
 #include <boost/log/trivial.hpp>
 
-bool spi_open(string spi_device, unsigned int spi_flags)
+
+void spi_open(string spi_device, unsigned int spi_flags)
 {
     int i;
     char  spi_mode;
@@ -13,29 +14,25 @@ bool spi_open(string spi_device, unsigned int spi_flags)
 
     if ((spi_fd = open(spi_device.c_str(), O_RDWR)) < 0)
     {
-        BOOST_LOG_TRIVIAL(error) << "[spisource] couldn't open SPI device " << spi_device;
-        return false;
+        throw SPIException("couldn't open SPI device " + spi_device);
     }
 
     if (ioctl(spi_fd, SPI_IOC_WR_MODE, &spi_mode) < 0)
     {
         close(spi_fd);
-        BOOST_LOG_TRIVIAL(error) << "[spisource] couldn't set SPI mode";
-        return false;
+        throw SPIException("couldn't set SPI mode");
     }
 
     if (ioctl(spi_fd, SPI_IOC_WR_BITS_PER_WORD, &spi_bits) < 0)
     {
         close(spi_fd);
-        BOOST_LOG_TRIVIAL(error) << "[spisource] couldn't set SPI bits/word";
-        return false;
+        throw SPIException("couldn't set SPI bits/word");
     }
 
     if (ioctl(spi_fd, SPI_IOC_WR_MAX_SPEED_HZ, &spi_speed) < 0)
     {
         close(spi_fd);
-        BOOST_LOG_TRIVIAL(error) << "[spisource] couldn't set SPI speed";
-        return false;
+        throw SPIException("couldn't set SPI speed");
     }
 
     memset(&spi_transfer, 0, sizeof(spi_transfer));
@@ -47,17 +44,56 @@ bool spi_open(string spi_device, unsigned int spi_flags)
     spi_transfer.delay_usecs = 0;
     spi_transfer.bits_per_word = 8;
     spi_transfer.cs_change = 0;
-
-    return true;
 }
 
-int spi_close()
+void spi_close()
 {
-    return close(spi_fd);
+    close(spi_fd);
 }
 
-int spi_read(unsigned int count)
+void spi_read(unsigned int count, uint8_t* buf)
 {
-    spi_transfer.len = count;
-    return ioctl(spi_fd, SPI_IOC_MESSAGE(1), &spi_transfer);
+    if (buf == nullptr) {
+        buf = spi_buffer;
+        if (count > spi_buffer_len) {
+            count = spi_buffer_len;
+        }
+    }
+
+    // Count might be longer than the maximal SPI transfer size. In this case, split into chunks
+    while (count > 0) {
+
+        if (count > spi_kernel_bufsize) {
+            spi_transfer.len = spi_kernel_bufsize;
+            count -= spi_kernel_bufsize;
+        }
+        else {
+            spi_transfer.len = count;
+            count = 0;
+        }
+        spi_transfer.rx_buf = (__u64)buf;
+
+        int res = ioctl(spi_fd, SPI_IOC_MESSAGE(1), &spi_transfer);
+        if (res < 0) {
+            int err = errno;
+            BOOST_LOG_TRIVIAL(error) << "[spisource] SPI ioctl error: " << err;
+            switch (err) {
+            case EMSGSIZE:
+                throw std::ios::failure("Package too long");
+            }
+            throw std::ios::failure("Unknown error");
+        }
+
+        // position to next chunk (might not be needed)
+        spi_transfer.rx_buf += spi_kernel_bufsize;
+    }
+
+}
+
+SPIException::SPIException(const string msg)
+{
+}
+
+SPIException::~SPIException()
+{
 }

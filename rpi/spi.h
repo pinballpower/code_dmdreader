@@ -9,7 +9,18 @@
 
 using namespace std;
 
+
+class SPIException : public exception {
+
+public:
+    SPIException(const string msg);
+    ~SPIException();
+
+    string msg;
+};
+
 static unsigned int spi_speed = 10000000;
+static int spi_kernel_bufsize = 4096; // can be read from /sys/module/spidev/parameters/bufsiz, but hardcoded now for simplicity
 
 // SPI data transfer buffer
 const int spi_buffer_len = 16384; // our SPI packets can't be bigger than 16kB
@@ -20,6 +31,6 @@ static bool spi_finished = false;
 
 static  struct spi_ioc_transfer spi_transfer;
 
-bool spi_open(string spi_device, unsigned int spi_flags = 0);
-int spi_close();
-int spi_read(unsigned int count);
+void spi_open(string spi_device, unsigned int spi_flags = 0);
+void spi_close();
+void spi_read(unsigned int count, uint8_t *buf = nullptr);
