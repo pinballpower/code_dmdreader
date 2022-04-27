@@ -16,14 +16,14 @@ public:
 
 	~FrameStore();
 
-	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source);
-	virtual DMDFrame processFrame(DMDFrame &f);
+	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) override;
+	virtual DMDFrame processFrame(DMDFrame &f) override;
 
-	virtual void close();
+	virtual void close() override;
 
 private:
 
-	void write_to_file(DMDFrame& f);
+	void writeFrameToFile(DMDFrame& f);
 
 	ofstream outputfile;
 	bool isFinished = true;

@@ -50,7 +50,7 @@ DMDFrame FrameStore::processFrame(DMDFrame& f)
 			frames_to_write.push(f);
 		}
 		else {
-			write_to_file(f);
+			writeFrameToFile(f);
 		}
 	}
 	return f;
@@ -63,14 +63,14 @@ void FrameStore::close()
 	}
 	while (!frames_to_write.empty()) {
 		auto frame = frames_to_write.front();
-		write_to_file(frame);
+		writeFrameToFile(frame);
 		frames_to_write.pop();
 	}
 	outputfile.close();
 	BOOST_LOG_TRIVIAL(debug) << "[framestore] " << frameno << " frames written";
 }
 
-void FrameStore::write_to_file(DMDFrame& f)
+void FrameStore::writeFrameToFile(DMDFrame& f)
 {
 	if (outputfile.is_open()) {
 		outputfile << "$" << std::hex << std::setw(8) << std::setfill('0') << frameno << std::endl;

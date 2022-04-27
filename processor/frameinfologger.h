@@ -11,7 +11,7 @@ public:
 
 	FrameInfoLogger();
 	~FrameInfoLogger();
-	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source);
+	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) override;
 
-	virtual DMDFrame processFrame(DMDFrame &f);
+	virtual DMDFrame processFrame(DMDFrame &f) override;
 };
