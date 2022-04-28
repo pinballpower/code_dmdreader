@@ -4,6 +4,7 @@
 #include <vector>
 #include <filesystem>
 #include <chrono>
+#include <thread>
 
 #include <boost/log/trivial.hpp>
 
@@ -52,6 +53,12 @@ bool TXTDMDSource::openFile(string filename)
 
 	BOOST_LOG_TRIVIAL(info) << "[txtdmdsource] successfully opened " << filename;
 	return true;
+}
+
+uint32_t TXTDMDSource::getCurrentTimestamp()
+{
+	unsigned long now = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+	return now - startMillisec;
 }
 
 void TXTDMDSource::preloadNextFrame()
@@ -124,10 +131,21 @@ void TXTDMDSource::preloadNextFrame()
 	}
 }
 
+
+
 DMDFrame TXTDMDSource::getNextFrame()
 {
 	DMDFrame res = std::move(preloadedFrame);
 	preloadNextFrame();
+
+	if (useTimingData) {
+		uint32_t timestamp = getCurrentTimestamp();
+		while (timestamp < preloadedFrameTimestamp) {
+			this_thread::sleep_for(std::chrono::milliseconds(10));
+			timestamp = getCurrentTimestamp();
+		}
+	}
+
 	return res;
 }
 

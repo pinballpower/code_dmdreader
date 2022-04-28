@@ -33,6 +33,7 @@ private:
 
 	void preloadNextFrame();
 	bool openFile(string filename);
+	uint32_t getCurrentTimestamp();
 
 	int bits = 0;
 	bool eof = false;
