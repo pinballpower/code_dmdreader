@@ -6,8 +6,6 @@ set(VCPKG_TARGET_TRIPLET=x64-windows-static)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING)
-set(BUILD_SHARED_LIBS OFF)
-set(Boost_USE_STATIC_LIBS ON)
 
 project ("DMDReader")
 
@@ -120,7 +118,7 @@ endif()
 #
 # Boost
 #
-SET(Boost_USE_STATIC_LIBS ON)
+SET(Boost_USE_STATIC_LIBS OFF)
 find_package(Boost COMPONENTS log system iostreams REQUIRED)
 
 find_package(ZLIB REQUIRED)
