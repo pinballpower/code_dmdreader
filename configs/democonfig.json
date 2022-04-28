@@ -49,6 +49,7 @@
       "dmd_height": 480,
       "overlay_texture": "img/circle_blurred.png",
       "scale_linear": false,
-      "display": true
+      "display": true,
+      "display_number":  0
     }
 }

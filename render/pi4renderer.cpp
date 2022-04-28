@@ -53,14 +53,21 @@ static const EGLint contextAttribs[] = {
     EGL_CONTEXT_CLIENT_VERSION, 2,
     EGL_NONE };
 
-static drmModeConnector* getConnector(drmModeRes* resources)
+static drmModeConnector* getConnector(drmModeRes* resources, int displayNumber = 0)
 {
+    int currentDisplay = 0;
+
     for (int i = 0; i < resources->count_connectors; i++)
     {
         drmModeConnector* connector = drmModeGetConnector(device, resources->connectors[i]);
         if (connector->connection == DRM_MODE_CONNECTED)
         {
-            return connector;
+            if (currentDisplay == displayNumber) {
+                return connector;
+            }
+            else {
+                currentDisplay++;
+            }
         }
         drmModeFreeConnector(connector);
     }
@@ -77,34 +84,37 @@ static drmModeEncoder* findEncoder(drmModeConnector* connector)
     return NULL;
 }
 
-static int getDisplay(EGLDisplay* display)
+static bool getDisplay(EGLDisplay* display, int displayNumber = 0)
 {
     drmModeRes* resources = drmModeGetResources(device);
     if (resources == NULL)
     {
-        fprintf(stderr, "Unable to get DRM resources\n");
-        return -1;
+        BOOST_LOG_TRIVIAL(info) << "[pi4renderer] unable to get DRM resources";
+        return false;
     }
 
-    drmModeConnector* connector = getConnector(resources);
+    drmModeConnector* connector = getConnector(resources, displayNumber);
     if (connector == NULL)
     {
-        fprintf(stderr, "Unable to get connector\n");
+        BOOST_LOG_TRIVIAL(debug) << "[pi4renderer] unable to get connector";
         drmModeFreeResources(resources);
-        return -1;
+        return false;
     }
 
     connectorId = connector->connector_id;
+    for (int i = 0; i < connector->count_modes; i++) {
+        mode = connector->modes[i];
+        BOOST_LOG_TRIVIAL(debug) << "[pi4renderer] found supported resolution: " << mode.hdisplay << "x" << mode.vdisplay;
+    }
     mode = connector->modes[0];
-    BOOST_LOG_TRIVIAL(info) << "[pi4renderer] native resolution: " << mode.hdisplay << "x" << mode.vdisplay;
 
     drmModeEncoder* encoder = findEncoder(connector);
     if (encoder == NULL)
     {
-        fprintf(stderr, "Unable to get encoder\n");
+        BOOST_LOG_TRIVIAL(info) << "[pi4renderer] unable to get encoder";
         drmModeFreeConnector(connector);
         drmModeFreeResources(resources);
-        return -1;
+        return false;
     }
 
     crtc = drmModeGetCrtc(device, encoder->crtc_id);
@@ -114,7 +124,7 @@ static int getDisplay(EGLDisplay* display)
     gbmDevice = gbm_create_device(device);
     gbmSurface = gbm_surface_create(gbmDevice, mode.hdisplay, mode.vdisplay, GBM_FORMAT_XRGB8888, GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
     *display = eglGetDisplay(gbmDevice);
-    return 0;
+    return true;
 }
 
 static int matchConfigToVisual(EGLDisplay display, EGLint visualId, EGLConfig* configs, int count)
@@ -227,22 +237,26 @@ static const char* eglGetErrorStr()
     return "Unknown error!";
 }
 
-bool start_ogl(int width=0, int height=0)
-{
-    // You can try chaning this to "card0" if "card1" does not work.
-    device = open("/dev/dri/card0", O_RDWR | O_CLOEXEC);
-    if (getDisplay(&display) != 0)
-    {
-        close(device);
-        device = open("/dev/dri/card1", O_RDWR | O_CLOEXEC);
-        if (getDisplay(&display) != 0)
+bool connectToDisplay(int displayNumber, const vector<string> devices) {
+
+    // There are more then one device to check, usually /dev/dri/card0 and /dev/dri/card1
+    for (auto filename: devices) {
+        device = open(filename.c_str(), O_RDWR | O_CLOEXEC);
+        if (getDisplay(&display, displayNumber)) {
+            BOOST_LOG_TRIVIAL(info) << "[pi4renderer] opened device " << filename;
+            return true;
+        } else 
         {
-            BOOST_LOG_TRIVIAL(error) << "[pi4renderer] unable to get EGL display";
             close(device);
-            return false;
+            BOOST_LOG_TRIVIAL(info) << "[pi4renderer] unable to get EGL display on " << filename;
         }
     }
 
+    return false;
+}
+
+bool startOpenGL(int width=0, int height=0)
+{
     // We will use the screen resolution as the desired width and height for the viewport.
     int desiredWidth = width;
     if (desiredWidth == 0) {
@@ -363,11 +377,24 @@ Pi4Renderer::Pi4Renderer() {
 	shader_prefix = "pi4";
 }
 
+bool Pi4Renderer::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_renderer)
+{
+    // Only add Pi4 specific settings
+    displayNumber = pt_renderer.get("display_number", 0);
+
+    return OpenGLRenderer::configureFromPtree(pt_general, pt_renderer);
+}
+
 void Pi4Renderer::swapBuffers() {
 	gbmSwapBuffers();
 }
 
 bool Pi4Renderer::initializeDisplay()
 {
-	return start_ogl(width, height);
+    vector<string> devicesToTry = { "/dev/dri/card0","/dev/dri/card1" };
+    if (!connectToDisplay(displayNumber, devicesToTry)) {
+        return false;
+    }
+
+	return startOpenGL(width, height);
 }
