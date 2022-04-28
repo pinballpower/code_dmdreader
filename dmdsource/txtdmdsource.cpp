@@ -3,10 +3,17 @@
 #include <string>
 #include <vector>
 #include <filesystem>
+#include <chrono>
 
 #include <boost/log/trivial.hpp>
 
 #include "txtdmdsource.h"
+
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::seconds;
+using std::chrono::system_clock;
+
 
 using namespace std;
 
@@ -53,7 +60,7 @@ void TXTDMDSource::preloadNextFrame()
 		// Look for checksum
 		bool timestamp_found = false;
 		string line;
-		regex timestamp_regex("(0x|\\$)[0-9a-fA-F]{8}.*");
+		regex timestamp_regex("(0x|\\$)([0-9a-fA-F]{8}).*");
 		while (!timestamp_found) {
 			if (!std::getline(is, line)) {
 				if (std::cin.eof()) {
@@ -65,8 +72,13 @@ void TXTDMDSource::preloadNextFrame()
 			}
 			rtrim(line);
 
-			if (regex_match(line, timestamp_regex)) {
+			smatch matches;
+			if (regex_search(line, matches, timestamp_regex)) {
+				// parse timestamp to uint32_t
 				timestamp_found = true;
+				stringstream ss;
+				ss << std::hex << matches[2].str();
+				ss >> preloadedFrameTimestamp;
 			}
 		}
 
@@ -136,7 +148,9 @@ SourceProperties TXTDMDSource::getProperties() {
 
 bool TXTDMDSource::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {
 	bits = pt_source.get("bitsperpixel", 4);
+	useTimingData = pt_source.get("use__timing_data", true);
 	bool res=openFile(pt_source.get("name", ""));
 	if (res) preloadNextFrame();
+	startMillisec = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 	return res;
 }
