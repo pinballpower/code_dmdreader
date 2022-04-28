@@ -5,8 +5,9 @@
   },
   "source": {
     "spi": {
+      "device": "/dev/spidev0.0",
       "notify_gpio": 7,
-      "speed":  5000000
+      "speed": 4000000
     },
     "dat": {
       "name": "../samples/spiimage-ghostbusters3.dat"

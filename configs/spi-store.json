@@ -5,6 +5,7 @@
   },
   "source": {
     "spi": {
+      "device": "/dev/spidev0.0",
       "notify_gpio": 7,
       "speed": 4000000
     }
