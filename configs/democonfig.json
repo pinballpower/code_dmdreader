@@ -21,6 +21,11 @@
   "processor": {
     "frameinfo": {
     },
+    "store": {
+      "filename": "../output.txt",
+      "ignore_duplicates": true,
+      "async": true
+    },
     "pin2dmd": {
       "basename": "../samples/ghostbusters"
     },
