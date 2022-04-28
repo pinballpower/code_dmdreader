@@ -12,7 +12,8 @@
       "name": "../samples/spiimage-ghostbusters3.dat"
     },
     "txt": {
-      "name": "../samples/ghostbusters.txt"
+      "name": "../samples/ghostbusters.txt",
+      "use_timing_data":  true
     },
     "null": {
     }
