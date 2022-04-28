@@ -50,6 +50,7 @@
       "overlay_texture": "img/circle_blurred.png",
       "scale_linear": false,
       "display": true,
-      "display_number":  0
+      "display_number": 0
     }
+  }
 }
