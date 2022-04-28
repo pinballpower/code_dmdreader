@@ -104,9 +104,10 @@ static bool getDisplay(EGLDisplay* display, int displayNumber = 0)
     connectorId = connector->connector_id;
     for (int i = 0; i < connector->count_modes; i++) {
         mode = connector->modes[i];
-        BOOST_LOG_TRIVIAL(debug) << "[pi4renderer] found supported resolution: " << mode.hdisplay << "x" << mode.vdisplay;
+        BOOST_LOG_TRIVIAL(info) << "[pi4renderer] found supported resolution: " << mode.hdisplay << "x" << mode.vdisplay;
     }
     mode = connector->modes[0];
+    BOOST_LOG_TRIVIAL(info) << "[pi4renderer] using native resolution: " << mode.hdisplay << "x" << mode.vdisplay;
 
     drmModeEncoder* encoder = findEncoder(connector);
     if (encoder == NULL)
