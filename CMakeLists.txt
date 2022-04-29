@@ -7,7 +7,7 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING)
 
-project ("DMDReader")
+project ("dmdeader")
 
 message(STATUS "$ENV{CMAKE_INCLUDE_PATH}")
 
