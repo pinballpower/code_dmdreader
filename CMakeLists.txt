@@ -25,12 +25,6 @@ set(EXTRA_LIBS winmm.lib)
 endif()
 
 #
-# STB 
-#
-find_path(STB_INCLUDE_DIRS "stb.h")
-include_directories(${STB_INCLUDE_DIRS})
-
-#
 # Pi4
 #
 if (RPI)
