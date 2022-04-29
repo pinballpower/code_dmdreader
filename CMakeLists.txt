@@ -150,6 +150,7 @@ endif()
 SET(Boost_USE_STATIC_LIBS OFF)
 set(Boost_NO_WARN_NEW_VERSIONS 1)
 find_package(Boost COMPONENTS log system iostreams REQUIRED)
+message(STATUS "Boost libs: ${Boost_LIBRARIES}")
 find_package(ZLIB REQUIRED)
 
 
