@@ -12,7 +12,7 @@ project ("DMDReader")
 message(STATUS "$ENV{CMAKE_INCLUDE_PATH}")
 
 # detect Raspberry Pi
-find_file(RPI bcm_host.h)
+find_path(RPI bcm_host.h)
 if (RPI)
 message(STATUS "compiling on Raspberry Pi")
 else()
@@ -35,8 +35,39 @@ include_directories(${STB_INCLUDE_DIRS})
 #
 if (RPI)
 message(STATUS "compiling OpenGL ES for Raspberry Pi")
-find_path(DRM_INCLUDE_DIR "drm.h")
+
+find_path(DRM_INCLUDE_DIR "drm.h" /usr/include/libdrm)
+if (DRM_INCLUDE_DIR)
 message(STATUS "drm.h found in ${DRM_INCLUDE_DIR}")
+include_directories(${DRM_INCLUDE_DIR})
+else()
+message(FATAL_ERROR "drm.h not found")
+endif()
+
+find_path(EGL_INCLUDE_DIR "egl.h" /usr/include/EGL)
+if (EGL_INCLUDE_DIR)
+message(STATUS "egl.h found in ${EGL_INCLUDE_DIR}")
+include_directories(${EGL_INCLUDE_DIR})
+else()
+message(FATAL_ERROR "egl.h not found")
+endif()
+
+find_path(XF86_INCLUDE_DIR "xf86drm.h")
+if (XF86_INCLUDE_DIR)
+message(STATUS "xf86drm.h found in ${XF86_INCLUDE_DIR}")
+include_directories(${XF86_INCLUDE_DIR})
+else()
+message(FATAL_ERROR "xf86drm.h not found")
+endif()
+
+find_path(GL2_INCLUDE_DIR "gl2.h" /usr/include/GLES2)
+if (GL2_INCLUDE_DIR)
+message(STATUS "gl2.h found in ${GL2_INCLUDE_DIR}")
+include_directories(${GL2_INCLUDE_DIR})
+else()
+message(FATAL_ERROR "gl2.h not found")
+endif()
+
 add_definitions(-DUSE_OPENGLPI4)
 add_definitions(-DUSE_SPI)
 # set (PI_INCLUDE_DIRS "/usr/include:/usr/include/stb:/usr/include/libdrm")
@@ -47,7 +78,7 @@ endif()
 
 
 #
-# OpenGL/GLAD
+# OpenGL/GLAD (only tested under Windows)
 #
 if (NOT(RPI))
 message(STATUS "Checking for OpenGL")
@@ -120,12 +151,8 @@ endif()
 #
 SET(Boost_USE_STATIC_LIBS OFF)
 find_package(Boost COMPONENTS log system iostreams REQUIRED)
-
 find_package(ZLIB REQUIRED)
 
-message(STATUS "Zlib libs: ${ZLIB_LIBRARIES}")
-
-#add_library(Boost STATIC IMPORTED)
 
 # also use colorisation files if they exists
 get_filename_component(COLOR_CMAKE "colorize/CMakeLists.txt" ABSOLUTE)
