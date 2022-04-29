@@ -148,9 +148,10 @@ endif()
 # Boost
 #
 if (ENABLE_BOOST_STATIC_LIBS)
-SET(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_STATIC_LIBS ON)
 else()
-SET(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_STATIC_LIBS OFF)
+add_definitions (-DBOOST_LOG_DYN_LINK=1)
 endif()
 find_package(Boost COMPONENTS log system iostreams REQUIRED)
 include_directories( ${Boost_INCLUDE_DIR} )
