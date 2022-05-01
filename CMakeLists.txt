@@ -7,7 +7,7 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING)
 
-project ("dmdeader")
+project ("dmdreader")
 
 message(STATUS "$ENV{CMAKE_INCLUDE_PATH}")
 
@@ -26,6 +26,7 @@ endif()
 if(WIN32)
 message(STATUS "compiling on Windows")
 set(EXTRA_LIBS winmm.lib)
+set(ENABLE_BOOST_STATIC_LIBS ON)
 endif()
 
 #
