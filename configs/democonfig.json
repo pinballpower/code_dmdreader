@@ -1,7 +1,8 @@
 {
   "general": {
     "cwd_to_configdir": true,
-    "skip_unmodified_frames": true
+    "skip_unmodified_frames": true,
+    "terminate_when_finished":  true
   },
   "source": {
     "spi": {

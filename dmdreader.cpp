@@ -10,6 +10,8 @@
 #include <map>
 #include <csignal>
 #include <stdlib.h>
+#include <chrono>
+#include <thread>
 
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
@@ -27,6 +29,7 @@ using namespace std;
 DMDSource* source = NULL;
 vector<DMDFrameProcessor*> processors = vector<DMDFrameProcessor*>();
 vector<FrameRenderer*> renderers = vector<FrameRenderer*>();
+bool terminateWhenFinished = true;
 
 bool skip_unmodified_frames = true;
 
@@ -48,6 +51,8 @@ bool read_config(string filename) {
 	// General
 	//
 	boost::property_tree::ptree pt_general = pt.get_child("general");
+	terminateWhenFinished = pt_general.get("terminate_when_finished", true);
+
 	if ((pt_general.get("type", "") == "spike") || (pt_general.get("type", "") == "spike1")) {
 		pt_general.put("bitsperpixel", 4);
 		pt_general.put("rows", 32);
@@ -225,6 +230,7 @@ volatile bool isFinished = false;
 void signal_handler(int sig)
 {
 	isFinished = true;
+	terminateWhenFinished = true;
 }
 
 
@@ -301,6 +307,11 @@ int main(int argc, char** argv)
 		<< (float)frameno / (t2 - t1) << " frames/s, "
 		<< source->getDroppedFrames() << " frames dropped, "
 		<< skippedFrames << " duplicated frames skipped";
+
+	// if the program should not terminate, just loop endlessly auntil aborted
+	while (! terminateWhenFinished) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	}
 
 	// Finishing
 	source->close();
