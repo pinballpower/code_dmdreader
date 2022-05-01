@@ -37,7 +37,7 @@ bool PaletteColorizer::configureFromPtree(boost::property_tree::ptree pt_general
 {
     int numcolors = pt_source.get("colors", 16);
 
-	BOOST_LOG_TRIVIAL(info) << "[palettecolorizer] using " << numcolors << "colors";
+	BOOST_LOG_TRIVIAL(info) << "[palettecolorizer] using " << numcolors << " colors";
 
 	palette.clear();
 	palette.reserve(numcolors);
