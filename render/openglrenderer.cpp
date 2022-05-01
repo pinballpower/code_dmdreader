@@ -95,8 +95,6 @@ void OpenGLRenderer::initializeOpenGL()
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
 
-	shader.use();
-
 }
 
 void OpenGLRenderer::renderFrame(DMDFrame& f)
