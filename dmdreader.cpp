@@ -26,7 +26,7 @@
 
 using namespace std;
 
-DMDSource* source = NULL;
+vector<DMDSource*> sources = vector<DMDSource*>();
 vector<DMDFrameProcessor*> processors = vector<DMDFrameProcessor*>();
 vector<FrameRenderer*> renderers = vector<FrameRenderer*>();
 bool terminateWhenFinished = true;
@@ -105,71 +105,28 @@ bool read_config(string filename) {
 	bool source_configured = false;
 	try {
 		BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("source")) {
-			if (source_configured) {
-				BOOST_LOG_TRIVIAL(info) << "[readconfig] ignoring " << v.first << " only a single source is supported";
-			}
-			else {
-				source = createSource(v.first);
-				if (source) {
-					if (source->configureFromPtree(pt_general, v.second)) {
-						BOOST_LOG_TRIVIAL(info) << "[readconfig] successfully initialized input type " << v.first;
-						source_configured = true;
-					}
-					else {
-						BOOST_LOG_TRIVIAL(warning) << "[readconfig] couldn't initialise source " << v.first << ", ignoring";
-					}
+
+			DMDSource* source = createSource(v.first);
+			if (source) {
+				if (source->configureFromPtree(pt_general, v.second)) {
+					BOOST_LOG_TRIVIAL(info) << "[readconfig] successfully initialized input type " << v.first;
+					sources.push_back(source);
 				}
 				else {
-					BOOST_LOG_TRIVIAL(warning) << "[readconfig] don't know input type " << v.first << ", ignoring";
+					BOOST_LOG_TRIVIAL(warning) << "[readconfig] couldn't initialise source " << v.first << ", ignoring";
 				}
+			}
+			else {
+				BOOST_LOG_TRIVIAL(warning) << "[readconfig] don't know input type " << v.first << ", ignoring";
 			}
 		}
 	}
 	catch (const boost::property_tree::ptree_bad_path& e) {}
 
-	if (!(source_configured)) {
+	if (sources.empty()) {
 		BOOST_LOG_TRIVIAL(error) << "[readconfig] couldn't initialise any source, aborting";
 		return false;
 	}
-
-	// 
-	// Sanity checks
-	//
-	int bpp_configured = pt_general.get("bitsperpixel", 0);
-	SourceProperties sourceprop = source->getProperties();
-
-	if (!(bpp_configured)) {
-		pt_general.put("bitsperpixel", sourceprop.bitsperpixel);
-	}
-	else if (sourceprop.bitsperpixel && (bpp_configured != sourceprop.bitsperpixel)) {
-
-		BOOST_LOG_TRIVIAL(error) << "[readconfig] bits/pixel configured=" << bpp_configured << ", detected=" << sourceprop.bitsperpixel <<
-			" do not match, aborting";
-		return false;
-	}
-
-	int width_configured = pt_general.get("columns", 0);
-	if (!(width_configured)) {
-		pt_general.put("columns", sourceprop.width);
-	}
-	else if (sourceprop.width && (width_configured != sourceprop.width)) {
-
-		BOOST_LOG_TRIVIAL(error) << "[readconfig] columns configured=" << width_configured << ", detected=" << sourceprop.width <<
-			" do not match, aborting";
-		return false;
-	}
-
-	int height_configured = pt_general.get("rows", 0);
-	if (!(height_configured)) {
-		pt_general.put("rows", sourceprop.height);
-	}
-	else if (sourceprop.height && (height_configured != sourceprop.height)) {
-
-		BOOST_LOG_TRIVIAL(error) << "[readconfig] height configured=" << width_configured << ", detected=" << sourceprop.height <<
-			" do not match, aborting";
-		return false;
-	}
-
 
 	//
 	// Processors
@@ -272,12 +229,27 @@ int main(int argc, char** argv)
 
 	uint32_t checksum_last_frame = 0;
 	int skippedFrames = 0;
+	bool sourcesFinished = false;
+	int activeSourceIndex = 0;
+	DMDSource* source = sources[activeSourceIndex];
 
-	while ((!(source->isFinished()) && (! isFinished))) {
+	while ((!(sourcesFinished) && (! isFinished))) {
 
 		BOOST_LOG_TRIVIAL(trace) << "[dmdreader] processing frame " << frameno;
 
+		if (source->isFinished()) {
+			// switch to next source if there is one
+			if (activeSourceIndex < sources.size() - 1) {
+				activeSourceIndex++;
+				source = sources[activeSourceIndex];
+			}
+			else {
+				sourcesFinished = true;
+				continue;
+			}
+		}
 		DMDFrame frame = source->getNextFrame();
+
 
 		if (skip_unmodified_frames) {
 			if (frame.getChecksum() == checksum_last_frame) {
@@ -310,12 +282,16 @@ int main(int argc, char** argv)
 
 	// if the program should not terminate, just loop endlessly auntil aborted
 	while (! terminateWhenFinished) {
+		BOOST_LOG_TRIVIAL(trace) << "[dmdreader] waiting for termination signal";
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
 
 	// Finishing
-	source->close();
-	delete(source);
+	for (DMDSource* s : sources) {
+		s->close();
+		delete(s);
+	}
+	sources.clear();
 
 	for (DMDFrameProcessor* proc : processors) {
 		proc->close();
