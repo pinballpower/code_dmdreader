@@ -185,3 +185,4 @@ install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 install(DIRECTORY shaders DESTINATION ${CONFIGDIR})
 install(DIRECTORY sample-configs DESTINATION ${CONFIGDIR})
 install(DIRECTORY img DESTINATION ${CONFIGDIR})
+install(FILES sample-configs/pispi.json DESTINATION ${CONFIGDIR} RENAME dmdreader.json) # Default config

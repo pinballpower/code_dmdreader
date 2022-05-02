@@ -210,7 +210,7 @@ int main(int argc, char** argv)
 		config_file = argv[1];
 	}
 	else {
-		config_file = "dmdreader.json";
+		config_file = "/etc/dmdreader/dmdreader.json";
 	}
 	std::time_t t1 = std::time(nullptr);
 
