@@ -182,7 +182,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${
 # Install
 #
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
-install(DIRECTORY shaders DESTINATION ${CONFIGDIR})
-install(DIRECTORY sample-configs DESTINATION ${CONFIGDIR})
-install(DIRECTORY img DESTINATION ${CONFIGDIR})
+install(DIRECTORY shaders DESTINATION ${CONFIGDIR} FILES_MATCHING PATTERN "*.?s")
+install(DIRECTORY sample-configs DESTINATION ${CONFIGDIR} FILES_MATCHING PATTERN "*.json")
+install(DIRECTORY img DESTINATION ${CONFIGDIR} FILES_MATCHING PATTERN "*.png")
 install(FILES sample-configs/pispi.json DESTINATION ${CONFIGDIR} RENAME dmdreader.json) # Default config
