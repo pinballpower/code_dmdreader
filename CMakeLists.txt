@@ -19,6 +19,7 @@ find_path(RPI bcm_host.h)
 endif()
 if (RPI)
 message(STATUS "compiling for Raspberry Pi")
+set (CONFIGDIR "/etc/dmdreader")
 else()
 message(STATUS "not compiling for Raspberry Pi")
 endif()
@@ -27,6 +28,7 @@ if(WIN32)
 message(STATUS "compiling on Windows")
 set(EXTRA_LIBS winmm.lib)
 set(ENABLE_BOOST_STATIC_LIBS ON)
+set (CONFIGDIR "/temp")
 endif()
 
 #
@@ -176,4 +178,10 @@ add_executable (${PROJECT_NAME} "dmdreader.cpp" "util/crc32.cpp" "util/crc32.h" 
 target_include_directories(${PROJECT_NAME} PRIVATE ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBS} ${ZLIB_LIBRARIES})
 
+#
+# Install
+#
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+install(DIRECTORY shaders DESTINATION ${CONFIGDIR})
+install(DIRECTORY sample-configs DESTINATION ${CONFIGDIR})
+install(DIRECTORY img DESTINATION ${CONFIGDIR})
