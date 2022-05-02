@@ -1,6 +1,4 @@
-﻿// DMDReader.cpp: Definiert den Einstiegspunkt für die Anwendung.
-//
-#include <iostream>
+﻿#include <iostream>
 #include <fstream>
 #include <memory>
 #include <string>

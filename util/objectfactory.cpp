@@ -4,6 +4,7 @@
 #include "../dmdsource/datdmdsource.h"
 #include "../dmdsource/txtdmdsource.h"
 #include "../dmdsource/nullsource.h"
+#include "../dmdsource/pngsource.h"
 #include "../processor/pubcapture.h"
 #include "../processor/frameprocessor.h"
 #include "../processor/frameinfologger.h"
@@ -38,6 +39,9 @@ DMDSource* createSource(string name) {
 	}
 	else if (name == "null") {
 		return (DMDSource*)(new NullDMDSource());
+	}
+	else if (name == "png") {
+		return (DMDSource*)(new PNGSource());
 	}
 #ifdef USE_SPI
 	else if (name == "spi") {
