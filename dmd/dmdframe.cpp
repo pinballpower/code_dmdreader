@@ -40,6 +40,17 @@ DMDFrame::DMDFrame(int columns, int rows, int bitsperpixel, vector<uint8_t> data
 	this->data = std::move(data);
 }
 
+DMDFrame::DMDFrame(const RGBBuffer rgbBuffer)
+{
+	this->width = rgbBuffer.width;
+	this->height = rgbBuffer.height;
+	this->bitsperpixel = 24;
+	checksum = 0;
+	pixel_mask = 0;
+	initMemory();
+	this->data = rgbBuffer.getData();
+}
+
 
 DMDFrame::~DMDFrame() {
 }

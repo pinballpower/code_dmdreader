@@ -32,6 +32,7 @@ public:
 
 	DMDFrame(int width = 0, int height = 0, int bitsperpixel = 0, uint8_t* data1 = nullptr, bool packed = false);
 	DMDFrame(int width, int height, int bitsperpixel, vector <uint8_t> data1);
+	DMDFrame(const RGBBuffer rgbBuffer);
 	~DMDFrame();
 
 	PIXVAL getPixel(int x, int y);
