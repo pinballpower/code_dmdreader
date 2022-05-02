@@ -1,6 +1,7 @@
 #include <boost/log/trivial.hpp>
 
 #include "openglshader.h"
+#include "../util/image.h"
 
 OpenGLShader::OpenGLShader() {
 

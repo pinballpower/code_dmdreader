@@ -1,8 +1,4 @@
 #include <filesystem> 
-
-#define STB_IMAGE_IMPLEMENTATION
-#include "../stb/stb_image.h"
-
 #include <boost/log/trivial.hpp>
 
 #include "openglshader.h"
@@ -74,19 +70,17 @@ void OpenGLRenderer::initializeOpenGL()
 	// set texture filtering parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	int width, height, nrChannels;
-	unsigned char* data = stbi_load(overlay_texture_file.c_str(), &width, &height, &nrChannels, 4);
-	if (data)
+	RGBBuffer textureBuff = RGBBuffer::fromPNG(overlay_texture_file.c_str(), true);
+	if (!(textureBuff.isNull()))
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureBuff.width, textureBuff.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureBuff.getData().data());
 		glGenerateMipmap(GL_TEXTURE_2D);
 		BOOST_LOG_TRIVIAL(debug) << "[openglrenderer] loaded overlay_texture " << overlay_texture_file;
-		stbi_image_free(data);
 	}
 	else
 	{
 		BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] Failed to load overlay_texture " << overlay_texture_file << ", will use no overlay";
-		data = new unsigned char[4]{ 0xff, 0xff, 0xff, 0xff }; // create a one-pixel texture that's completely transparent
+		unsigned char* data = new unsigned char[4]{ 0xff, 0xff, 0xff, 0x00 }; // create a one-pixel texture that's completely transparent
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		delete[] data;
 	}
