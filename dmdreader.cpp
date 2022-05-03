@@ -35,6 +35,12 @@ bool read_config(string filename) {
 
 	int i = 0;
 
+	ifstream configFile(filename);
+	if (!configFile) {
+		BOOST_LOG_TRIVIAL(fatal) << "[readconfig] can't read JSON configuration file " << filename << ", aborting";
+		exit(1);
+	}
+
 	boost::property_tree::ptree pt;
 	try {
 		boost::property_tree::json_parser::read_json(filename, pt);
@@ -43,7 +49,7 @@ bool read_config(string filename) {
 	catch (const boost::property_tree::json_parser::json_parser_error e) {
 		BOOST_LOG_TRIVIAL(fatal) << "[readconfig] couldn't parse JSON configuration file " << e.what() << ", aborting";
 		exit(1);
-	}
+	} 
 
 	//
 	// General
