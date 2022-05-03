@@ -75,6 +75,18 @@ add_definitions(-DUSE_SPI)
 set (PI_LIBS EGL drm gbm GLESv2)
 set (opengl_sources "render/pi4renderer.h" "render/pi4renderer.cpp" "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h" "render/openglshader.cpp")
 set (spi_sources "dmdsource/spisource.h" "dmdsource/spisource.cpp" "rpi/spi.h" "rpi/spi.cpp" "rpi/gpio.h" "rpi/gpio.cpp")
+
+# libavutil
+find_path(LIBAV_INCLUDE_DIR "libavutil/hwcontext_drm.h")
+if (LIBAV_INCLUDE_DIR)
+message(STATUS "libavutil/hwcontext_drm.h found in ${LIBAV_INCLUDE_DIR}")
+include_directories(${LIBAV_INCLUDE_DIR})
+else()
+message(FATAL_ERROR "libavutil/hwcontext_drm.h not found")
+endif()
+
+
+
 endif()
 
 
