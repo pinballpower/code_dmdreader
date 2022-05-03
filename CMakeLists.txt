@@ -81,6 +81,8 @@ find_path(LIBAV_INCLUDE_DIR "libavutil/hwcontext_drm.h")
 if (LIBAV_INCLUDE_DIR)
 message(STATUS "libavutil/hwcontext_drm.h found in ${LIBAV_INCLUDE_DIR}")
 include_directories(${LIBAV_INCLUDE_DIR})
+set (video_sources "rpi/drmprime_out.c" "rpi/drmprime_out.h" "rpi/videoplayer.cpp" "rpi/videoplayer.h" "rpi/drmdemo.c" "rpi/drmdemo.h")
+set (VIDEO_LIBS avcodec avfilter avutil avformat drm)
 else()
 message(FATAL_ERROR "libavutil/hwcontext_drm.h not found")
 endif()
@@ -185,10 +187,10 @@ message(STATUS "not enabling colorisation module")
 endif()
 
 
-add_executable (${PROJECT_NAME} "dmdreader.cpp" "util/crc32.cpp" "util/crc32.h" "render/framerenderer.h"  "dmd/dmdframe.cpp" "dmd/dmdframe.h" "render/framerenderer.cpp" "util/bmp.h" "util/bmp.cpp"  "dmd/color.cpp" "util/endian.h" "util/endian.cpp" "processor/pubcapture.cpp" "processor/frameprocessor.h" "processor/frameprocessor.cpp" "util/image.h" "util/image.cpp" "dmdsource/pngsource.h" "dmdsource/pngsource.cpp" "dmdsource/dmdsource.h" "dmdsource/dmdsource.cpp" "util/objectfactory.h" "util/objectfactory.cpp" "util/endian.cpp"  "dmdsource/datdmdsource.h" "dmdsource/datdmdsource.cpp" "dmdsource/txtdmdsource.h" "dmdsource/txtdmdsource.cpp" "processor/frameinfologger.h" "processor/frameinfologger.cpp"    "dmd/palette.h"     "dmd/maskeddmdframe.h" "dmd/maskedmdframe.cpp" "dmdsource/nullsource.cpp" "dmd/palette.cpp" "util/bithelper.cpp" "processor/palettecolorizer.h" "processor/palettecolorizer.cpp" "processor/framestore.h" "processor/framestore.cpp" "stb/stb_image.h" ${color_sources} ${opengl_sources} ${spi_sources})
+add_executable (${PROJECT_NAME} "dmdreader.cpp" "util/crc32.cpp" "util/crc32.h" "render/framerenderer.h"  "dmd/dmdframe.cpp" "dmd/dmdframe.h" "render/framerenderer.cpp" "util/bmp.h" "util/bmp.cpp"  "dmd/color.cpp" "util/endian.h" "util/endian.cpp" "processor/pubcapture.cpp" "processor/frameprocessor.h" "processor/frameprocessor.cpp" "util/image.h" "util/image.cpp" "dmdsource/pngsource.h" "dmdsource/pngsource.cpp" "dmdsource/dmdsource.h" "dmdsource/dmdsource.cpp" "util/objectfactory.h" "util/objectfactory.cpp" "util/endian.cpp"  "dmdsource/datdmdsource.h" "dmdsource/datdmdsource.cpp" "dmdsource/txtdmdsource.h" "dmdsource/txtdmdsource.cpp" "processor/frameinfologger.h" "processor/frameinfologger.cpp"    "dmd/palette.h"     "dmd/maskeddmdframe.h" "dmd/maskedmdframe.cpp" "dmdsource/nullsource.cpp" "dmd/palette.cpp" "util/bithelper.cpp" "processor/palettecolorizer.h" "processor/palettecolorizer.cpp" "processor/framestore.h" "processor/framestore.cpp" "stb/stb_image.h" ${color_sources} ${opengl_sources} ${spi_sources} ${video_sources})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBS} ${ZLIB_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBS} ${ZLIB_LIBRARIES} ${VIDEO_LIBS})
 
 #
 # Install
