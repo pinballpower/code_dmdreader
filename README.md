@@ -14,6 +14,10 @@ There is an alternative version of this software that includes code that we can'
 
 We're happy to accept contributions via Pull requests to this project. However, due to the dual-licensing, all code that will be merged into our project
 has to be compatible with this dual licensing. That means you additional code needs to use only licenses that also allow the use in closed source software.
+Some examples are:
+- BSD/MIT
+- LGPL
+
 I understand that this isn't a perfect solution. If you don't agree with this policy, you can simply fork the GPL part of this project and work on your own 
 version. That's just fine. We simply can't merge pull requests into this repository that do not qualify for closed-source use cases.
 I hope we can fully open-source this software at some point, but that's not something we can decide by ourself.
