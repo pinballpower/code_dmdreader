@@ -72,25 +72,39 @@ endif()
 add_definitions(-DUSE_OPENGLPI4)
 add_definitions(-DUSE_SPI)
 # set (PI_INCLUDE_DIRS "/usr/include:/usr/include/stb:/usr/include/libdrm")
-set (PI_LIBS EGL drm gbm GLESv2)
-set (opengl_sources "render/pi4renderer.h" "render/pi4renderer.cpp" "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h" "render/openglshader.cpp")
-set (spi_sources "dmdsource/spisource.h" "dmdsource/spisource.cpp" "rpi/spi.h" "rpi/spi.cpp" "rpi/gpio.h" "rpi/gpio.cpp")
+set (PI_LIBRARIES EGL drm gbm GLESv2)
+set (OPENGL_SRC "render/pi4renderer.h" "render/pi4renderer.cpp" "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h" "render/openglshader.cpp")
+set (SPI_SRC "dmdsource/spisource.h" "dmdsource/spisource.cpp" "rpi/spi.h" "rpi/spi.cpp" "rpi/gpio.h" "rpi/gpio.cpp")
 
 # libavutil
 find_path(LIBAV_INCLUDE_DIR "libavutil/hwcontext_drm.h")
 if (LIBAV_INCLUDE_DIR)
 message(STATUS "libavutil/hwcontext_drm.h found in ${LIBAV_INCLUDE_DIR}")
 include_directories(${LIBAV_INCLUDE_DIR})
-set (video_sources "rpi/drmprime_out.c" "rpi/drmprime_out.h" "rpi/videoplayer.cpp" "rpi/videoplayer.h" "rpi/drmdemo.c" "rpi/drmdemo.h")
-set (VIDEO_LIBS avcodec avfilter avutil avformat drm)
+set (VIDEO_SRC "rpi/drmprime_out.c" "rpi/drmprime_out.h" "rpi/videoplayer.cpp" "rpi/videoplayer.h" "rpi/drmdemo.c" "rpi/drmdemo.h")
+set (VIDEO_LIBRARIES avcodec avfilter avutil avformat drm)
 else()
-message(FATAL_ERROR "libavutil/hwcontext_drm.h not found")
+message(FATAL_ERROR "libavutil/hwcontext_drm.h not found, you might need to install libavutil-dev ")
+endif()
+
+find_path(LIBAVCODEC_INCLUDE_DIR "libavcodec/avcodec.h")
+if (LIBAVCODEC_INCLUDE_DIR)
+include_directories(${LIBAVCODEC_INCLUDE_DIR})
+message(STATUS "libavcodec/avcodec.h found in ${LIBAVCODEC_INCLUDE_DIR}")
+else()
+message(FATAL_ERROR "libavcodec/avcodec.h not found, you might need to install libavcodec-dev")
+endif()
+
+find_path(LIBAVFILTER_INCLUDE_DIR "libavfilter/buffersink.h")
+if (LIBAVFILTER_INCLUDE_DIR)
+include_directories(${LIBAVFILTER_INCLUDE_DIR})
+message(STATUS "libavfilter/buffersink.h found in ${LIBAVFILTER_INCLUDE_DIR}")
+else()
+message(FATAL_ERROR "libavfilter/buffersink.h not found, you might need to install libavfilter-dev")
 endif()
 
 
-
 endif()
-
 
 #
 # OpenGL/GLAD (only tested under Windows)
@@ -143,7 +157,7 @@ endif()
 
 if (OPENGL)
 add_definitions(-DUSE_OPENGLGLAD)
-set (opengl_sources "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h" "render/openglshader.cpp" "render/gladopenglrenderer.h" "render/gladopenglrenderer.cpp")
+set (OPENGL_SRC "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h" "render/openglshader.cpp" "render/gladopenglrenderer.h" "render/gladopenglrenderer.cpp")
 set(OPENGL_LIBRARIES fmt::fmt
     fmt::fmt-header-only
     glfw
@@ -186,11 +200,16 @@ else()
 message(STATUS "not enabling colorisation module")
 endif()
 
+set (UTIL_SRC "util/crc32.cpp" "util/crc32.h" "util/bmp.h" "util/bmp.cpp"  "dmd/color.cpp" "util/endian.h" "util/endian.cpp" "util/image.h" "util/image.cpp" "util/objectfactory.h" "util/objectfactory.cpp" "util/endian.cpp" "util/bithelper.cpp"  "stb/stb_image.h")
+set (RENDER_SRC "render/framerenderer.h"  "render/framerenderer.cpp" )
+set (DMDSOURCE_SRC  "dmdsource/pngsource.h" "dmdsource/pngsource.cpp" "dmdsource/dmdsource.h" "dmdsource/dmdsource.cpp" "dmdsource/datdmdsource.h" "dmdsource/datdmdsource.cpp" "dmdsource/nullsource.cpp" "dmdsource/txtdmdsource.h" "dmdsource/txtdmdsource.cpp")
+set (DMD_SRC "dmd/palette.h" "dmd/maskeddmdframe.h" "dmd/maskedmdframe.cpp" "dmd/dmdframe.cpp" "dmd/dmdframe.h"  "dmd/palette.cpp"  )
+set (PROCESSOR_SRC "processor/pubcapture.cpp" "processor/frameprocessor.h" "processor/frameprocessor.cpp" "processor/frameinfologger.h" "processor/frameinfologger.cpp" "processor/palettecolorizer.h" "processor/palettecolorizer.cpp" "processor/framestore.h" "processor/framestore.cpp")
 
-add_executable (${PROJECT_NAME} "dmdreader.cpp" "util/crc32.cpp" "util/crc32.h" "render/framerenderer.h"  "dmd/dmdframe.cpp" "dmd/dmdframe.h" "render/framerenderer.cpp" "util/bmp.h" "util/bmp.cpp"  "dmd/color.cpp" "util/endian.h" "util/endian.cpp" "processor/pubcapture.cpp" "processor/frameprocessor.h" "processor/frameprocessor.cpp" "util/image.h" "util/image.cpp" "dmdsource/pngsource.h" "dmdsource/pngsource.cpp" "dmdsource/dmdsource.h" "dmdsource/dmdsource.cpp" "util/objectfactory.h" "util/objectfactory.cpp" "util/endian.cpp"  "dmdsource/datdmdsource.h" "dmdsource/datdmdsource.cpp" "dmdsource/txtdmdsource.h" "dmdsource/txtdmdsource.cpp" "processor/frameinfologger.h" "processor/frameinfologger.cpp"    "dmd/palette.h"     "dmd/maskeddmdframe.h" "dmd/maskedmdframe.cpp" "dmdsource/nullsource.cpp" "dmd/palette.cpp" "util/bithelper.cpp" "processor/palettecolorizer.h" "processor/palettecolorizer.cpp" "processor/framestore.h" "processor/framestore.cpp" "stb/stb_image.h" ${color_sources} ${opengl_sources} ${spi_sources} ${video_sources})
+add_executable (${PROJECT_NAME} "dmdreader.cpp" ${UTIL_SRC} ${RENDER_SRC} ${DMD_SRC} ${DMDSOURCE_SRC} ${PROCESSOR_SRC} ${COLOR_SRC} ${OPENGL_SRC} ${SPI_SRC} ${VIDEO_SRC})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBS} ${ZLIB_LIBRARIES} ${VIDEO_LIBS})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBRARIES} ${ZLIB_LIBRARIES} ${VIDEO_LIBRARIES})
 
 #
 # Install
