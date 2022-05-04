@@ -18,3 +18,4 @@ samples/*.txt
 /debug.json
 /samples/gb1.txt.gz
 /debug-win.json
+/samples/jellyfish-3-mbps-hd-hevc.mkv
