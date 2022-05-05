@@ -17,20 +17,6 @@
 
 #include <boost/log/trivial.hpp>
 
-#include <xf86drm.h>
-#include <xf86drmMode.h>
-#include <gbm.h>
-#include <EGL/egl.h>
-#include <GLES2/gl2.h>
-
-
-struct gbm_device* gbmDevice;
-struct gbm_surface* gbmSurface;
-
-EGLDisplay display;
-EGLContext context;
-EGLSurface surface;
-
 
 static const EGLint configAttribs[] = {
     EGL_RED_SIZE, 8,
@@ -44,72 +30,6 @@ static const EGLint contextAttribs[] = {
     EGL_CONTEXT_CLIENT_VERSION, 2,
     EGL_NONE };
 
-
-
-static bool getDisplay(EGLDisplay* display, int displayNumber = 0)
-{
-    if (!drmHelper.initFullscreen(displayNumber)) {
-        return false;
-    }
-    gbmDevice = gbm_create_device(drmHelper.getDRMDeviceFd());
-    gbmSurface = gbm_surface_create(gbmDevice, drmHelper.getScreenSize().width, drmHelper.getScreenSize().height, GBM_FORMAT_XRGB8888, GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
-    *display = eglGetDisplay(gbmDevice);
-    return true;
-}
-
-static int matchConfigToVisual(EGLDisplay display, EGLint visualId, EGLConfig* configs, int count)
-{
-    EGLint id;
-    for (int i = 0; i < count; ++i)
-    {
-        if (!eglGetConfigAttrib(display, configs[i], EGL_NATIVE_VISUAL_ID, &id))
-            continue;
-        if (id == visualId)
-            return i;
-    }
-    return -1;
-}
-
-static struct gbm_bo* previousBo = NULL;
-static uint32_t previousFb;
-
-void gbmSwapBuffers(EGLDisplay* display, EGLSurface* surface)
-{
-    eglSwapBuffers(*display, *surface);
-
-    struct gbm_bo* bo = gbm_surface_lock_front_buffer(gbmSurface);
-    uint32_t handle = gbm_bo_get_handle(bo).u32;
-    uint32_t pitch = gbm_bo_get_stride(bo);
-    uint32_t fb;
-    fb = drmHelper.addAndActivateFramebuffer(pitch, handle);
-
-    if (previousBo)
-    {
-        drmHelper.removeFramebuffer(previousFb);
-        gbm_surface_release_buffer(gbmSurface, previousBo);
-    }
-    previousBo = bo;
-    previousFb = fb;
-}
-
-void gbmSwapBuffers() {
-    gbmSwapBuffers(&display, &surface);
-}
-
-static void gbmClean()
-{
-    // set the previous crtc
-    drmHelper.setPreviousCrtc();
-
-    if (previousBo)
-    {
-        drmHelper.removeFramebuffer(previousFb);
-        gbm_surface_release_buffer(gbmSurface, previousBo);
-    }
-
-    gbm_surface_destroy(gbmSurface);
-    gbm_device_destroy(gbmDevice);
-}
 
 // Get the EGL error back as a string. Useful for debugging.
 static const char* eglGetErrorStr()
@@ -165,32 +85,94 @@ static const char* eglGetErrorStr()
     return "Unknown error!";
 }
 
-bool connectToDisplay(int displayNumber) {
 
-    drmHelper.openDRMDevice();
-    if (getDisplay(&display, displayNumber)) {
-        BOOST_LOG_TRIVIAL(info) << "[pi4renderer] got display connector via DRM device " << drmHelper.getDRMDeviceFilename();
+bool Pi4Renderer::getDisplay(EGLDisplay* display)
+{
+    gbmDevice = gbm_create_device(drmHelper->getDRMDeviceFd());
+    gbmSurface = gbm_surface_create(gbmDevice, drmHelper->getScreenSize().width, drmHelper->getScreenSize().height, GBM_FORMAT_XRGB8888, GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
+    *display = eglGetDisplay(gbmDevice);
+    return true;
+}
+
+static int matchConfigToVisual(EGLDisplay display, EGLint visualId, EGLConfig* configs, int count)
+{
+    EGLint id;
+    for (int i = 0; i < count; ++i)
+    {
+        if (!eglGetConfigAttrib(display, configs[i], EGL_NATIVE_VISUAL_ID, &id))
+            continue;
+        if (id == visualId)
+            return i;
+    }
+    return -1;
+}
+
+
+void Pi4Renderer::gbmSwapBuffers(EGLDisplay* display, EGLSurface* surface)
+{
+    eglSwapBuffers(*display, *surface);
+
+    struct gbm_bo* bo = gbm_surface_lock_front_buffer(gbmSurface);
+    uint32_t handle = gbm_bo_get_handle(bo).u32;
+    uint32_t pitch = gbm_bo_get_stride(bo);
+    uint32_t fb;
+    fb = drmHelper->addAndActivateFramebuffer(pitch, handle);
+
+    if (previousBo)
+    {
+        drmHelper->removeFramebuffer(previousFb);
+        gbm_surface_release_buffer(gbmSurface, previousBo);
+    }
+    previousBo = bo;
+    previousFb = fb;
+}
+
+void Pi4Renderer::gbmSwapBuffers() {
+    gbmSwapBuffers(&display, &surface);
+}
+
+void Pi4Renderer::gbmClean()
+{
+    // set the previous crtc
+    drmHelper->setPreviousCrtc();
+
+    if (previousBo)
+    {
+        drmHelper->removeFramebuffer(previousFb);
+        gbm_surface_release_buffer(gbmSurface, previousBo);
+    }
+
+    gbm_surface_destroy(gbmSurface);
+    gbm_device_destroy(gbmDevice);
+}
+
+bool Pi4Renderer::connectToDisplay(int displayNumber) {
+
+    drmHelper = DRMHelper::getDRMForDisplay(displayNumber);
+
+    if (getDisplay(&display)) {
+        BOOST_LOG_TRIVIAL(info) << "[pi4renderer] got display connector via DRM device " << drmHelper->getDRMDeviceFilename();
         return true;
     } else 
     {
-        drmHelper.closeDRMDevice();
-        BOOST_LOG_TRIVIAL(info) << "[pi4renderer] unable to get EGL display on DRM device " << drmHelper.getDRMDeviceFilename();
+        drmHelper->closeDRMDevice();
+        BOOST_LOG_TRIVIAL(info) << "[pi4renderer] unable to get EGL display on DRM device " << drmHelper->getDRMDeviceFilename();
     }
 
     return false;
 }
 
-bool startOpenGL(int width=0, int height=0)
+bool Pi4Renderer::startOpenGL(int width, int height)
 {
     // We will use the screen resolution as the desired width and height for the viewport.
     int desiredWidth = width;
     if (desiredWidth == 0) {
-        desiredWidth = drmHelper.getScreenSize().width;
+        desiredWidth = drmHelper->getScreenSize().width;
     }
 
     int desiredHeight = height;
     if (desiredHeight == 0) {
-        desiredHeight = drmHelper.getScreenSize().height;
+        desiredHeight = drmHelper->getScreenSize().height;
     }
 
     // Other variables we will need further down the code.
@@ -282,7 +264,7 @@ bool startOpenGL(int width=0, int height=0)
 }
 
 
-void stop_fullscreen_ogl() {
+void Pi4Renderer::stop_fullscreen_ogl() {
 
     // Cleanup
     eglDestroyContext(display, context);
@@ -290,7 +272,7 @@ void stop_fullscreen_ogl() {
     eglTerminate(display);
     gbmClean();
 
-    drmHelper.closeDRMDevice();
+    drmHelper->closeDRMDevice();
 }
 
 //

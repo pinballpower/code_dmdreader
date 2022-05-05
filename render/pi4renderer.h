@@ -1,5 +1,11 @@
 #pragma once
 
+#include <memory>
+
+#include <gbm.h>
+#include <EGL/egl.h>
+#include <GLES2/gl2.h>
+
 #include "openglrenderer.h"
 
 #include "../rpi/drmhelper.hpp"
@@ -14,6 +20,25 @@ private:
 	virtual bool initializeDisplay() override;
 	virtual void swapBuffers() override;
 
-	int displayNumber = 0;
+	shared_ptr<DRMHelper> drmHelper;
+	int displayNumber;
+
+	// Low level graphics stuff
+	struct gbm_device* gbmDevice;
+	struct gbm_surface* gbmSurface;
+
+	EGLDisplay display;
+	EGLContext context;
+	EGLSurface surface;
+
+	bool getDisplay(EGLDisplay* display);
+	struct gbm_bo* previousBo = NULL;
+	uint32_t previousFb;
+	void gbmSwapBuffers(EGLDisplay* display, EGLSurface* surface);
+	void gbmSwapBuffers();
+	void gbmClean();
+	bool connectToDisplay(int displayNumber);
+	bool startOpenGL(int width = 0, int height = 0);
+	void stop_fullscreen_ogl();
 
 };

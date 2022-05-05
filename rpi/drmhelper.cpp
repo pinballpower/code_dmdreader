@@ -4,11 +4,42 @@
 
 #include "drmhelper.hpp"
 
-DRMHelper drmHelper; // singleton DRMHelper object
+// DRMHelper drmHelper; // singleton DRMHelper object
 
 const vector<string> devicesToTry = { "/dev/dri/card0","/dev/dri/card1" };
-int DRMHelper::drmDeviceFd = 0; // there is only a single file descriptor, even when using multiple screens
 
+// static variables of DRMHelper
+int DRMHelper::drmDeviceFd = 0; // there is only a single file descriptor, even when using multiple screens
+string DRMHelper::deviceFilename;
+map<int, shared_ptr<DRMHelper>> DRMHelper::displayToDRM;
+
+
+DRMException::DRMException(string message) {
+	this->message = message;
+}
+
+const char* DRMException::what() const throw ()
+{
+	return "DRM Exception";
+}
+
+
+shared_ptr<DRMHelper> DRMHelper::getDRMForDisplay(int displayNumber) {
+	if (displayToDRM.contains(displayNumber)) {
+		return displayToDRM[displayNumber];
+	}
+	else {
+		shared_ptr<DRMHelper> drmHelper(new DRMHelper());
+		drmHelper->openDRMDevice();
+		if (!drmHelper->initFullscreen(displayNumber)) {
+			BOOST_LOG_TRIVIAL(debug) << "[drmhelper] culd not connect to display " << displayNumber;
+			std::shared_ptr<DRMHelper> res(nullptr);
+			return res;
+		}
+		displayToDRM[displayNumber] = drmHelper;
+		return drmHelper;
+	}
+}
 
 drmModeConnector* DRMHelper::getDRMConnector(drmModeRes* resources, int displayNumber)
 {
@@ -88,7 +119,7 @@ bool DRMHelper::initFullscreen(int displayNumber) {
 }
 
 bool DRMHelper::openDRMDevice() {
-	if (this->isOpen()) {
+	if (DRMHelper::isOpen()) {
 		return true;
 	};
 
@@ -116,13 +147,12 @@ void DRMHelper::closeDRMDevice() {
 	}
 	drmDeviceFd = 0;
 	deviceFilename = "";
-	initialized = false;
 }
 
 int DRMHelper::getDRMDeviceFd(bool autoInit)
 {
 	if (drmDeviceFd <= 0) {
-		this->openDRMDevice();
+		DRMHelper::openDRMDevice();
 		return drmDeviceFd;
 	}
 	else {
@@ -137,7 +167,7 @@ bool DRMHelper::isOpen()
 
 extern "C" int cgetDRMDeviceFd()
 {
-	return drmHelper.getDRMDeviceFd();
+	return DRMHelper::getDRMDeviceFd();
 }
 
 const ScreenSize DRMHelper::getScreenSize() const
@@ -145,7 +175,7 @@ const ScreenSize DRMHelper::getScreenSize() const
 	return currentScreenSize;
 }
 
-const string DRMHelper::getDRMDeviceFilename() const
+const string DRMHelper::getDRMDeviceFilename()
 {
 	return deviceFilename;
 }
@@ -158,7 +188,7 @@ uint32_t DRMHelper::addAndActivateFramebuffer(uint32_t pitch, uint32_t handle) {
 }
 
 void DRMHelper::removeFramebuffer(uint32_t fb) {
-	drmModeRmFB(drmHelper.getDRMDeviceFd(), fb);
+	drmModeRmFB(drmDeviceFd, fb);
 }
 
 void DRMHelper::setPreviousCrtc()
