@@ -1,6 +1,10 @@
-#include "drmhelper.h"
+#include <fcntl.h>
 
 #include <boost/log/trivial.hpp>
+
+#include "drmhelper.h"
+
+
 
 int drmDeviceFd;
 drmModeModeInfo drmMode;
@@ -77,4 +81,16 @@ bool initDRM(int displayNumber) {
 	drmModeFreeResources(resources);
 
 	return true;
+}
+
+bool openDRMDevice(string filename) {
+	drmDeviceFd = open(filename.c_str(), O_RDWR | O_CLOEXEC);
+
+	return true;
+}
+
+void closeDRMDevice() {
+	if (drmDeviceFd) {
+		close(drmDeviceFd);
+	}
 }

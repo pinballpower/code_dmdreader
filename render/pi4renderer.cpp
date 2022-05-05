@@ -12,7 +12,6 @@
  * Based on https://github.com/matusnovak/rpi-opengl-without-x
  */
 #include <stdlib.h>
-#include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>
 
@@ -174,13 +173,13 @@ bool connectToDisplay(int displayNumber, const vector<string> devices) {
 
     // There are more then one device to check, usually /dev/dri/card0 and /dev/dri/card1
     for (auto filename: devices) {
-        drmDeviceFd = open(filename.c_str(), O_RDWR | O_CLOEXEC);
+        openDRMDevice(filename);
         if (getDisplay(&display, displayNumber)) {
             BOOST_LOG_TRIVIAL(info) << "[pi4renderer] opened device " << filename;
             return true;
         } else 
         {
-            close(drmDeviceFd);
+            closeDRMDevice();
             BOOST_LOG_TRIVIAL(info) << "[pi4renderer] unable to get EGL display on " << filename;
         }
     }
