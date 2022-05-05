@@ -8,10 +8,6 @@
 using namespace std;
 
 
-// TODO: move these into the object and make them private
-extern drmModeModeInfo drmMode;
-// extern uint32_t drmConnectorId;
-
 struct ScreenSize {
 	int width;
 	int height;
@@ -45,6 +41,7 @@ private:
 	string deviceFilename;
 	bool initialized = false;
 	ScreenSize currentScreenSize;
+	drmModeModeInfo drmMode;
 };
 
 extern "C" int cgetDRMDeviceFd();
