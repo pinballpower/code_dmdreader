@@ -74,7 +74,8 @@ add_definitions(-DUSE_SPI)
 # set (PI_INCLUDE_DIRS "/usr/include:/usr/include/stb:/usr/include/libdrm")
 set (PI_LIBRARIES EGL drm gbm GLESv2)
 set (OPENGL_SRC "render/pi4renderer.h" "render/pi4renderer.cpp" "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h" "render/openglshader.cpp")
-set (SPI_SRC "dmdsource/spisource.h" "dmdsource/spisource.cpp" "rpi/spi.h" "rpi/spi.cpp" "rpi/gpio.h" "rpi/gpio.cpp")
+set (SPI_SRC "dmdsource/spisource.h" "dmdsource/spisource.cpp" )
+set (RPI_SRC "rpi/drmhelper.h" "rpi/drmhelper.cpp" "rpi/spi.h" "rpi/spi.cpp" "rpi/gpio.h" "rpi/gpio.cpp")
 
 # libavutil
 find_path(LIBAV_INCLUDE_DIR "libavutil/hwcontext_drm.h")
@@ -102,7 +103,6 @@ message(STATUS "libavfilter/buffersink.h found in ${LIBAVFILTER_INCLUDE_DIR}")
 else()
 message(FATAL_ERROR "libavfilter/buffersink.h not found, you might need to install libavfilter-dev")
 endif()
-
 
 endif()
 
@@ -206,7 +206,7 @@ set (DMDSOURCE_SRC  "dmdsource/pngsource.h" "dmdsource/pngsource.cpp" "dmdsource
 set (DMD_SRC "dmd/palette.h" "dmd/maskeddmdframe.h" "dmd/maskedmdframe.cpp" "dmd/dmdframe.cpp" "dmd/dmdframe.h"  "dmd/palette.cpp"  )
 set (PROCESSOR_SRC "processor/pubcapture.cpp" "processor/frameprocessor.h" "processor/frameprocessor.cpp" "processor/frameinfologger.h" "processor/frameinfologger.cpp" "processor/palettecolorizer.h" "processor/palettecolorizer.cpp" "processor/framestore.h" "processor/framestore.cpp")
 
-add_executable (${PROJECT_NAME} "dmdreader.cpp" ${UTIL_SRC} ${RENDER_SRC} ${DMD_SRC} ${DMDSOURCE_SRC} ${PROCESSOR_SRC} ${COLOR_SRC} ${OPENGL_SRC} ${SPI_SRC} ${VIDEO_SRC})
+add_executable (${PROJECT_NAME} "dmdreader.cpp" ${UTIL_SRC} ${RENDER_SRC} ${DMD_SRC} ${DMDSOURCE_SRC} ${PROCESSOR_SRC} ${COLOR_SRC} ${OPENGL_SRC} ${SPI_SRC} ${RPI_SRC} ${VIDEO_SRC})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBRARIES} ${ZLIB_LIBRARIES} ${VIDEO_LIBRARIES})
