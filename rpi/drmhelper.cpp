@@ -142,7 +142,7 @@ extern "C" int cgetDRMDeviceFd()
 
 const ScreenSize DRMHelper::getScreenSize() const
 {
-	return ScreenSize();
+	return currentScreenSize;
 }
 
 const string DRMHelper::getDRMDeviceFilename() const

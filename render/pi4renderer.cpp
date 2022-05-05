@@ -52,7 +52,7 @@ static bool getDisplay(EGLDisplay* display, int displayNumber = 0)
         return false;
     }
     gbmDevice = gbm_create_device(drmHelper.getDRMDeviceFd());
-    gbmSurface = gbm_surface_create(gbmDevice, drmMode.hdisplay, drmMode.vdisplay, GBM_FORMAT_XRGB8888, GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
+    gbmSurface = gbm_surface_create(gbmDevice, drmHelper.getScreenSize().width, drmHelper.getScreenSize().height, GBM_FORMAT_XRGB8888, GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
     *display = eglGetDisplay(gbmDevice);
     return true;
 }
