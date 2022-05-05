@@ -25,12 +25,10 @@
 #include <GLES2/gl2.h>
 
 
-int drmDeviceFd;
-drmModeModeInfo drmMode;
+
+
 struct gbm_device* gbmDevice;
 struct gbm_surface* gbmSurface;
-drmModeCrtc* drmCrtc;
-uint32_t drmConnectorId;
 
 EGLDisplay display;
 EGLContext context;

@@ -2,6 +2,11 @@
 
 #include <boost/log/trivial.hpp>
 
+int drmDeviceFd;
+drmModeModeInfo drmMode;
+drmModeCrtc* drmCrtc;
+uint32_t drmConnectorId;
+
 drmModeConnector* getDRMConnector(int drmDeviceFd, drmModeRes* resources, int displayNumber)
 {
     int currentDisplay = 0;
