@@ -6,11 +6,7 @@
 
 DRMHelper drmHelper; // singleton DRMHelper object
 
-
 drmModeModeInfo drmMode;
-
-uint32_t drmConnectorId;
-string deviceFilename;
 
 static ScreenSize currentScreenSize;
 
