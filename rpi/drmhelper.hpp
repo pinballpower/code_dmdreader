@@ -43,6 +43,7 @@ private:
 	drmModeCrtc* drmCrtc;
 	uint32_t drmConnectorId;
 	string deviceFilename;
+	bool initialized = false;
 };
 
 extern "C" int cgetDRMDeviceFd();

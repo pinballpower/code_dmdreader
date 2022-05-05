@@ -84,6 +84,8 @@ bool DRMHelper::initFullscreen(int displayNumber) {
 	drmModeFreeConnector(connector);
 	drmModeFreeResources(resources);
 
+	initialized = true;
+
 	return true;
 }
 
@@ -116,11 +118,18 @@ void DRMHelper::closeDRMDevice() {
 	}
 	drmDeviceFd = 0;
 	deviceFilename = "";
+	initialized = false;
 }
 
 int DRMHelper::getDRMDeviceFd(bool autoInit)
 {
-	return drmDeviceFd;
+	if (drmDeviceFd <= 0) {
+		this->openDRMDevice();
+		return drmDeviceFd;
+	}
+	else {
+		return drmDeviceFd;
+	}
 }
 
 bool DRMHelper::isOpen()
