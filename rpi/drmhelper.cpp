@@ -8,7 +8,7 @@ DRMHelper drmHelper; // singleton DRMHelper object
 
 
 drmModeModeInfo drmMode;
-drmModeCrtc* drmCrtc;
+
 uint32_t drmConnectorId;
 string deviceFilename;
 
@@ -47,7 +47,7 @@ drmModeEncoder* DRMHelper::findDRMEncoder(drmModeConnector* connector)
 	return NULL;
 }
 
-bool DRMHelper::initDRM(int displayNumber) {
+bool DRMHelper::initFullscreen(int displayNumber) {
 	drmModeRes* resources = drmModeGetResources(drmDeviceFd);
 	if (resources == NULL)
 	{
@@ -92,6 +92,10 @@ bool DRMHelper::initDRM(int displayNumber) {
 }
 
 bool DRMHelper::openDRMDevice() {
+	if (this->isOpen()) {
+		return true;
+	};
+
 	for (auto filename : devicesToTry) {
 		drmDeviceFd = open(filename.c_str(), O_RDWR | O_CLOEXEC);
 
@@ -123,6 +127,11 @@ int DRMHelper::getDRMDeviceFd(bool autoInit)
 	return drmDeviceFd;
 }
 
+bool DRMHelper::isOpen()
+{
+	return drmDeviceFd > 0;
+}
+
 extern "C" int cgetDRMDeviceFd()
 {
 	return drmHelper.getDRMDeviceFd();
@@ -147,4 +156,10 @@ uint32_t DRMHelper::addAndActivateFramebuffer(uint32_t pitch, uint32_t handle) {
 
 void DRMHelper::removeFramebuffer(uint32_t fb) {
 	drmModeRmFB(drmHelper.getDRMDeviceFd(), fb);
+}
+
+void DRMHelper::setPreviousCrtc()
+{
+	drmModeSetCrtc(drmDeviceFd, drmCrtc->crtc_id, drmCrtc->buffer_id, drmCrtc->x, drmCrtc->y, &drmConnectorId, 1, &drmCrtc->mode);
+	drmModeFreeCrtc(drmCrtc);
 }

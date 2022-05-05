@@ -48,7 +48,7 @@ static const EGLint contextAttribs[] = {
 
 static bool getDisplay(EGLDisplay* display, int displayNumber = 0)
 {
-    if (!drmHelper.initDRM(displayNumber)) {
+    if (!drmHelper.initFullscreen(displayNumber)) {
         return false;
     }
     gbmDevice = gbm_create_device(drmHelper.getDRMDeviceFd());
@@ -98,14 +98,12 @@ void gbmSwapBuffers() {
 
 static void gbmClean()
 {
-    int fd = drmHelper.getDRMDeviceFd();
     // set the previous crtc
-    drmModeSetCrtc(fd, drmCrtc->crtc_id, drmCrtc->buffer_id, drmCrtc->x, drmCrtc->y, &drmConnectorId, 1, &drmCrtc->mode);
-    drmModeFreeCrtc(drmCrtc);
+    drmHelper.setPreviousCrtc();
 
     if (previousBo)
     {
-        drmModeRmFB(fd, previousFb);
+        drmHelper.removeFramebuffer(previousFb);
         gbm_surface_release_buffer(gbmSurface, previousBo);
     }
 

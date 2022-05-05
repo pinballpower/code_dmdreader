@@ -10,7 +10,6 @@ using namespace std;
 
 // TODO: move these into the object and make them private
 extern drmModeModeInfo drmMode;
-extern drmModeCrtc* drmCrtc;
 extern uint32_t drmConnectorId;
 
 struct ScreenSize {
@@ -22,22 +21,26 @@ class DRMHelper {
 
 public:
 
-	bool initDRM(int displayNumber);
 	bool openDRMDevice();
 	void closeDRMDevice();
 	int getDRMDeviceFd(bool autoInit = true);
+	bool isOpen();
 
+	bool initFullscreen(int displayNumber);
 	const ScreenSize getScreenSize() const;
 	const string getDRMDeviceFilename() const;
 
 	uint32_t addAndActivateFramebuffer(uint32_t pitch, uint32_t handle);
 	void removeFramebuffer(uint32_t fb);
 
+	void setPreviousCrtc();
+
 private: 
 	drmModeConnector* getDRMConnector(drmModeRes* resources, int displayNumber = 0);
 	drmModeEncoder* findDRMEncoder(drmModeConnector* connector);
 
 	int drmDeviceFd=0;
+	drmModeCrtc* drmCrtc;
 };
 
 extern "C" int cgetDRMDeviceFd();
