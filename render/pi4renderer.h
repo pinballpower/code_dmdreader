@@ -2,7 +2,7 @@
 
 #include "openglrenderer.h"
 
-#include "../rpi/drmhelper.h"
+#include "../rpi/drmhelper.hpp"
 
 class Pi4Renderer : public OpenGLRenderer
 {

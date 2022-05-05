@@ -24,8 +24,6 @@
 #include <GLES2/gl2.h>
 
 
-
-
 struct gbm_device* gbmDevice;
 struct gbm_surface* gbmSurface;
 
@@ -171,19 +169,16 @@ static const char* eglGetErrorStr()
     return "Unknown error!";
 }
 
-bool connectToDisplay(int displayNumber, const vector<string> devices) {
+bool connectToDisplay(int displayNumber) {
 
-    // There are more then one device to check, usually /dev/dri/card0 and /dev/dri/card1
-    for (auto filename: devices) {
-        openDRMDevice(filename);
-        if (getDisplay(&display, displayNumber)) {
-            BOOST_LOG_TRIVIAL(info) << "[pi4renderer] opened device " << filename;
-            return true;
-        } else 
-        {
-            closeDRMDevice();
-            BOOST_LOG_TRIVIAL(info) << "[pi4renderer] unable to get EGL display on " << filename;
-        }
+    openDRMDevice();
+    if (getDisplay(&display, displayNumber)) {
+        BOOST_LOG_TRIVIAL(info) << "[pi4renderer] got display connector via DRM device " << getDRMDeviceFilename();
+        return true;
+    } else 
+    {
+        closeDRMDevice();
+        BOOST_LOG_TRIVIAL(info) << "[pi4renderer] unable to get EGL display on DRM device " << getDRMDeviceFilename();
     }
 
     return false;
@@ -325,8 +320,8 @@ void Pi4Renderer::swapBuffers() {
 
 bool Pi4Renderer::initializeDisplay()
 {
-    vector<string> devicesToTry = { "/dev/dri/card0","/dev/dri/card1" };
-    if (!connectToDisplay(displayNumber, devicesToTry)) {
+    
+    if (!connectToDisplay(displayNumber)) {
         return false;
     }
 
