@@ -81,13 +81,11 @@ void gbmSwapBuffers(EGLDisplay* display, EGLSurface* surface)
     uint32_t handle = gbm_bo_get_handle(bo).u32;
     uint32_t pitch = gbm_bo_get_stride(bo);
     uint32_t fb;
-    int fd = drmHelper.getDRMDeviceFd();
-    drmModeAddFB(fd, drmMode.hdisplay, drmMode.vdisplay, 24, 32, pitch, handle, &fb);
-    drmModeSetCrtc(fd, drmCrtc->crtc_id, fb, 0, 0, &drmConnectorId, 1, &drmMode);
+    fb = drmHelper.addAndActivateFramebuffer(pitch, handle);
 
     if (previousBo)
     {
-        drmModeRmFB(fd, previousFb);
+        drmModeRmFB(drmHelper.getDRMDeviceFd(), previousFb);
         gbm_surface_release_buffer(gbmSurface, previousBo);
     }
     previousBo = bo;

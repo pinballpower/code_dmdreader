@@ -27,12 +27,16 @@ public:
 	void closeDRMDevice();
 	int getDRMDeviceFd(bool autoInit = true);
 
-	const ScreenSize getScreenSize();
-	const string getDRMDeviceFilename();
+	const ScreenSize getScreenSize() const;
+	const string getDRMDeviceFilename() const;
+
+	uint32_t addAndActivateFramebuffer(uint32_t pitch, uint32_t handle);
 
 private: 
 	drmModeConnector* getDRMConnector(drmModeRes* resources, int displayNumber = 0);
 	drmModeEncoder* findDRMEncoder(drmModeConnector* connector);
+
+	int drmDeviceFd=0;
 };
 
 extern "C" int cgetDRMDeviceFd();

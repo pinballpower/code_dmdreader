@@ -6,7 +6,7 @@
 
 DRMHelper drmHelper; // singleton DRMHelper object
 
-static int drmDeviceFd;
+
 drmModeModeInfo drmMode;
 drmModeCrtc* drmCrtc;
 uint32_t drmConnectorId;
@@ -128,12 +128,19 @@ extern "C" int cgetDRMDeviceFd()
 	return drmHelper.getDRMDeviceFd();
 }
 
-const ScreenSize DRMHelper::getScreenSize()
+const ScreenSize DRMHelper::getScreenSize() const
 {
 	return ScreenSize();
 }
 
-const string DRMHelper::getDRMDeviceFilename()
+const string DRMHelper::getDRMDeviceFilename() const
 {
 	return deviceFilename;
+}
+
+uint32_t DRMHelper::addAndActivateFramebuffer(uint32_t pitch, uint32_t handle) {
+	uint32_t fb = 0;
+	drmModeAddFB(drmDeviceFd, drmMode.hdisplay, drmMode.vdisplay, 24, 32, pitch, handle, &fb);
+	drmModeSetCrtc(drmDeviceFd, drmCrtc->crtc_id, fb, 0, 0, &drmConnectorId, 1, &drmMode);
+	return fb;
 }
