@@ -149,15 +149,9 @@ void DRMHelper::closeDRMDevice() {
 	deviceFilename = "";
 }
 
-int DRMHelper::getDRMDeviceFd(bool autoInit)
+int DRMHelper::getDRMDeviceFd()
 {
-	if (drmDeviceFd <= 0) {
-		DRMHelper::openDRMDevice();
-		return drmDeviceFd;
-	}
-	else {
-		return drmDeviceFd;
-	}
+	return drmDeviceFd;
 }
 
 bool DRMHelper::isOpen()

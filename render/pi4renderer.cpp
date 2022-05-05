@@ -155,7 +155,6 @@ bool Pi4Renderer::connectToDisplay(int displayNumber) {
         return true;
     } else 
     {
-        drmHelper->closeDRMDevice();
         BOOST_LOG_TRIVIAL(info) << "[pi4renderer] unable to get EGL display on DRM device " << drmHelper->getDRMDeviceFilename();
     }
 
@@ -272,7 +271,7 @@ void Pi4Renderer::stop_fullscreen_ogl() {
     eglTerminate(display);
     gbmClean();
 
-    drmHelper->closeDRMDevice();
+    // DRM will be cleared by the DRM destructor
 }
 
 //
