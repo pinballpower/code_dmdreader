@@ -31,6 +31,7 @@ public:
 	const string getDRMDeviceFilename() const;
 
 	uint32_t addAndActivateFramebuffer(uint32_t pitch, uint32_t handle);
+	void removeFramebuffer(uint32_t fb);
 
 private: 
 	drmModeConnector* getDRMConnector(drmModeRes* resources, int displayNumber = 0);

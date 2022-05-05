@@ -85,7 +85,7 @@ void gbmSwapBuffers(EGLDisplay* display, EGLSurface* surface)
 
     if (previousBo)
     {
-        drmModeRmFB(drmHelper.getDRMDeviceFd(), previousFb);
+        drmHelper.removeFramebuffer(previousFb);
         gbm_surface_release_buffer(gbmSurface, previousBo);
     }
     previousBo = bo;

@@ -144,3 +144,7 @@ uint32_t DRMHelper::addAndActivateFramebuffer(uint32_t pitch, uint32_t handle) {
 	drmModeSetCrtc(drmDeviceFd, drmCrtc->crtc_id, fb, 0, 0, &drmConnectorId, 1, &drmMode);
 	return fb;
 }
+
+void DRMHelper::removeFramebuffer(uint32_t fb) {
+	drmModeRmFB(drmHelper.getDRMDeviceFd(), fb);
+}
