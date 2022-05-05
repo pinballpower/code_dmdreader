@@ -2,16 +2,21 @@
 
 #include <boost/log/trivial.hpp>
 
-#include "drmhelper.h"
+#include "drmhelper.hpp"
+
+DRMHelper drmHelper; // singleton DRMHelper object
 
 static int drmDeviceFd;
 drmModeModeInfo drmMode;
 drmModeCrtc* drmCrtc;
 uint32_t drmConnectorId;
+string deviceFilename;
 
 static ScreenSize currentScreenSize;
 
-drmModeConnector* getDRMConnector(drmModeRes* resources, int displayNumber)
+const vector<string> devicesToTry = { "/dev/dri/card0","/dev/dri/card1" };
+
+drmModeConnector* DRMHelper::getDRMConnector(drmModeRes* resources, int displayNumber)
 {
 	int currentDisplay = 0;
 
@@ -33,7 +38,7 @@ drmModeConnector* getDRMConnector(drmModeRes* resources, int displayNumber)
 	return NULL;
 }
 
-drmModeEncoder* findDRMEncoder(drmModeConnector* connector)
+drmModeEncoder* DRMHelper::findDRMEncoder(drmModeConnector* connector)
 {
 	if (connector->encoder_id)
 	{
@@ -42,18 +47,18 @@ drmModeEncoder* findDRMEncoder(drmModeConnector* connector)
 	return NULL;
 }
 
-bool initDRM(int displayNumber) {
+bool DRMHelper::initDRM(int displayNumber) {
 	drmModeRes* resources = drmModeGetResources(drmDeviceFd);
 	if (resources == NULL)
 	{
-		BOOST_LOG_TRIVIAL(info) << "[pi4renderer] unable to get DRM resources";
+		BOOST_LOG_TRIVIAL(info) << "[drmhelper] unable to get DRM resources";
 		return false;
 	}
 
 	drmModeConnector* connector = getDRMConnector(resources, displayNumber);
 	if (connector == NULL)
 	{
-		BOOST_LOG_TRIVIAL(debug) << "[pi4renderer] unable to get connector";
+		BOOST_LOG_TRIVIAL(debug) << "[drmhelper] unable to get connector";
 		drmModeFreeResources(resources);
 		return false;
 	}
@@ -61,18 +66,18 @@ bool initDRM(int displayNumber) {
 	drmConnectorId = connector->connector_id;
 	for (int i = 0; i < connector->count_modes; i++) {
 		drmMode = connector->modes[i];
-		BOOST_LOG_TRIVIAL(info) << "[pi4renderer] found supported resolution: " << drmMode.hdisplay << "x" << drmMode.vdisplay;
+		BOOST_LOG_TRIVIAL(info) << "[drmhelper] found supported resolution: " << drmMode.hdisplay << "x" << drmMode.vdisplay;
 	}
 	drmMode = connector->modes[0];
 	currentScreenSize.width = drmMode.hdisplay;
 	currentScreenSize.height = drmMode.vdisplay;
 
-	BOOST_LOG_TRIVIAL(info) << "[pi4renderer] using native resolution: " << drmMode.hdisplay << "x" << drmMode.vdisplay;
+	BOOST_LOG_TRIVIAL(info) << "[drmhelper] using native resolution: " << drmMode.hdisplay << "x" << drmMode.vdisplay;
 
 	drmModeEncoder* encoder = findDRMEncoder(connector);
 	if (encoder == NULL)
 	{
-		BOOST_LOG_TRIVIAL(info) << "[pi4renderer] unable to get encoder";
+		BOOST_LOG_TRIVIAL(info) << "[drmhelper] unable to get encoder";
 		drmModeFreeConnector(connector);
 		drmModeFreeResources(resources);
 		return false;
@@ -86,24 +91,49 @@ bool initDRM(int displayNumber) {
 	return true;
 }
 
-bool openDRMDevice(const string filename) {
-	drmDeviceFd = open(filename.c_str(), O_RDWR | O_CLOEXEC);
+bool DRMHelper::openDRMDevice() {
+	for (auto filename : devicesToTry) {
+		drmDeviceFd = open(filename.c_str(), O_RDWR | O_CLOEXEC);
 
-	return true;
+		drmModeRes* resources = drmModeGetResources(drmDeviceFd);
+		if (resources == NULL)
+		{
+			closeDRMDevice();
+		}
+		else {
+			BOOST_LOG_TRIVIAL(info) << "[drmhelper] using DRM device " << filename;
+			deviceFilename = filename;
+			return true;
+		}
+	}
+
+	return false;
 }
 
-void closeDRMDevice() {
+void DRMHelper::closeDRMDevice() {
 	if (drmDeviceFd) {
 		close(drmDeviceFd);
 	}
+	drmDeviceFd = 0;
+	deviceFilename = "";
 }
 
-int getDRMDeviceFd()
+int DRMHelper::getDRMDeviceFd(bool autoInit)
 {
 	return drmDeviceFd;
 }
 
-const ScreenSize getScreenSize()
+extern "C" int cgetDRMDeviceFd()
+{
+	return drmHelper.getDRMDeviceFd();
+}
+
+const ScreenSize DRMHelper::getScreenSize()
 {
 	return ScreenSize();
+}
+
+const string DRMHelper::getDRMDeviceFilename()
+{
+	return deviceFilename;
 }

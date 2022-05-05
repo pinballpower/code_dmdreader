@@ -48,10 +48,10 @@ static const EGLint contextAttribs[] = {
 
 static bool getDisplay(EGLDisplay* display, int displayNumber = 0)
 {
-    if (!initDRM(displayNumber)) {
+    if (!drmHelper.initDRM(displayNumber)) {
         return false;
     }
-    gbmDevice = gbm_create_device(getDRMDeviceFd());
+    gbmDevice = gbm_create_device(drmHelper.getDRMDeviceFd());
     gbmSurface = gbm_surface_create(gbmDevice, drmMode.hdisplay, drmMode.vdisplay, GBM_FORMAT_XRGB8888, GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
     *display = eglGetDisplay(gbmDevice);
     return true;
@@ -81,7 +81,7 @@ void gbmSwapBuffers(EGLDisplay* display, EGLSurface* surface)
     uint32_t handle = gbm_bo_get_handle(bo).u32;
     uint32_t pitch = gbm_bo_get_stride(bo);
     uint32_t fb;
-    int fd = getDRMDeviceFd();
+    int fd = drmHelper.getDRMDeviceFd();
     drmModeAddFB(fd, drmMode.hdisplay, drmMode.vdisplay, 24, 32, pitch, handle, &fb);
     drmModeSetCrtc(fd, drmCrtc->crtc_id, fb, 0, 0, &drmConnectorId, 1, &drmMode);
 
@@ -100,7 +100,7 @@ void gbmSwapBuffers() {
 
 static void gbmClean()
 {
-    int fd = getDRMDeviceFd();
+    int fd = drmHelper.getDRMDeviceFd();
     // set the previous crtc
     drmModeSetCrtc(fd, drmCrtc->crtc_id, drmCrtc->buffer_id, drmCrtc->x, drmCrtc->y, &drmConnectorId, 1, &drmCrtc->mode);
     drmModeFreeCrtc(drmCrtc);
@@ -171,14 +171,14 @@ static const char* eglGetErrorStr()
 
 bool connectToDisplay(int displayNumber) {
 
-    openDRMDevice();
+    drmHelper.openDRMDevice();
     if (getDisplay(&display, displayNumber)) {
-        BOOST_LOG_TRIVIAL(info) << "[pi4renderer] got display connector via DRM device " << getDRMDeviceFilename();
+        BOOST_LOG_TRIVIAL(info) << "[pi4renderer] got display connector via DRM device " << drmHelper.getDRMDeviceFilename();
         return true;
     } else 
     {
-        closeDRMDevice();
-        BOOST_LOG_TRIVIAL(info) << "[pi4renderer] unable to get EGL display on DRM device " << getDRMDeviceFilename();
+        drmHelper.closeDRMDevice();
+        BOOST_LOG_TRIVIAL(info) << "[pi4renderer] unable to get EGL display on DRM device " << drmHelper.getDRMDeviceFilename();
     }
 
     return false;
@@ -189,12 +189,12 @@ bool startOpenGL(int width=0, int height=0)
     // We will use the screen resolution as the desired width and height for the viewport.
     int desiredWidth = width;
     if (desiredWidth == 0) {
-        desiredWidth = getScreenSize().width;
+        desiredWidth = drmHelper.getScreenSize().width;
     }
 
     int desiredHeight = height;
     if (desiredHeight == 0) {
-        desiredHeight = getScreenSize().height;
+        desiredHeight = drmHelper.getScreenSize().height;
     }
 
     // Other variables we will need further down the code.
@@ -294,7 +294,7 @@ void stop_fullscreen_ogl() {
     eglTerminate(display);
     gbmClean();
 
-    closeDRMDevice();
+    drmHelper.closeDRMDevice();
 }
 
 //
