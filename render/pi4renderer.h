@@ -2,6 +2,8 @@
 
 #include "openglrenderer.h"
 
+#include "../rpi/drmhelper.h"
+
 class Pi4Renderer : public OpenGLRenderer
 {
 public:

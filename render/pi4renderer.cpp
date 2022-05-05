@@ -49,36 +49,7 @@ static const EGLint contextAttribs[] = {
     EGL_CONTEXT_CLIENT_VERSION, 2,
     EGL_NONE };
 
-static drmModeConnector* getDRMConnector(drmModeRes* resources, int displayNumber = 0)
-{
-    int currentDisplay = 0;
 
-    for (int i = 0; i < resources->count_connectors; i++)
-    {
-        drmModeConnector* connector = drmModeGetConnector(drmDeviceFd, resources->connectors[i]);
-        if (connector->connection == DRM_MODE_CONNECTED)
-        {
-            if (currentDisplay == displayNumber) {
-                return connector;
-            }
-            else {
-                currentDisplay++;
-            }
-        }
-        drmModeFreeConnector(connector);
-    }
-
-    return NULL;
-}
-
-static drmModeEncoder* findDRMEncoder(drmModeConnector* connector)
-{
-    if (connector->encoder_id)
-    {
-        return drmModeGetEncoder(drmDeviceFd, connector->encoder_id);
-    }
-    return NULL;
-}
 
 static bool getDisplay(EGLDisplay* display, int displayNumber = 0)
 {
@@ -89,7 +60,7 @@ static bool getDisplay(EGLDisplay* display, int displayNumber = 0)
         return false;
     }
 
-    drmModeConnector* connector = getDRMConnector(resources, displayNumber);
+    drmModeConnector* connector = getDRMConnector(drmDeviceFd, resources, displayNumber);
     if (connector == NULL)
     {
         BOOST_LOG_TRIVIAL(debug) << "[pi4renderer] unable to get connector";
@@ -105,7 +76,7 @@ static bool getDisplay(EGLDisplay* display, int displayNumber = 0)
     drmMode = connector->modes[0];
     BOOST_LOG_TRIVIAL(info) << "[pi4renderer] using native resolution: " << drmMode.hdisplay << "x" << drmMode.vdisplay;
 
-    drmModeEncoder* encoder = findDRMEncoder(connector);
+    drmModeEncoder* encoder = findDRMEncoder(drmDeviceFd, connector);
     if (encoder == NULL)
     {
         BOOST_LOG_TRIVIAL(info) << "[pi4renderer] unable to get encoder";
