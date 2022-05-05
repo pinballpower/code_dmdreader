@@ -9,12 +9,19 @@ extern drmModeModeInfo drmMode;
 extern drmModeCrtc* drmCrtc;
 extern uint32_t drmConnectorId;
 
+struct ScreenSize {
+	int width;
+	int height;
+};
+
 using namespace std;
 
 bool initDRM(int displayNumber);
 bool openDRMDevice(const string filename);
 void closeDRMDevice();
 int getDRMDeviceFd();
+
+const ScreenSize getScreenSize();
 
 drmModeConnector* getDRMConnector(drmModeRes* resources, int displayNumber = 0);
 drmModeEncoder* findDRMEncoder(drmModeConnector* connector);

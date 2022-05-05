@@ -194,12 +194,12 @@ bool startOpenGL(int width=0, int height=0)
     // We will use the screen resolution as the desired width and height for the viewport.
     int desiredWidth = width;
     if (desiredWidth == 0) {
-        desiredWidth = drmMode.hdisplay;
+        desiredWidth = getScreenSize().width;
     }
 
     int desiredHeight = height;
     if (desiredHeight == 0) {
-        desiredHeight = drmMode.vdisplay;
+        desiredHeight = getScreenSize().height;
     }
 
     // Other variables we will need further down the code.

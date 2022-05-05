@@ -9,6 +9,8 @@ drmModeModeInfo drmMode;
 drmModeCrtc* drmCrtc;
 uint32_t drmConnectorId;
 
+static ScreenSize currentScreenSize;
+
 drmModeConnector* getDRMConnector(drmModeRes* resources, int displayNumber)
 {
 	int currentDisplay = 0;
@@ -62,6 +64,9 @@ bool initDRM(int displayNumber) {
 		BOOST_LOG_TRIVIAL(info) << "[pi4renderer] found supported resolution: " << drmMode.hdisplay << "x" << drmMode.vdisplay;
 	}
 	drmMode = connector->modes[0];
+	currentScreenSize.width = drmMode.hdisplay;
+	currentScreenSize.height = drmMode.vdisplay;
+
 	BOOST_LOG_TRIVIAL(info) << "[pi4renderer] using native resolution: " << drmMode.hdisplay << "x" << drmMode.vdisplay;
 
 	drmModeEncoder* encoder = findDRMEncoder(connector);
@@ -96,4 +101,9 @@ void closeDRMDevice() {
 int getDRMDeviceFd()
 {
 	return drmDeviceFd;
+}
+
+const ScreenSize getScreenSize()
+{
+	return ScreenSize();
 }
