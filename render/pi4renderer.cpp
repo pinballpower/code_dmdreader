@@ -25,12 +25,12 @@
 #include <GLES2/gl2.h>
 
 
-int device;
-drmModeModeInfo mode;
+int drmDeviceFd;
+drmModeModeInfo drmMode;
 struct gbm_device* gbmDevice;
 struct gbm_surface* gbmSurface;
-drmModeCrtc* crtc;
-uint32_t connectorId;
+drmModeCrtc* drmCrtc;
+uint32_t drmConnectorId;
 
 EGLDisplay display;
 EGLContext context;
@@ -55,7 +55,7 @@ static drmModeConnector* getConnector(drmModeRes* resources, int displayNumber =
 
     for (int i = 0; i < resources->count_connectors; i++)
     {
-        drmModeConnector* connector = drmModeGetConnector(device, resources->connectors[i]);
+        drmModeConnector* connector = drmModeGetConnector(drmDeviceFd, resources->connectors[i]);
         if (connector->connection == DRM_MODE_CONNECTED)
         {
             if (currentDisplay == displayNumber) {
@@ -75,14 +75,14 @@ static drmModeEncoder* findEncoder(drmModeConnector* connector)
 {
     if (connector->encoder_id)
     {
-        return drmModeGetEncoder(device, connector->encoder_id);
+        return drmModeGetEncoder(drmDeviceFd, connector->encoder_id);
     }
     return NULL;
 }
 
 static bool getDisplay(EGLDisplay* display, int displayNumber = 0)
 {
-    drmModeRes* resources = drmModeGetResources(device);
+    drmModeRes* resources = drmModeGetResources(drmDeviceFd);
     if (resources == NULL)
     {
         BOOST_LOG_TRIVIAL(info) << "[pi4renderer] unable to get DRM resources";
@@ -97,13 +97,13 @@ static bool getDisplay(EGLDisplay* display, int displayNumber = 0)
         return false;
     }
 
-    connectorId = connector->connector_id;
+    drmConnectorId = connector->connector_id;
     for (int i = 0; i < connector->count_modes; i++) {
-        mode = connector->modes[i];
-        BOOST_LOG_TRIVIAL(info) << "[pi4renderer] found supported resolution: " << mode.hdisplay << "x" << mode.vdisplay;
+        drmMode = connector->modes[i];
+        BOOST_LOG_TRIVIAL(info) << "[pi4renderer] found supported resolution: " << drmMode.hdisplay << "x" << drmMode.vdisplay;
     }
-    mode = connector->modes[0];
-    BOOST_LOG_TRIVIAL(info) << "[pi4renderer] using native resolution: " << mode.hdisplay << "x" << mode.vdisplay;
+    drmMode = connector->modes[0];
+    BOOST_LOG_TRIVIAL(info) << "[pi4renderer] using native resolution: " << drmMode.hdisplay << "x" << drmMode.vdisplay;
 
     drmModeEncoder* encoder = findEncoder(connector);
     if (encoder == NULL)
@@ -114,12 +114,12 @@ static bool getDisplay(EGLDisplay* display, int displayNumber = 0)
         return false;
     }
 
-    crtc = drmModeGetCrtc(device, encoder->crtc_id);
+    drmCrtc = drmModeGetCrtc(drmDeviceFd, encoder->crtc_id);
     drmModeFreeEncoder(encoder);
     drmModeFreeConnector(connector);
     drmModeFreeResources(resources);
-    gbmDevice = gbm_create_device(device);
-    gbmSurface = gbm_surface_create(gbmDevice, mode.hdisplay, mode.vdisplay, GBM_FORMAT_XRGB8888, GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
+    gbmDevice = gbm_create_device(drmDeviceFd);
+    gbmSurface = gbm_surface_create(gbmDevice, drmMode.hdisplay, drmMode.vdisplay, GBM_FORMAT_XRGB8888, GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
     *display = eglGetDisplay(gbmDevice);
     return true;
 }
@@ -148,12 +148,12 @@ void gbmSwapBuffers(EGLDisplay* display, EGLSurface* surface)
     uint32_t handle = gbm_bo_get_handle(bo).u32;
     uint32_t pitch = gbm_bo_get_stride(bo);
     uint32_t fb;
-    drmModeAddFB(device, mode.hdisplay, mode.vdisplay, 24, 32, pitch, handle, &fb);
-    drmModeSetCrtc(device, crtc->crtc_id, fb, 0, 0, &connectorId, 1, &mode);
+    drmModeAddFB(drmDeviceFd, drmMode.hdisplay, drmMode.vdisplay, 24, 32, pitch, handle, &fb);
+    drmModeSetCrtc(drmDeviceFd, drmCrtc->crtc_id, fb, 0, 0, &drmConnectorId, 1, &drmMode);
 
     if (previousBo)
     {
-        drmModeRmFB(device, previousFb);
+        drmModeRmFB(drmDeviceFd, previousFb);
         gbm_surface_release_buffer(gbmSurface, previousBo);
     }
     previousBo = bo;
@@ -167,12 +167,12 @@ void gbmSwapBuffers() {
 static void gbmClean()
 {
     // set the previous crtc
-    drmModeSetCrtc(device, crtc->crtc_id, crtc->buffer_id, crtc->x, crtc->y, &connectorId, 1, &crtc->mode);
-    drmModeFreeCrtc(crtc);
+    drmModeSetCrtc(drmDeviceFd, drmCrtc->crtc_id, drmCrtc->buffer_id, drmCrtc->x, drmCrtc->y, &drmConnectorId, 1, &drmCrtc->mode);
+    drmModeFreeCrtc(drmCrtc);
 
     if (previousBo)
     {
-        drmModeRmFB(device, previousFb);
+        drmModeRmFB(drmDeviceFd, previousFb);
         gbm_surface_release_buffer(gbmSurface, previousBo);
     }
 
@@ -238,13 +238,13 @@ bool connectToDisplay(int displayNumber, const vector<string> devices) {
 
     // There are more then one device to check, usually /dev/dri/card0 and /dev/dri/card1
     for (auto filename: devices) {
-        device = open(filename.c_str(), O_RDWR | O_CLOEXEC);
+        drmDeviceFd = open(filename.c_str(), O_RDWR | O_CLOEXEC);
         if (getDisplay(&display, displayNumber)) {
             BOOST_LOG_TRIVIAL(info) << "[pi4renderer] opened device " << filename;
             return true;
         } else 
         {
-            close(device);
+            close(drmDeviceFd);
             BOOST_LOG_TRIVIAL(info) << "[pi4renderer] unable to get EGL display on " << filename;
         }
     }
@@ -257,12 +257,12 @@ bool startOpenGL(int width=0, int height=0)
     // We will use the screen resolution as the desired width and height for the viewport.
     int desiredWidth = width;
     if (desiredWidth == 0) {
-        desiredWidth = mode.hdisplay;
+        desiredWidth = drmMode.hdisplay;
     }
 
     int desiredHeight = height;
     if (desiredHeight == 0) {
-        desiredHeight = mode.vdisplay;
+        desiredHeight = drmMode.vdisplay;
     }
 
     // Other variables we will need further down the code.
@@ -362,7 +362,7 @@ void stop_fullscreen_ogl() {
     eglTerminate(display);
     gbmClean();
 
-    close(device);
+    close(drmDeviceFd);
 }
 
 //
