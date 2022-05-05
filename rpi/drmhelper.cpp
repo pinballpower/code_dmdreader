@@ -6,8 +6,6 @@
 
 DRMHelper drmHelper; // singleton DRMHelper object
 
-drmModeModeInfo drmMode;
-
 const vector<string> devicesToTry = { "/dev/dri/card0","/dev/dri/card1" };
 
 drmModeConnector* DRMHelper::getDRMConnector(drmModeRes* resources, int displayNumber)
