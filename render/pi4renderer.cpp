@@ -53,7 +53,7 @@ static bool getDisplay(EGLDisplay* display, int displayNumber = 0)
     if (!initDRM(displayNumber)) {
         return false;
     }
-    gbmDevice = gbm_create_device(drmDeviceFd);
+    gbmDevice = gbm_create_device(getDRMDeviceFd());
     gbmSurface = gbm_surface_create(gbmDevice, drmMode.hdisplay, drmMode.vdisplay, GBM_FORMAT_XRGB8888, GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
     *display = eglGetDisplay(gbmDevice);
     return true;
@@ -83,12 +83,13 @@ void gbmSwapBuffers(EGLDisplay* display, EGLSurface* surface)
     uint32_t handle = gbm_bo_get_handle(bo).u32;
     uint32_t pitch = gbm_bo_get_stride(bo);
     uint32_t fb;
-    drmModeAddFB(drmDeviceFd, drmMode.hdisplay, drmMode.vdisplay, 24, 32, pitch, handle, &fb);
-    drmModeSetCrtc(drmDeviceFd, drmCrtc->crtc_id, fb, 0, 0, &drmConnectorId, 1, &drmMode);
+    int fd = getDRMDeviceFd();
+    drmModeAddFB(fd, drmMode.hdisplay, drmMode.vdisplay, 24, 32, pitch, handle, &fb);
+    drmModeSetCrtc(fd, drmCrtc->crtc_id, fb, 0, 0, &drmConnectorId, 1, &drmMode);
 
     if (previousBo)
     {
-        drmModeRmFB(drmDeviceFd, previousFb);
+        drmModeRmFB(fd, previousFb);
         gbm_surface_release_buffer(gbmSurface, previousBo);
     }
     previousBo = bo;
@@ -101,13 +102,14 @@ void gbmSwapBuffers() {
 
 static void gbmClean()
 {
+    int fd = getDRMDeviceFd();
     // set the previous crtc
-    drmModeSetCrtc(drmDeviceFd, drmCrtc->crtc_id, drmCrtc->buffer_id, drmCrtc->x, drmCrtc->y, &drmConnectorId, 1, &drmCrtc->mode);
+    drmModeSetCrtc(fd, drmCrtc->crtc_id, drmCrtc->buffer_id, drmCrtc->x, drmCrtc->y, &drmConnectorId, 1, &drmCrtc->mode);
     drmModeFreeCrtc(drmCrtc);
 
     if (previousBo)
     {
-        drmModeRmFB(drmDeviceFd, previousFb);
+        drmModeRmFB(fd, previousFb);
         gbm_surface_release_buffer(gbmSurface, previousBo);
     }
 
@@ -297,7 +299,7 @@ void stop_fullscreen_ogl() {
     eglTerminate(display);
     gbmClean();
 
-    close(drmDeviceFd);
+    closeDRMDevice();
 }
 
 //

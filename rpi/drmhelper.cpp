@@ -4,14 +4,12 @@
 
 #include "drmhelper.h"
 
-
-
-int drmDeviceFd;
+static int drmDeviceFd;
 drmModeModeInfo drmMode;
 drmModeCrtc* drmCrtc;
 uint32_t drmConnectorId;
 
-drmModeConnector* getDRMConnector(int drmDeviceFd, drmModeRes* resources, int displayNumber)
+drmModeConnector* getDRMConnector(drmModeRes* resources, int displayNumber)
 {
 	int currentDisplay = 0;
 
@@ -33,7 +31,7 @@ drmModeConnector* getDRMConnector(int drmDeviceFd, drmModeRes* resources, int di
 	return NULL;
 }
 
-drmModeEncoder* findDRMEncoder(int drmDeviceFd, drmModeConnector* connector)
+drmModeEncoder* findDRMEncoder(drmModeConnector* connector)
 {
 	if (connector->encoder_id)
 	{
@@ -50,7 +48,7 @@ bool initDRM(int displayNumber) {
 		return false;
 	}
 
-	drmModeConnector* connector = getDRMConnector(drmDeviceFd, resources, displayNumber);
+	drmModeConnector* connector = getDRMConnector(resources, displayNumber);
 	if (connector == NULL)
 	{
 		BOOST_LOG_TRIVIAL(debug) << "[pi4renderer] unable to get connector";
@@ -66,7 +64,7 @@ bool initDRM(int displayNumber) {
 	drmMode = connector->modes[0];
 	BOOST_LOG_TRIVIAL(info) << "[pi4renderer] using native resolution: " << drmMode.hdisplay << "x" << drmMode.vdisplay;
 
-	drmModeEncoder* encoder = findDRMEncoder(drmDeviceFd, connector);
+	drmModeEncoder* encoder = findDRMEncoder(connector);
 	if (encoder == NULL)
 	{
 		BOOST_LOG_TRIVIAL(info) << "[pi4renderer] unable to get encoder";
@@ -93,4 +91,9 @@ void closeDRMDevice() {
 	if (drmDeviceFd) {
 		close(drmDeviceFd);
 	}
+}
+
+int getDRMDeviceFd()
+{
+	return drmDeviceFd;
 }
