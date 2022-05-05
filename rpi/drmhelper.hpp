@@ -31,11 +31,14 @@ public:
 
 	void setPreviousCrtc();
 
+protected:
+
+	static int drmDeviceFd;
+
 private: 
 	drmModeConnector* getDRMConnector(drmModeRes* resources, int displayNumber = 0);
 	drmModeEncoder* findDRMEncoder(drmModeConnector* connector);
 
-	int drmDeviceFd=0;
 	drmModeCrtc* drmCrtc;
 	uint32_t drmConnectorId;
 	string deviceFilename;

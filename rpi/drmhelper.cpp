@@ -7,6 +7,8 @@
 DRMHelper drmHelper; // singleton DRMHelper object
 
 const vector<string> devicesToTry = { "/dev/dri/card0","/dev/dri/card1" };
+int DRMHelper::drmDeviceFd = 0; // there is only a single file descriptor, even when using multiple screens
+
 
 drmModeConnector* DRMHelper::getDRMConnector(drmModeRes* resources, int displayNumber)
 {
@@ -164,3 +166,4 @@ void DRMHelper::setPreviousCrtc()
 	drmModeSetCrtc(drmDeviceFd, drmCrtc->crtc_id, drmCrtc->buffer_id, drmCrtc->x, drmCrtc->y, &drmConnectorId, 1, &drmCrtc->mode);
 	drmModeFreeCrtc(drmCrtc);
 }
+
