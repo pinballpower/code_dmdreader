@@ -49,7 +49,7 @@ static const EGLint contextAttribs[] = {
     EGL_CONTEXT_CLIENT_VERSION, 2,
     EGL_NONE };
 
-static drmModeConnector* getConnector(drmModeRes* resources, int displayNumber = 0)
+static drmModeConnector* getDRMConnector(drmModeRes* resources, int displayNumber = 0)
 {
     int currentDisplay = 0;
 
@@ -71,7 +71,7 @@ static drmModeConnector* getConnector(drmModeRes* resources, int displayNumber =
     return NULL;
 }
 
-static drmModeEncoder* findEncoder(drmModeConnector* connector)
+static drmModeEncoder* findDRMEncoder(drmModeConnector* connector)
 {
     if (connector->encoder_id)
     {
@@ -89,7 +89,7 @@ static bool getDisplay(EGLDisplay* display, int displayNumber = 0)
         return false;
     }
 
-    drmModeConnector* connector = getConnector(resources, displayNumber);
+    drmModeConnector* connector = getDRMConnector(resources, displayNumber);
     if (connector == NULL)
     {
         BOOST_LOG_TRIVIAL(debug) << "[pi4renderer] unable to get connector";
@@ -105,7 +105,7 @@ static bool getDisplay(EGLDisplay* display, int displayNumber = 0)
     drmMode = connector->modes[0];
     BOOST_LOG_TRIVIAL(info) << "[pi4renderer] using native resolution: " << drmMode.hdisplay << "x" << drmMode.vdisplay;
 
-    drmModeEncoder* encoder = findEncoder(connector);
+    drmModeEncoder* encoder = findDRMEncoder(connector);
     if (encoder == NULL)
     {
         BOOST_LOG_TRIVIAL(info) << "[pi4renderer] unable to get encoder";
