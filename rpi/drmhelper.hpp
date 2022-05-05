@@ -44,6 +44,7 @@ private:
 	uint32_t drmConnectorId;
 	string deviceFilename;
 	bool initialized = false;
+	ScreenSize currentScreenSize;
 };
 
 extern "C" int cgetDRMDeviceFd();
