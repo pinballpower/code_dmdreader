@@ -66,8 +66,10 @@
       "remoteCopySourcesMethod": "rsync",
       "environments": [
         {
-          "CMAKE_INCLUDE_PATH": "/usr/include:/usr/include/stb:/usr/include/libdrm:/opt/vc/include"
-        }
+          "CMAKE_INCLUDE_PATH": "/usr/include/libdrm:/opt/vc/include",
+          "CMAKE_BUILD_PARALLEL_LEVEL": "2"
+        } 
+
       ]
     }
   ]

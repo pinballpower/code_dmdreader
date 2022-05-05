@@ -22,6 +22,10 @@
 #include "dmdsource/dmdsource.h"
 #include "util/objectfactory.h"
 
+extern "C" {
+#include "rpi/drmdemo.h"
+}
+
 using namespace std;
 
 vector<DMDSource*> sources = vector<DMDSource*>();
@@ -237,6 +241,8 @@ int main(int argc, char** argv)
 	int activeSourceIndex = 0;
 	DMDSource* source = sources[activeSourceIndex];
 
+	//	drmdemo();
+
 	while ((!(sourcesFinished) && (! isFinished))) {
 
 		BOOST_LOG_TRIVIAL(trace) << "[dmdreader] processing frame " << frameno;
@@ -276,6 +282,7 @@ int main(int argc, char** argv)
 		}
 
 		frameno++;
+
 	}
 
 	t2 = std::time(nullptr);

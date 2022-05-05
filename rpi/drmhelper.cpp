@@ -81,7 +81,7 @@ bool initDRM(int displayNumber) {
 	return true;
 }
 
-bool openDRMDevice(string filename) {
+bool openDRMDevice(const string filename) {
 	drmDeviceFd = open(filename.c_str(), O_RDWR | O_CLOEXEC);
 
 	return true;

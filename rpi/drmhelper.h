@@ -12,7 +12,7 @@ extern uint32_t drmConnectorId;
 using namespace std;
 
 bool initDRM(int displayNumber);
-bool openDRMDevice(string filename);
+bool openDRMDevice(const string filename);
 void closeDRMDevice();
 int getDRMDeviceFd();
 

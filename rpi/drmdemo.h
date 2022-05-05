@@ -1,3 +1,3 @@
 #pragma once
 
-static int drmdemo();
+int drmdemo();

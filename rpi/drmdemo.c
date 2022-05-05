@@ -46,6 +46,7 @@
 #include <libavfilter/buffersrc.h>
 
 #include "drmprime_out.h"
+#include "drmprime_out.h"
 
 static enum AVPixelFormat hw_pix_fmt;
 static FILE* output_file = NULL;
@@ -54,6 +55,10 @@ static long frames = 0;
 static AVFilterContext* buffersink_ctx = NULL;
 static AVFilterContext* buffersrc_ctx = NULL;
 static AVFilterGraph* filter_graph = NULL;
+
+static int test(int i) {
+    return i;
+}
 
 static int hw_decoder_init(AVCodecContext* ctx, const enum AVHWDeviceType type)
 {
@@ -94,6 +99,7 @@ static int decode_write(AVCodecContext* const avctx,
     int ret = 0;
     unsigned int i;
 
+    ret = avcodec_send_packet(avctx, packet);
     ret = avcodec_send_packet(avctx, packet);
     if (ret < 0) {
         fprintf(stderr, "Error during decoding\n");
@@ -283,8 +289,7 @@ end:
     return ret;
 }
 
-
-static int drmdemo()
+int drmdemo()
 {
     AVFormatContext* input_ctx = NULL;
     int video_stream, ret;
@@ -322,7 +327,7 @@ static int drmdemo()
     }
 
 loopy:
-    in_file = "x.mp4";
+    in_file = "samples/jellyfish-3-mbps-hd-hevc.mkv";
 
     /* open the input file */
     if (avformat_open_input(&input_ctx, in_file, NULL, NULL) != 0) {
