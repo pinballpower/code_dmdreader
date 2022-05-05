@@ -8,5 +8,6 @@ extern drmModeModeInfo drmMode;
 extern drmModeCrtc* drmCrtc;
 extern uint32_t drmConnectorId;
 
+bool initDRM(int displayNumber);
 drmModeConnector* getDRMConnector(int drmDeviceFd, drmModeRes* resources, int displayNumber = 0);
 drmModeEncoder* findDRMEncoder(int drmDeviceFd, drmModeConnector* connector);

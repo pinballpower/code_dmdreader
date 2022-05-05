@@ -51,42 +51,9 @@ static const EGLint contextAttribs[] = {
 
 static bool getDisplay(EGLDisplay* display, int displayNumber = 0)
 {
-    drmModeRes* resources = drmModeGetResources(drmDeviceFd);
-    if (resources == NULL)
-    {
-        BOOST_LOG_TRIVIAL(info) << "[pi4renderer] unable to get DRM resources";
+    if (!initDRM(displayNumber)) {
         return false;
     }
-
-    drmModeConnector* connector = getDRMConnector(drmDeviceFd, resources, displayNumber);
-    if (connector == NULL)
-    {
-        BOOST_LOG_TRIVIAL(debug) << "[pi4renderer] unable to get connector";
-        drmModeFreeResources(resources);
-        return false;
-    }
-
-    drmConnectorId = connector->connector_id;
-    for (int i = 0; i < connector->count_modes; i++) {
-        drmMode = connector->modes[i];
-        BOOST_LOG_TRIVIAL(info) << "[pi4renderer] found supported resolution: " << drmMode.hdisplay << "x" << drmMode.vdisplay;
-    }
-    drmMode = connector->modes[0];
-    BOOST_LOG_TRIVIAL(info) << "[pi4renderer] using native resolution: " << drmMode.hdisplay << "x" << drmMode.vdisplay;
-
-    drmModeEncoder* encoder = findDRMEncoder(drmDeviceFd, connector);
-    if (encoder == NULL)
-    {
-        BOOST_LOG_TRIVIAL(info) << "[pi4renderer] unable to get encoder";
-        drmModeFreeConnector(connector);
-        drmModeFreeResources(resources);
-        return false;
-    }
-
-    drmCrtc = drmModeGetCrtc(drmDeviceFd, encoder->crtc_id);
-    drmModeFreeEncoder(encoder);
-    drmModeFreeConnector(connector);
-    drmModeFreeResources(resources);
     gbmDevice = gbm_create_device(drmDeviceFd);
     gbmSurface = gbm_surface_create(gbmDevice, drmMode.hdisplay, drmMode.vdisplay, GBM_FORMAT_XRGB8888, GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
     *display = eglGetDisplay(gbmDevice);
