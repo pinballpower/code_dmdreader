@@ -485,11 +485,6 @@ void drmprime_out_delete(drmprime_out_env_t* de)
 
 	av_frame_free(&de->q_next);
 
-	if (de->drm_fd >= 0) {
-		// close(de->drm_fd);
-		de->drm_fd = -1;
-	}
-
 	free(de);
 }
 
@@ -507,15 +502,6 @@ drmprime_out_env_t* drmprime_out_new()
 	de->setup = (struct drm_setup){ 0 };
 	de->q_terminate = 0;
 	de->show_all = 1;
-
-
-	if (!de->drm_fd) {
-		if ((de->drm_fd = drmOpen(drm_module, NULL)) < 0) {
-			rv = AVERROR(errno);
-			fprintf(stderr, "Failed to drmOpen %s: %s\n", drm_module, av_err2str(rv));
-			goto fail_free;
-		}
-	}
 
 	if (find_crtc(de->drm_fd, &de->setup, &de->con_id) != 0) {
 		fprintf(stderr, "failed to find valid mode\n");

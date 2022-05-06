@@ -39,7 +39,7 @@ public:
 	/// <returns></returns>
 	static shared_ptr<DRMHelper> getDRMForDisplay(int displayNumber);
 
-	static int getDRMDeviceFd();
+	static int getDRMDeviceFd(bool autoOpen = true);
 	static bool isOpen();
 	static const string getDRMDeviceFilename();
 
@@ -72,7 +72,3 @@ private:
 
 	static map<int, shared_ptr<DRMHelper>> displayToDRM;
 };
-
-extern "C" int cgetDRMDeviceFd();
-
-// extern DRMHelper drmHelper;
