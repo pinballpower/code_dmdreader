@@ -149,8 +149,11 @@ void DRMHelper::closeDRMDevice() {
 	deviceFilename = "";
 }
 
-int DRMHelper::getDRMDeviceFd()
+int DRMHelper::getDRMDeviceFd(bool autoOpen)
 {
+	if (autoOpen && (drmDeviceFd <= 0)) {
+		openDRMDevice();
+	}
 	return drmDeviceFd;
 }
 
@@ -159,10 +162,7 @@ bool DRMHelper::isOpen()
 	return drmDeviceFd > 0;
 }
 
-extern "C" int cgetDRMDeviceFd()
-{
-	return DRMHelper::getDRMDeviceFd();
-}
+
 
 const ScreenSize DRMHelper::getScreenSize() const
 {
@@ -191,3 +191,24 @@ void DRMHelper::setPreviousCrtc()
 	drmModeFreeCrtc(drmCrtc);
 }
 
+//
+// C helper wrappers
+//
+extern "C" int cgetDRMDeviceFdForDisplay(int displayNumber)
+{
+	// do not initialize a display if only access to the DRM device is needed
+	if (displayNumber < 0) {
+		return DRMHelper::getDRMDeviceFd(true);
+	}
+
+	shared_ptr<DRMHelper> drmHelper = DRMHelper::getDRMForDisplay(displayNumber);
+	if (drmHelper == nullptr) {
+		return 0;
+	}
+	
+	return DRMHelper::getDRMDeviceFd();
+}
+
+extern "C" int cgetDRMDeviceFd() {
+	return cgetDRMDeviceFdForDisplay(-1);
+}
