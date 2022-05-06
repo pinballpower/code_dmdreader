@@ -48,6 +48,8 @@
 #include "drmprime_out.h"
 #include "drmprime_out.h"
 
+#include "drmhelper.h"
+
 static enum AVPixelFormat hw_pix_fmt;
 static FILE* output_file = NULL;
 static long frames = 0;
@@ -327,7 +329,7 @@ int drmdemo()
     }
 
 loopy:
-    in_file = "samples/jellyfish-3-mbps-hd-hevc.mkv";
+    in_file = "/home/matuschd/code_dmdreader/samples/jellyfish-3-mbps-hd-hevc.mkv";
 
     /* open the input file */
     if (avformat_open_input(&input_ctx, in_file, NULL, NULL) != 0) {
