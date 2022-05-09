@@ -21,12 +21,9 @@
 
 #include "drmprime_out.h"
 
-extern "C" {
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include <thread>
 
-#include <pthread.h>
+extern "C" {
 #include <semaphore.h>
 
 #include <xf86drm.h>
@@ -40,10 +37,9 @@ extern "C" {
 #include "drmhelper.h" 
 }
 
-
 #include <boost/log/trivial.hpp>
 
-
+using namespace std;
 
 #define DRM_MODULE "vc4"
 
@@ -83,7 +79,7 @@ typedef struct drmprime_out_env_s
 	unsigned int ano;
 	drm_aux_t aux[AUX_SIZE];
 
-	pthread_t q_thread;
+	thread q_thread;
 	sem_t q_sem_in;
 	sem_t q_sem_out;
 	int q_terminate;
@@ -261,9 +257,9 @@ static int do_sem_wait(sem_t* const sem, const int nowait)
 	return 0;
 }
 
-static void* display_thread(void* v)
+static void display_thread(drmprime_out_env_t* v)
 {
-	drmprime_out_env_t* const de = (drmprime_out_env_t*)v;
+	drmprime_out_env_t* const de = v;
 	int i;
 
 	sem_post(&de->q_sem_out);
@@ -287,8 +283,6 @@ static void* display_thread(void* v)
 		da_uninit(de, de->aux + i);
 
 	av_frame_free(&de->q_next);
-
-	return NULL;
 }
 
 static int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, compose_t compose)
@@ -456,7 +450,7 @@ void drmprime_out_delete(drmprime_out_env_t* de)
 {
 	de->q_terminate = 1;
 	sem_post(&de->q_sem_in);
-	pthread_join(de->q_thread, NULL);
+	de->q_thread.join();
 	sem_destroy(&de->q_sem_in);
 	sem_destroy(&de->q_sem_out);
 
@@ -489,10 +483,8 @@ drmprime_out_env_t* drmprime_out_new(compose_t compose)
 
 	sem_init(&de->q_sem_in, 0, 0);
 	sem_init(&de->q_sem_out, 0, 0);
-	if (pthread_create(&de->q_thread, NULL, display_thread, (void*)de)) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] failed to create display thread";
-		goto fail_close;
-	}
+
+	de->q_thread = thread(display_thread, de);
 
 	return de;
 
