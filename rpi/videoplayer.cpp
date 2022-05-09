@@ -77,7 +77,7 @@ static enum AVPixelFormat get_hw_format(AVCodecContext* ctx,
 }
 
 static int decode_write(AVCodecContext* const avctx,
-	drmprime_out_env_t* const dpo,
+	DRMPrimeOut* const dpo,
 	AVPacket* packet)
 {
 	AVFrame* frame = NULL, * sw_frame = NULL;
@@ -110,8 +110,7 @@ static int decode_write(AVCodecContext* const avctx,
 			goto fail;
 		}
 
-		drmprime_out_display(dpo, frame);
-
+		dpo->displayFrame(frame);
 
 	fail:
 		av_frame_free(&frame);
@@ -257,7 +256,7 @@ bool VideoPlayer::openScreen()
 {
 	if (!(screenOpened)) {
 		compose_t compose{ x,y,width,height };
-		dpo = drmprime_out_new(compose);
+		dpo = new DRMPrimeOut(compose);
 		if (dpo == NULL) {
 			BOOST_LOG_TRIVIAL(error) << "[videoplayer] failed to open drmprime output";
 			return false;
@@ -275,8 +274,7 @@ bool VideoPlayer::openScreen()
 
 void VideoPlayer::closeScreen() {
 	screenOpened = false;
-	drmprime_out_delete(dpo);
-	dpo = nullptr;
+	delete dpo;
 }
 
 void VideoPlayer::play(string filename, int loopCount)

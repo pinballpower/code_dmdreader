@@ -42,5 +42,5 @@ private:
 	thread playerThread;
 
 	// screen
-	drmprime_out_env_t* dpo = nullptr;
+	DRMPrimeOut* dpo = nullptr;
 };

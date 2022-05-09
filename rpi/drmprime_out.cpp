@@ -21,76 +21,13 @@
 
 #include "drmprime_out.h"
 
-#include <thread>
-#include <boost/interprocess/sync/interprocess_semaphore.hpp>
-
-
-extern "C" {
-#include <xf86drm.h>
-#include <xf86drmMode.h>
-
-#include "libavutil/frame.h"
-#include "libavutil/hwcontext.h"
-#include "libavutil/hwcontext_drm.h"
-#include "libavutil/pixdesc.h"
-
-#include "drmhelper.h" 
-}
-
 #include <boost/log/trivial.hpp>
-
-using namespace std;
-using namespace boost::interprocess;
 
 #define DRM_MODULE "vc4"
 
 #define ERRSTR strerror(errno)
 
-struct drm_setup
-{
-	int conId;
-	uint32_t crtcId;
-	int crtcIdx;
-	uint32_t planeId;
-	unsigned int out_fourcc;
-	compose_t compose;
-};
-
-typedef struct drm_aux_s
-{
-	unsigned int fb_handle;
-	uint32_t bo_handles[AV_DRM_MAX_PLANES];
-
-	AVFrame* frame;
-} drm_aux_t;
-
-// Aux size should only need to be 2, but on a few streams (Hobbit) under FKMS
-// we get initial flicker probably due to dodgy drm timing
-#define AUX_SIZE 3
-typedef struct drmprime_out_env_s
-{
-	AVClass* avClass;
-
-	int drm_fd;
-	uint32_t con_id;
-	struct drm_setup setup;
-	enum AVPixelFormat avfmt;
-	int show_all;
-
-	unsigned int ano;
-	drm_aux_t aux[AUX_SIZE];
-
-	thread renderThread;
-	interprocess_semaphore semaphoreNextFrameReady = interprocess_semaphore(0);
-	interprocess_semaphore semaphoreRendererReady = interprocess_semaphore(0);
-	bool terminate = false;
-	AVFrame* q_next;
-
-} drmprime_out_env_t;
-
-
-static int find_plane(const int drmfd, const int crtcidx, const uint32_t format,
-	uint32_t* const pplane_id)
+static int find_plane(const int drmfd, const int crtcidx, const uint32_t format, uint32_t* const pplane_id)
 {
 	drmModePlaneResPtr planes;
 	drmModePlanePtr plane;
@@ -136,19 +73,19 @@ static int find_plane(const int drmfd, const int crtcidx, const uint32_t format,
 	return ret;
 }
 
-static void da_uninit(drmprime_out_env_t* const de, drm_aux_t* da)
+void DRMPrimeOut::da_uninit(drm_aux_t* da)
 {
 	unsigned int i;
 
 	if (da->fb_handle != 0) {
-		drmModeRmFB(de->drm_fd, da->fb_handle);
+		drmModeRmFB(drm_fd, da->fb_handle);
 		da->fb_handle = 0;
 	}
 
 	for (i = 0; i != AV_DRM_MAX_PLANES; ++i) {
 		if (da->bo_handles[i]) {
 			struct drm_gem_close gem_close = { .handle = da->bo_handles[i] };
-			drmIoctl(de->drm_fd, DRM_IOCTL_GEM_CLOSE, &gem_close);
+			drmIoctl(drm_fd, DRM_IOCTL_GEM_CLOSE, &gem_close);
 			da->bo_handles[i] = 0;
 		}
 	}
@@ -156,20 +93,20 @@ static void da_uninit(drmprime_out_env_t* const de, drm_aux_t* da)
 	av_frame_free(&da->frame);
 }
 
-static int do_display(drmprime_out_env_t* const de, AVFrame* frame)
+int DRMPrimeOut::do_display(AVFrame* frame)
 {
 	const AVDRMFrameDescriptor* desc = (AVDRMFrameDescriptor*)frame->data[0];
-	drm_aux_t* da = de->aux + de->ano;
+	drm_aux_t* da = aux + ano;
 	const uint32_t format = desc->layers[0].format;
 	int ret = 0;
 
-	if (de->setup.out_fourcc != format) {
-		if (find_plane(de->drm_fd, de->setup.crtcIdx, format, &de->setup.planeId)) {
+	if (setup.out_fourcc != format) {
+		if (find_plane(drm_fd, setup.crtcIdx, format, &setup.planeId)) {
 			av_frame_free(&frame);
 			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] No plane for format " << format;
 			return -1;
 		}
-		de->setup.out_fourcc = format;
+		setup.out_fourcc = format;
 	}
 
 	{
@@ -180,7 +117,7 @@ static int do_display(drmprime_out_env_t* const de, AVFrame* frame)
 			}
 		};
 
-		while (drmWaitVBlank(de->drm_fd, &vbl)) {
+		while (drmWaitVBlank(drm_fd, &vbl)) {
 			if (errno != EINTR) {
 				// This always fails - don't know why
 				//                fprintf(stderr, "drmWaitVBlank failed: %s\n", ERRSTR);
@@ -189,7 +126,7 @@ static int do_display(drmprime_out_env_t* const de, AVFrame* frame)
 		}
 	}
 
-	da_uninit(de, da);
+	da_uninit(da);
 
 	{
 		uint32_t pitches[4] = { 0 };
@@ -202,7 +139,7 @@ static int do_display(drmprime_out_env_t* const de, AVFrame* frame)
 
 		memset(da->bo_handles, 0, sizeof(da->bo_handles));
 		for (i = 0; i < desc->nb_objects; ++i) {
-			if (drmPrimeFDToHandle(de->drm_fd, desc->objects[i].fd, da->bo_handles + i) != 0) {
+			if (drmPrimeFDToHandle(drm_fd, desc->objects[i].fd, da->bo_handles + i) != 0) {
 				BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmPrimeFDToHandle failed:", ERRSTR;
 				return -1;
 			}
@@ -221,7 +158,7 @@ static int do_display(drmprime_out_env_t* const de, AVFrame* frame)
 			}
 		}
 
-		if (drmModeAddFB2WithModifiers(de->drm_fd,
+		if (drmModeAddFB2WithModifiers(drm_fd,
 			av_frame_cropped_width(frame),
 			av_frame_cropped_height(frame),
 			desc->layers[0].format, bo_handles,
@@ -232,11 +169,10 @@ static int do_display(drmprime_out_env_t* const de, AVFrame* frame)
 		}
 	}
 
-	ret = drmModeSetPlane(de->drm_fd, de->setup.planeId, de->setup.crtcId,
+	ret = drmModeSetPlane(drm_fd, setup.planeId, setup.crtcId,
 		da->fb_handle, 0,
-		de->setup.compose.x, de->setup.compose.y,
-		de->setup.compose.width,
-		de->setup.compose.height,
+		setup.compose.x, setup.compose.y,
+		setup.compose.width, setup.compose.height,
 		0, 0,
 		av_frame_cropped_width(frame) << 16,
 		av_frame_cropped_height(frame) << 16);
@@ -245,39 +181,12 @@ static int do_display(drmprime_out_env_t* const de, AVFrame* frame)
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeSetPlane failed:" << ERRSTR;
 	}
 
-	de->ano = de->ano + 1 >= AUX_SIZE ? 0 : de->ano + 1;
+	ano = ano + 1 >= AUX_SIZE ? 0 : ano + 1;
 
 	return ret;
 }
 
-static void display_thread(drmprime_out_env_t* v)
-{
-	drmprime_out_env_t* const de = v;
-	int i;
 
-	de->semaphoreRendererReady.post();
-
-	for (;;) {
-		AVFrame* frame;
-
-		de->semaphoreNextFrameReady.wait();
-
-		if (de->terminate)
-			break;
-
-		frame = de->q_next;
-		de->q_next = NULL;
-
-		de->semaphoreRendererReady.post();
-
-		do_display(de, frame);
-	}
-
-	for (i = 0; i != AUX_SIZE; ++i)
-		da_uninit(de, de->aux + i);
-
-	av_frame_free(&de->q_next);
-}
 
 static int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, compose_t compose)
 {
@@ -400,7 +309,7 @@ fail_res:
 	return ret;
 }
 
-int drmprime_out_display(drmprime_out_env_t* de, struct AVFrame* src_frame)
+int DRMPrimeOut::displayFrame(struct AVFrame* src_frame)
 {
 	AVFrame* frame;
 	int ret;
@@ -430,16 +339,16 @@ int drmprime_out_display(drmprime_out_env_t* de, struct AVFrame* src_frame)
 
 	// wait until the last frame has been processed?
 	bool readyForNextFrame = true;
-	if (de->show_all) {
-		de->semaphoreRendererReady.wait();
+	if (show_all) {
+		semaphoreRendererReady.wait();
 	}
 	else {
-		readyForNextFrame = de->semaphoreRendererReady.try_wait();
+		readyForNextFrame = semaphoreRendererReady.try_wait();
 	}
 
 	if (readyForNextFrame) {
-		de->q_next = frame;
-		de->semaphoreNextFrameReady.post();
+		q_next = frame;
+		semaphoreNextFrameReady.post();
 	}
 	else {
 		// drop frame
@@ -449,48 +358,59 @@ int drmprime_out_display(drmprime_out_env_t* de, struct AVFrame* src_frame)
 	return 0;
 }
 
-void drmprime_out_delete(drmprime_out_env_t* de)
-{
-	de->terminate = true;
-
-	de->semaphoreNextFrameReady.post();
-	de->renderThread.join();
-
-	av_frame_free(&de->q_next);
-
-	delete de;
-}
-
-drmprime_out_env_t* drmprime_out_new(compose_t compose)
+DRMPrimeOut::DRMPrimeOut(compose_t compose)
 {
 	int rv;
-	drmprime_out_env_t* const de = new drmprime_out_env_t;
-	if (de == NULL)
-		return NULL;
 
 	const char* drm_module = DRM_MODULE;
 
-	de->drm_fd = cgetDRMDeviceFd();
-	de->con_id = 0;
-	de->setup = (struct drm_setup){ 0 };
-	de->terminate = false;
-	de->show_all = 1;
+	drm_fd = cgetDRMDeviceFd();
+	con_id = 0;
+	setup = (struct drm_setup){ 0 };
+	terminate = false;
+	show_all = 1;
 
-	if (find_crtc(de->drm_fd, &de->setup, &de->con_id, compose) != 0) {
+	if (find_crtc(drm_fd, &setup, &con_id, compose) != 0) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] failed to find valid mode";
-		rv = AVERROR(EINVAL);
-		goto fail_close;
 	}
 
-	de->renderThread = thread(display_thread, de);
+	renderThread = thread(&DRMPrimeOut::renderLoop, this);
+}
 
-	return de;
+DRMPrimeOut::~DRMPrimeOut() {
+	terminate = true;
 
-fail_close:
-	close(de->drm_fd);
-	de->drm_fd = -1;
-fail_free:
-	delete de;
-	fprintf(stderr, ">>> %s: FAIL\n", __func__);
-	return NULL;
+	semaphoreNextFrameReady.post();
+	renderThread.join();
+
+	av_frame_free(&q_next);
+}
+
+
+void DRMPrimeOut::renderLoop()
+{
+	int i;
+
+	semaphoreRendererReady.post();
+
+	for (;;) {
+		AVFrame* frame;
+
+		semaphoreNextFrameReady.wait();
+
+		if (terminate)
+			break;
+
+		frame = q_next;
+		q_next = NULL;
+
+		semaphoreRendererReady.post();
+
+		do_display(frame);
+	}
+
+	for (i = 0; i != AUX_SIZE; ++i)
+		da_uninit(aux + i);
+
+	av_frame_free(&q_next);
 }
