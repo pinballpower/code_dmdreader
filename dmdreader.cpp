@@ -26,6 +26,8 @@ extern "C" {
 #include "rpi/drmdemo.h"
 }
 
+#include "rpi/videoplayer.h"
+
 using namespace std;
 
 vector<DMDSource*> sources = vector<DMDSource*>();
@@ -224,6 +226,8 @@ int main(int argc, char** argv)
 	}
 	std::time_t t1 = std::time(nullptr);
 
+	playVideo("/home/matuschd/code_dmdreader/samples/jellyfish-3-mbps-hd-hevc.mkv");
+
 	if (!read_config(config_file)) {
 		BOOST_LOG_TRIVIAL(error) << "[dmdreader]couldn't configure DMDReader, aborting";
 		exit(1);
@@ -241,7 +245,6 @@ int main(int argc, char** argv)
 	int activeSourceIndex = 0;
 	DMDSource* source = sources[activeSourceIndex];
 
-	//	drmdemo();
 
 	while ((!(sourcesFinished) && (! isFinished))) {
 

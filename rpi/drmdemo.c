@@ -46,7 +46,6 @@
 #include <libavfilter/buffersrc.h>
 
 #include "drmprime_out.h"
-#include "drmprime_out.h"
 
 #include "drmhelper.h"
 
@@ -101,7 +100,6 @@ static int decode_write(AVCodecContext* const avctx,
     int ret = 0;
     unsigned int i;
 
-    ret = avcodec_send_packet(avctx, packet);
     ret = avcodec_send_packet(avctx, packet);
     if (ret < 0) {
         fprintf(stderr, "Error during decoding\n");
@@ -307,8 +305,8 @@ int drmdemo()
     const char* hwdev = "drm";
     int i;
     drmprime_out_env_t* dpo;
-    long loop_count = 20;
-    long frame_count = 200;
+    long loop_count = 2; // just for debugging
+    long frame_count = 200;// just for debugging
     const char* out_name = NULL;
     bool wants_deinterlace = false;
 
