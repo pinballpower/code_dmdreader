@@ -128,7 +128,7 @@ static int decode_write(AVCodecContext* const avctx,
 }
 
 
-bool VideoPlayer::playLoop(int loopCount)
+bool VideoPlayer::playLoop(string filename, int loopCount)
 {
 	AVFormatContext* input_ctx = NULL;
 	int video_stream, ret;
@@ -258,20 +258,19 @@ loopy:
 	return true;
 }
 
-VideoPlayer::VideoPlayer(const string filename)
+VideoPlayer::VideoPlayer()
 {
-	this->filename = filename;
 	playing = false;
 }
 
-void VideoPlayer::play(int loopCount)
+void VideoPlayer::play(string filename, int loopCount)
 {
-	playLoop(loopCount);
+	playLoop(filename, loopCount);
 }
 
-void VideoPlayer::playBackground(int loopCount)
+void VideoPlayer::playBackground(string filename, int loopCount)
 {
-	playerThread = thread(&VideoPlayer::playLoop, this, loopCount);
+	playerThread = thread(&VideoPlayer::playLoop, this, filename, loopCount);
 }
 
 bool VideoPlayer::isPlaying()

@@ -10,10 +10,10 @@ class VideoPlayer {
 
 public: 
 
-	VideoPlayer(const string filename);
+	VideoPlayer();
 
-	void play(int loopCount=0);
-	void playBackground(int loopCount=0);
+	void play(string filename, int loopCount=0);
+	void playBackground(string filename, int loopCount=0);
 	bool isPlaying();
 	void stop();
 
@@ -27,10 +27,9 @@ private:
 	int width = -1;
 	int height = -1;
 
-	string filename;
 	bool playing;
 
-	bool playLoop(int loopCount=0);
+	bool playLoop(string filename, int loopCount=0);
 
 	thread playerThread;
 };

@@ -239,9 +239,9 @@ int main(int argc, char** argv)
 	int activeSourceIndex = 0;
 	DMDSource* source = sources[activeSourceIndex];
 
-	VideoPlayer pl = VideoPlayer("/home/matuschd/code_dmdreader/samples/jellyfish-3-mbps-hd-hevc.mkv");
+	VideoPlayer pl = VideoPlayer();
 	pl.setScaling(100, 100, 400, 300);
-	pl.playBackground(-1);
+	pl.playBackground("/home/matuschd/code_dmdreader/samples/jellyfish-3-mbps-hd-hevc.mkv" ,-1);
 
 	while ((!(sourcesFinished) && (! isFinished))) {
 
