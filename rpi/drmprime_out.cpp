@@ -40,6 +40,11 @@ extern "C" {
 #include "drmhelper.h" 
 }
 
+
+#include <boost/log/trivial.hpp>
+
+
+
 #define DRM_MODULE "vc4"
 
 #define ERRSTR strerror(errno)
@@ -98,14 +103,14 @@ static int find_plane(const int drmfd, const int crtcidx, const uint32_t format,
 
 	planes = drmModeGetPlaneResources(drmfd);
 	if (!planes) {
-		fprintf(stderr, "drmModeGetPlaneResources failed: %s\n", ERRSTR);
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetPlaneResources failed: " << ERRSTR;
 		return -1;
 	}
 
 	for (i = 0; i < planes->count_planes; ++i) {
 		plane = drmModeGetPlane(drmfd, planes->planes[i]);
 		if (!planes) {
-			fprintf(stderr, "drmModeGetPlane failed: %s\n", ERRSTR);
+			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetPlane failed: " << ERRSTR;
 			break;
 		}
 
@@ -164,7 +169,7 @@ static int do_display(drmprime_out_env_t* const de, AVFrame* frame)
 	if (de->setup.out_fourcc != format) {
 		if (find_plane(de->drm_fd, de->setup.crtcIdx, format, &de->setup.planeId)) {
 			av_frame_free(&frame);
-			fprintf(stderr, "No plane for format: %#x\n", format);
+			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] No plane for format " << format;
 			return -1;
 		}
 		de->setup.out_fourcc = format;
@@ -201,7 +206,7 @@ static int do_display(drmprime_out_env_t* const de, AVFrame* frame)
 		memset(da->bo_handles, 0, sizeof(da->bo_handles));
 		for (i = 0; i < desc->nb_objects; ++i) {
 			if (drmPrimeFDToHandle(de->drm_fd, desc->objects[i].fd, da->bo_handles + i) != 0) {
-				fprintf(stderr, "drmPrimeFDToHandle[%d](%d) failed: %s\n", i, desc->objects[i].fd, ERRSTR);
+				BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmPrimeFDToHandle failed:", ERRSTR;
 				return -1;
 			}
 		}
@@ -225,7 +230,7 @@ static int do_display(drmprime_out_env_t* const de, AVFrame* frame)
 			desc->layers[0].format, bo_handles,
 			pitches, offsets, modifiers,
 			&da->fb_handle, DRM_MODE_FB_MODIFIERS /** 0 if no mods */) != 0) {
-			fprintf(stderr, "drmModeAddFB2WithModifiers failed: %s\n", ERRSTR);
+			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeAddFB2WithModifiers failed: ", ERRSTR;
 			return -1;
 		}
 	}
@@ -240,7 +245,7 @@ static int do_display(drmprime_out_env_t* const de, AVFrame* frame)
 		av_frame_cropped_height(frame) << 16);
 
 	if (ret != 0) {
-		fprintf(stderr, "drmModeSetPlane failed: %s\n", ERRSTR);
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeSetPlane failed:" << ERRSTR;
 	}
 
 	de->ano = de->ano + 1 >= AUX_SIZE ? 0 : de->ano + 1;
@@ -294,7 +299,7 @@ static int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, com
 	drmModeConnector* c;
 
 	if (!res) {
-		printf("drmModeGetResources failed: %s\n", ERRSTR);
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetResources failed: " << ERRSTR;
 		return -1;
 	}
 
@@ -304,8 +309,7 @@ static int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, com
 	}
 
 	if (!s->conId) {
-		fprintf(stderr,
-			"No connector ID specified.  Choosing default from list:\n");
+		BOOST_LOG_TRIVIAL(info) << "[drmprime_out] no connector ID specified, choosing default";
 
 		for (i = 0; i < res->count_connectors; i++) {
 			drmModeConnector* con =
@@ -325,19 +329,14 @@ static int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, com
 				s->crtcId = crtc->crtc_id;
 			}
 
-			fprintf(stderr, "Connector %d (crtc %d): type %d, %dx%d%s\n",
-				con->connector_id,
-				crtc ? crtc->crtc_id : 0,
-				con->connector_type,
-				crtc ? crtc->width : 0,
-				crtc ? crtc->height : 0,
-				(s->conId == (int)con->connector_id ?
-					" (chosen)" : ""));
+			if (crtc) {
+				BOOST_LOG_TRIVIAL(info) << "[drmprime_out] connector " << con->connector_id << "(crtc " << crtc->crtc_id <<
+					"): type " << con->connector_type << ": " << crtc->width << "x" << crtc->height;
+			}
 		}
 
 		if (!s->conId) {
-			fprintf(stderr,
-				"No suitable enabled connector found.\n");
+			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] no suitable enabled connector found";
 			return -1;;
 		}
 	}
@@ -352,23 +351,23 @@ static int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, com
 	}
 
 	if (s->crtcIdx == -1) {
-		fprintf(stderr, "drm: CRTC %u not found\n", s->crtcId);
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drm: CRTC "<< s->crtcId << " not found";
 		goto fail_res;
 	}
 
 	if (res->count_connectors <= 0) {
-		fprintf(stderr, "drm: no connectors\n");
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drm: no connectors";
 		goto fail_res;
 	}
 
 	c = drmModeGetConnector(drmfd, s->conId);
 	if (!c) {
-		fprintf(stderr, "drmModeGetConnector failed: %s\n", ERRSTR);
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetConnector failed: " << ERRSTR;
 		goto fail_res;
 	}
 
 	if (!c->count_modes) {
-		fprintf(stderr, "connector supports no mode\n");
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] connector supports no mode";
 		goto fail_conn;
 	}
 
