@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2022 Pinball Power
  * Copyright (c) 2020 John Cox for Raspberry Pi Trading
  *
  * This file is part of FFmpeg.
@@ -19,9 +20,6 @@
  */
 
 
- // *** This module is a work in progress and its utility is strictly
- //     limited to testing.
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -38,9 +36,6 @@
 #include "libavutil/pixdesc.h"
 
 #include "drmhelper.h"
-
-
-#define TRACE_ALL 0
 
 #define DRM_MODULE "vc4"
 
@@ -166,10 +161,6 @@ static int do_display(drmprime_out_env_t* const de, AVFrame* frame)
 	const uint32_t format = desc->layers[0].format;
 	int ret = 0;
 
-#if TRACE_ALL
-	fprintf(stderr, "<<< %s: fd=%d\n", __func__, desc->objects[0].fd);
-#endif
-
 	if (de->setup.out_fourcc != format) {
 		if (find_plane(de->drm_fd, de->setup.crtcIdx, format, &de->setup.planeId)) {
 			av_frame_free(&frame);
@@ -228,31 +219,6 @@ static int do_display(drmprime_out_env_t* const de, AVFrame* frame)
 			}
 		}
 
-#if 1 && TRACE_ALL
-		fprintf(stderr, "%dx%d, fmt: %x, boh=%d,%d,%d,%d, pitch=%d,%d,%d,%d,"
-			" offset=%d,%d,%d,%d, mod=%llx,%llx,%llx,%llx\n",
-			av_frame_cropped_width(frame),
-			av_frame_cropped_height(frame),
-			desc->layers[0].format,
-			bo_handles[0],
-			bo_handles[1],
-			bo_handles[2],
-			bo_handles[3],
-			pitches[0],
-			pitches[1],
-			pitches[2],
-			pitches[3],
-			offsets[0],
-			offsets[1],
-			offsets[2],
-			offsets[3],
-			(long long)modifiers[0],
-			(long long)modifiers[1],
-			(long long)modifiers[2],
-			(long long)modifiers[3]
-		);
-#endif
-
 		if (drmModeAddFB2WithModifiers(de->drm_fd,
 			av_frame_cropped_width(frame),
 			av_frame_cropped_height(frame),
@@ -295,10 +261,6 @@ static void* display_thread(void* v)
 	drmprime_out_env_t* const de = v;
 	int i;
 
-#if TRACE_ALL
-	fprintf(stderr, "<<< %s\n", __func__);
-#endif
-
 	sem_post(&de->q_sem_out);
 
 	for (;;) {
@@ -315,10 +277,6 @@ static void* display_thread(void* v)
 
 		do_display(de, frame);
 	}
-
-#if TRACE_ALL
-	fprintf(stderr, ">>> %s\n", __func__);
-#endif
 
 	for (i = 0; i != AUX_SIZE; ++i)
 		da_uninit(de, de->aux + i);
