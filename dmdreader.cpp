@@ -241,6 +241,7 @@ int main(int argc, char** argv)
 
 	VideoPlayer pl = VideoPlayer();
 	pl.setScaling(100, 100, 400, 300);
+	pl.openScreen();
 	pl.playBackground("/home/matuschd/code_dmdreader/samples/jellyfish-3-mbps-hd-hevc.mkv" ,-1);
 
 	while ((!(sourcesFinished) && (! isFinished))) {
