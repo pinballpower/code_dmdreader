@@ -12,8 +12,8 @@ public:
 
 	VideoPlayer(const string filename);
 
-	void play();
-	void playBackground();
+	void play(int loopCount=0);
+	void playBackground(int loopCount=0);
 	bool isPlaying();
 
 private:

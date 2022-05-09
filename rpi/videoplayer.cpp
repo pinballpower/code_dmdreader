@@ -263,14 +263,14 @@ VideoPlayer::VideoPlayer(const string filename)
 	playing = false;
 }
 
-void VideoPlayer::play()
+void VideoPlayer::play(int loopCount)
 {
-	playLoop();
+	playLoop(loopCount);
 }
 
-void VideoPlayer::playBackground()
+void VideoPlayer::playBackground(int loopCount)
 {
-	playerThread = thread(&VideoPlayer::playLoop, this, 0);
+	playerThread = thread(&VideoPlayer::playLoop, this, loopCount);
 }
 
 bool VideoPlayer::isPlaying()
