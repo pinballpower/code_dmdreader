@@ -80,10 +80,10 @@ typedef struct drmprime_out_env_s
 	unsigned int ano;
 	drm_aux_t aux[AUX_SIZE];
 
-	thread q_thread;
-	interprocess_semaphore q_sem_in = interprocess_semaphore(0);
-	interprocess_semaphore q_sem_out = interprocess_semaphore(0);
-	int q_terminate;
+	thread renderThread;
+	interprocess_semaphore semaphoreNextFrameReady = interprocess_semaphore(0);
+	interprocess_semaphore semaphoreRendererReady = interprocess_semaphore(0);
+	bool terminate = false;
 	AVFrame* q_next;
 
 } drmprime_out_env_t;
@@ -255,20 +255,20 @@ static void display_thread(drmprime_out_env_t* v)
 	drmprime_out_env_t* const de = v;
 	int i;
 
-	de->q_sem_out.post();
+	de->semaphoreRendererReady.post();
 
 	for (;;) {
 		AVFrame* frame;
 
-		de->q_sem_in.wait();
+		de->semaphoreNextFrameReady.wait();
 
-		if (de->q_terminate)
+		if (de->terminate)
 			break;
 
 		frame = de->q_next;
 		de->q_next = NULL;
 
-		de->q_sem_out.post();
+		de->semaphoreRendererReady.post();
 
 		do_display(de, frame);
 	}
@@ -431,15 +431,15 @@ int drmprime_out_display(drmprime_out_env_t* de, struct AVFrame* src_frame)
 	// wait until the last frame has been processed?
 	bool readyForNextFrame = true;
 	if (de->show_all) {
-		de->q_sem_out.wait();
+		de->semaphoreRendererReady.wait();
 	}
 	else {
-		readyForNextFrame = de->q_sem_out.try_wait();
+		readyForNextFrame = de->semaphoreRendererReady.try_wait();
 	}
 
 	if (readyForNextFrame) {
 		de->q_next = frame;
-		de->q_sem_in.post();
+		de->semaphoreNextFrameReady.post();
 	}
 	else {
 		// drop frame
@@ -451,10 +451,10 @@ int drmprime_out_display(drmprime_out_env_t* de, struct AVFrame* src_frame)
 
 void drmprime_out_delete(drmprime_out_env_t* de)
 {
-	de->q_terminate = 1;
+	de->terminate = true;
 
-	de->q_sem_in.post();
-	de->q_thread.join();
+	de->semaphoreNextFrameReady.post();
+	de->renderThread.join();
 
 	av_frame_free(&de->q_next);
 
@@ -473,7 +473,7 @@ drmprime_out_env_t* drmprime_out_new(compose_t compose)
 	de->drm_fd = cgetDRMDeviceFd();
 	de->con_id = 0;
 	de->setup = (struct drm_setup){ 0 };
-	de->q_terminate = 0;
+	de->terminate = false;
 	de->show_all = 1;
 
 	if (find_crtc(de->drm_fd, &de->setup, &de->con_id, compose) != 0) {
@@ -482,7 +482,7 @@ drmprime_out_env_t* drmprime_out_new(compose_t compose)
 		goto fail_close;
 	}
 
-	de->q_thread = thread(display_thread, de);
+	de->renderThread = thread(display_thread, de);
 
 	return de;
 
