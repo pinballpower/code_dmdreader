@@ -22,10 +22,10 @@
 #include "drmprime_out.h"
 
 #include <thread>
+#include <boost/interprocess/sync/interprocess_semaphore.hpp>
+
 
 extern "C" {
-#include <semaphore.h>
-
 #include <xf86drm.h>
 #include <xf86drmMode.h>
 
@@ -40,6 +40,7 @@ extern "C" {
 #include <boost/log/trivial.hpp>
 
 using namespace std;
+using namespace boost::interprocess;
 
 #define DRM_MODULE "vc4"
 
@@ -80,8 +81,8 @@ typedef struct drmprime_out_env_s
 	drm_aux_t aux[AUX_SIZE];
 
 	thread q_thread;
-	sem_t q_sem_in;
-	sem_t q_sem_out;
+	interprocess_semaphore q_sem_in = interprocess_semaphore(0);
+	interprocess_semaphore q_sem_out = interprocess_semaphore(0);
 	int q_terminate;
 	AVFrame* q_next;
 
@@ -249,32 +250,25 @@ static int do_display(drmprime_out_env_t* const de, AVFrame* frame)
 	return ret;
 }
 
-static int do_sem_wait(sem_t* const sem, const int nowait)
-{
-	while (nowait ? sem_trywait(sem) : sem_wait(sem)) {
-		if (errno != EINTR) return -errno;
-	}
-	return 0;
-}
-
 static void display_thread(drmprime_out_env_t* v)
 {
 	drmprime_out_env_t* const de = v;
 	int i;
 
-	sem_post(&de->q_sem_out);
+	de->q_sem_out.post();
 
 	for (;;) {
 		AVFrame* frame;
 
-		do_sem_wait(&de->q_sem_in, 0);
+		de->q_sem_in.wait();
 
 		if (de->q_terminate)
 			break;
 
 		frame = de->q_next;
 		de->q_next = NULL;
-		sem_post(&de->q_sem_out);
+
+		de->q_sem_out.post();
 
 		do_display(de, frame);
 	}
@@ -434,13 +428,22 @@ int drmprime_out_display(drmprime_out_env_t* de, struct AVFrame* src_frame)
 		return AVERROR(EINVAL);
 	}
 
-	ret = do_sem_wait(&de->q_sem_out, !de->show_all);
-	if (ret) {
-		av_frame_free(&frame);
+	// wait until the last frame has been processed?
+	bool readyForNextFrame = true;
+	if (de->show_all) {
+		de->q_sem_out.wait();
 	}
 	else {
+		readyForNextFrame = de->q_sem_out.try_wait();
+	}
+
+	if (readyForNextFrame) {
 		de->q_next = frame;
-		sem_post(&de->q_sem_in);
+		de->q_sem_in.post();
+	}
+	else {
+		// drop frame
+		av_frame_free(&frame);
 	}
 
 	return 0;
@@ -449,10 +452,9 @@ int drmprime_out_display(drmprime_out_env_t* de, struct AVFrame* src_frame)
 void drmprime_out_delete(drmprime_out_env_t* de)
 {
 	de->q_terminate = 1;
-	sem_post(&de->q_sem_in);
+
+	de->q_sem_in.post();
 	de->q_thread.join();
-	sem_destroy(&de->q_sem_in);
-	sem_destroy(&de->q_sem_out);
 
 	av_frame_free(&de->q_next);
 
@@ -479,10 +481,6 @@ drmprime_out_env_t* drmprime_out_new(compose_t compose)
 		rv = AVERROR(EINVAL);
 		goto fail_close;
 	}
-
-
-	sem_init(&de->q_sem_in, 0, 0);
-	sem_init(&de->q_sem_out, 0, 0);
 
 	de->q_thread = thread(display_thread, de);
 
