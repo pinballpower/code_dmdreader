@@ -39,10 +39,6 @@ extern "C" {
 
 #include <boost/log/trivial.hpp>
 
-extern "C" {
-#include "drmprime_out.h"
-}
-
 #include "drmhelper.h"
 #include "videoplayer.h"
 
@@ -139,7 +135,8 @@ bool VideoPlayer::playLoop(string filename, int loopCount)
 	enum AVHWDeviceType type;
 	const char* hwdev = "drm";
 	int i;
-	drmprime_out_env_t* dpo;
+
+	openScreen();
 
 	type = av_hwdevice_find_type_by_name(hwdev);
 	if (type == AV_HWDEVICE_TYPE_NONE) {
@@ -147,13 +144,6 @@ bool VideoPlayer::playLoop(string filename, int loopCount)
 		BOOST_LOG_TRIVIAL(error) << "[videoplayer] available device types:";
 		while ((type = av_hwdevice_iterate_types(type)) != AV_HWDEVICE_TYPE_NONE)
 			BOOST_LOG_TRIVIAL(error) << "              " << av_hwdevice_get_type_name(type);
-		return false;
-	}
-
-	compose_t compose{ x,y,width,height };
-	dpo = drmprime_out_new(compose);
-	if (dpo == NULL) {
-		BOOST_LOG_TRIVIAL(error) << "[videoplayer]failed to open drmprime output";
 		return false;
 	}
 
@@ -253,7 +243,7 @@ loopy:
 		goto loopy;
 	}
 
-	drmprime_out_delete(dpo);
+	closeScreen();
 
 	return true;
 }
@@ -261,6 +251,32 @@ loopy:
 VideoPlayer::VideoPlayer()
 {
 	playing = false;
+}
+
+bool VideoPlayer::openScreen()
+{
+	if (!(screenOpened)) {
+		compose_t compose{ x,y,width,height };
+		dpo = drmprime_out_new(compose);
+		if (dpo == NULL) {
+			BOOST_LOG_TRIVIAL(error) << "[videoplayer] failed to open drmprime output";
+			return false;
+		}
+		else {
+			BOOST_LOG_TRIVIAL(debug) << "[videoplayer] opened drmprime output";
+		}
+	}
+	else {
+		BOOST_LOG_TRIVIAL(trace) << "[videoplayer] screen already initialized";
+	}
+	screenOpened = true;
+	return true;
+}
+
+void VideoPlayer::closeScreen() {
+	screenOpened = false;
+	drmprime_out_delete(dpo);
+	dpo = nullptr;
 }
 
 void VideoPlayer::play(string filename, int loopCount)
