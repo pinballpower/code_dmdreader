@@ -222,9 +222,6 @@ int main(int argc, char** argv)
 	}
 	std::time_t t1 = std::time(nullptr);
 
-	VideoPlayer pl = VideoPlayer("/home/matuschd/code_dmdreader/samples/jellyfish-3-mbps-hd-hevc.mkv");
-	pl.playBackground();
-
 	if (!read_config(config_file)) {
 		BOOST_LOG_TRIVIAL(error) << "[dmdreader]couldn't configure DMDReader, aborting";
 		exit(1);
@@ -242,6 +239,9 @@ int main(int argc, char** argv)
 	int activeSourceIndex = 0;
 	DMDSource* source = sources[activeSourceIndex];
 
+	VideoPlayer pl = VideoPlayer("/home/matuschd/code_dmdreader/samples/jellyfish-3-mbps-hd-hevc.mkv");
+	pl.setScaling(100, 100, 400, 300);
+	pl.playBackground(-1);
 
 	while ((!(sourcesFinished) && (! isFinished))) {
 

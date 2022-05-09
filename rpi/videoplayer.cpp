@@ -150,7 +150,8 @@ bool VideoPlayer::playLoop(int loopCount)
 		return false;
 	}
 
-	dpo = drmprime_out_new();
+	compose_t compose{ x,y,width,height };
+	dpo = drmprime_out_new(compose);
 	if (dpo == NULL) {
 		BOOST_LOG_TRIVIAL(error) << "[videoplayer]failed to open drmprime output";
 		return false;
@@ -226,7 +227,7 @@ loopy:
 
 	/* actual decoding */
 	playing = true;
-	while (ret >= 0) {
+	while ((ret >= 0) and (playing)) {
 		if ((ret = av_read_frame(input_ctx, &packet)) < 0)
 			break;
 
@@ -276,4 +277,17 @@ void VideoPlayer::playBackground(int loopCount)
 bool VideoPlayer::isPlaying()
 {
 	return playing;
+}
+
+void VideoPlayer::stop()
+{
+	playing = false;
+}
+
+void VideoPlayer::setScaling(int x, int y, int width, int height)
+{
+	this->x = x;
+	this->y = y;
+	this->width = width;
+	this->height = height;
 }

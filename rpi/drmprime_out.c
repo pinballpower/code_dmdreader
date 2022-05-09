@@ -19,6 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include "drmprime_out.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,10 +49,7 @@ struct drm_setup
 	int crtcIdx;
 	uint32_t planeId;
 	unsigned int out_fourcc;
-	struct
-	{
-		int x, y, width, height;
-	} compose;
+	compose_t compose;
 };
 
 typedef struct drm_aux_s
@@ -286,7 +284,7 @@ static void* display_thread(void* v)
 	return NULL;
 }
 
-static int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId)
+static int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, compose_t compose)
 {
 	int ret = -1;
 	int i;
@@ -374,10 +372,30 @@ static int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId)
 
 	{
 		drmModeCrtc* crtc = drmModeGetCrtc(drmfd, s->crtcId);
-		s->compose.x = crtc->x;
-		s->compose.y = crtc->y;
-		s->compose.width = crtc->width;
-		s->compose.height = crtc->height;
+		if (compose.x < 0) {
+			s->compose.x = crtc->x;
+		}
+		else {
+			s->compose.x = compose.x;
+		}
+		if (compose.y < 0) {
+			s->compose.y = crtc->y;
+		}
+		else {
+			s->compose.y = compose.y;
+		}
+		if (compose.width < 0) {
+			s->compose.width = crtc->width;
+		}
+		else {
+			s->compose.width = compose.width;
+		}
+		if (compose.height < 0) {
+			s->compose.height = crtc->height;
+		}
+		else {
+			s->compose.height = compose.height;
+		}
 		drmModeFreeCrtc(crtc);
 	}
 
@@ -446,7 +464,7 @@ void drmprime_out_delete(drmprime_out_env_t* de)
 	free(de);
 }
 
-drmprime_out_env_t* drmprime_out_new()
+drmprime_out_env_t* drmprime_out_new(compose_t compose)
 {
 	int rv;
 	drmprime_out_env_t* const de = calloc(1, sizeof(*de));
@@ -461,7 +479,7 @@ drmprime_out_env_t* drmprime_out_new()
 	de->q_terminate = 0;
 	de->show_all = 1;
 
-	if (find_crtc(de->drm_fd, &de->setup, &de->con_id) != 0) {
+	if (find_crtc(de->drm_fd, &de->setup, &de->con_id, compose) != 0) {
 		fprintf(stderr, "failed to find valid mode\n");
 		rv = AVERROR(EINVAL);
 		goto fail_close;
