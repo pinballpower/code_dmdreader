@@ -223,7 +223,7 @@ int main(int argc, char** argv)
 	std::time_t t1 = std::time(nullptr);
 
 	VideoPlayer pl = VideoPlayer("/home/matuschd/code_dmdreader/samples/jellyfish-3-mbps-hd-hevc.mkv");
-	pl.play();
+	pl.playBackground();
 
 	if (!read_config(config_file)) {
 		BOOST_LOG_TRIVIAL(error) << "[dmdreader]couldn't configure DMDReader, aborting";

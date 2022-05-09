@@ -1,5 +1,6 @@
 
 /*
+ * Copyright (c) 2021 Pinball Power
  * Copyright (c) 2017 Jun Zhao
  * Copyright (c) 2017 Kaixuan Liu
  *
@@ -24,15 +25,6 @@
  * THE SOFTWARE.
  */
 
- /**
-  * @file
-  * HW-Accelerated decoding example.
-  *
-  * @example hw_decode.c
-  * This example shows how to do HW-accelerated decoding with output
-  * frames from the HW video surfaces.
-  */
-
 #include <string>
 
 extern "C" {
@@ -53,6 +45,7 @@ extern "C" {
 
 #include "drmhelper.h"
 #include "videoplayer.h"
+
 
 using namespace std;
 
@@ -135,9 +128,6 @@ static int decode_write(AVCodecContext* const avctx,
 }
 
 
-
-
-
 bool VideoPlayer::playLoop(int loopCount)
 {
 	AVFormatContext* input_ctx = NULL;
@@ -169,7 +159,7 @@ bool VideoPlayer::playLoop(int loopCount)
 loopy:
 
 	/* open the input file */
-	if (avformat_open_input(&input_ctx, filename.c_str() , NULL, NULL) != 0) {
+	if (avformat_open_input(&input_ctx, filename.c_str(), NULL, NULL) != 0) {
 		BOOST_LOG_TRIVIAL(error) << "[videoplayer] cannot open input file " << filename;
 		return false;
 	}
@@ -276,6 +266,11 @@ VideoPlayer::VideoPlayer(const string filename)
 void VideoPlayer::play()
 {
 	playLoop();
+}
+
+void VideoPlayer::playBackground()
+{
+	playerThread = thread(&VideoPlayer::playLoop, this, 0);
 }
 
 bool VideoPlayer::isPlaying()

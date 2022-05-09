@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <thread>
+
 
 using namespace std;
 
@@ -11,6 +13,7 @@ public:
 	VideoPlayer(const string filename);
 
 	void play();
+	void playBackground();
 	bool isPlaying();
 
 private:
@@ -19,4 +22,5 @@ private:
 
 	bool playLoop(int loopCount=0);
 
+	thread playerThread;
 };
