@@ -21,6 +21,7 @@
 
 #include "drmprime_out.h"
 
+extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -36,7 +37,8 @@
 #include "libavutil/hwcontext_drm.h"
 #include "libavutil/pixdesc.h"
 
-#include "drmhelper.h"
+#include "drmhelper.h" 
+}
 
 #define DRM_MODULE "vc4"
 
@@ -65,7 +67,7 @@ typedef struct drm_aux_s
 #define AUX_SIZE 3
 typedef struct drmprime_out_env_s
 {
-	AVClass* class;
+	AVClass* avClass;
 
 	int drm_fd;
 	uint32_t con_id;
@@ -256,7 +258,7 @@ static int do_sem_wait(sem_t* const sem, const int nowait)
 
 static void* display_thread(void* v)
 {
-	drmprime_out_env_t* const de = v;
+	drmprime_out_env_t* const de = (drmprime_out_env_t*)v;
 	int i;
 
 	sem_post(&de->q_sem_out);
@@ -461,13 +463,13 @@ void drmprime_out_delete(drmprime_out_env_t* de)
 
 	av_frame_free(&de->q_next);
 
-	free(de);
+	delete de;
 }
 
 drmprime_out_env_t* drmprime_out_new(compose_t compose)
 {
 	int rv;
-	drmprime_out_env_t* const de = calloc(1, sizeof(*de));
+	drmprime_out_env_t* const de = new drmprime_out_env_t;
 	if (de == NULL)
 		return NULL;
 
@@ -488,9 +490,8 @@ drmprime_out_env_t* drmprime_out_new(compose_t compose)
 
 	sem_init(&de->q_sem_in, 0, 0);
 	sem_init(&de->q_sem_out, 0, 0);
-	if (pthread_create(&de->q_thread, NULL, display_thread, de)) {
-		rv = AVERROR(errno);
-		fprintf(stderr, "Failed to create display thread: %s\n", av_err2str(rv));
+	if (pthread_create(&de->q_thread, NULL, display_thread, (void*)de)) {
+		fprintf(stderr, "Failed to create display thread");
 		goto fail_close;
 	}
 
@@ -500,7 +501,7 @@ fail_close:
 	close(de->drm_fd);
 	de->drm_fd = -1;
 fail_free:
-	free(de);
+	delete de;
 	fprintf(stderr, ">>> %s: FAIL\n", __func__);
 	return NULL;
 }
