@@ -78,14 +78,14 @@ void DRMPrimeOut::da_uninit(drm_aux_t* da)
 	unsigned int i;
 
 	if (da->fb_handle != 0) {
-		drmModeRmFB(drm_fd, da->fb_handle);
+		drmModeRmFB(drmFd, da->fb_handle);
 		da->fb_handle = 0;
 	}
 
 	for (i = 0; i != AV_DRM_MAX_PLANES; ++i) {
 		if (da->bo_handles[i]) {
 			struct drm_gem_close gem_close = { .handle = da->bo_handles[i] };
-			drmIoctl(drm_fd, DRM_IOCTL_GEM_CLOSE, &gem_close);
+			drmIoctl(drmFd, DRM_IOCTL_GEM_CLOSE, &gem_close);
 			da->bo_handles[i] = 0;
 		}
 	}
@@ -93,7 +93,7 @@ void DRMPrimeOut::da_uninit(drm_aux_t* da)
 	av_frame_free(&da->frame);
 }
 
-int DRMPrimeOut::do_display(AVFrame* frame)
+int DRMPrimeOut::renderFrame(AVFrame* frame)
 {
 	const AVDRMFrameDescriptor* desc = (AVDRMFrameDescriptor*)frame->data[0];
 	drm_aux_t* da = aux + ano;
@@ -101,7 +101,7 @@ int DRMPrimeOut::do_display(AVFrame* frame)
 	int ret = 0;
 
 	if (setup.out_fourcc != format) {
-		if (find_plane(drm_fd, setup.crtcIdx, format, &setup.planeId)) {
+		if (find_plane(drmFd, setup.crtcIdx, format, &setup.planeId)) {
 			av_frame_free(&frame);
 			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] No plane for format " << format;
 			return -1;
@@ -117,7 +117,7 @@ int DRMPrimeOut::do_display(AVFrame* frame)
 			}
 		};
 
-		while (drmWaitVBlank(drm_fd, &vbl)) {
+		while (drmWaitVBlank(drmFd, &vbl)) {
 			if (errno != EINTR) {
 				// This always fails - don't know why
 				//                fprintf(stderr, "drmWaitVBlank failed: %s\n", ERRSTR);
@@ -139,7 +139,7 @@ int DRMPrimeOut::do_display(AVFrame* frame)
 
 		memset(da->bo_handles, 0, sizeof(da->bo_handles));
 		for (i = 0; i < desc->nb_objects; ++i) {
-			if (drmPrimeFDToHandle(drm_fd, desc->objects[i].fd, da->bo_handles + i) != 0) {
+			if (drmPrimeFDToHandle(drmFd, desc->objects[i].fd, da->bo_handles + i) != 0) {
 				BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmPrimeFDToHandle failed:", ERRSTR;
 				return -1;
 			}
@@ -158,7 +158,7 @@ int DRMPrimeOut::do_display(AVFrame* frame)
 			}
 		}
 
-		if (drmModeAddFB2WithModifiers(drm_fd,
+		if (drmModeAddFB2WithModifiers(drmFd,
 			av_frame_cropped_width(frame),
 			av_frame_cropped_height(frame),
 			desc->layers[0].format, bo_handles,
@@ -169,7 +169,7 @@ int DRMPrimeOut::do_display(AVFrame* frame)
 		}
 	}
 
-	ret = drmModeSetPlane(drm_fd, setup.planeId, setup.crtcId,
+	ret = drmModeSetPlane(drmFd, setup.planeId, setup.crtcId,
 		da->fb_handle, 0,
 		setup.compose.x, setup.compose.y,
 		setup.compose.width, setup.compose.height,
@@ -188,126 +188,7 @@ int DRMPrimeOut::do_display(AVFrame* frame)
 
 
 
-static int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, compose_t compose)
-{
-	int ret = -1;
-	int i;
-	drmModeRes* res = drmModeGetResources(drmfd);
-	drmModeConnector* c;
 
-	if (!res) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetResources failed: " << ERRSTR;
-		return -1;
-	}
-
-	if (res->count_crtcs <= 0) {
-		printf("drm: no crts\n");
-		goto fail_res;
-	}
-
-	if (!s->conId) {
-		BOOST_LOG_TRIVIAL(info) << "[drmprime_out] no connector ID specified, choosing default";
-
-		for (i = 0; i < res->count_connectors; i++) {
-			drmModeConnector* con =
-				drmModeGetConnector(drmfd, res->connectors[i]);
-			drmModeEncoder* enc = NULL;
-			drmModeCrtc* crtc = NULL;
-
-			if (con->encoder_id) {
-				enc = drmModeGetEncoder(drmfd, con->encoder_id);
-				if (enc->crtc_id) {
-					crtc = drmModeGetCrtc(drmfd, enc->crtc_id);
-				}
-			}
-
-			if (!s->conId && crtc) {
-				s->conId = con->connector_id;
-				s->crtcId = crtc->crtc_id;
-			}
-
-			if (crtc) {
-				BOOST_LOG_TRIVIAL(info) << "[drmprime_out] connector " << con->connector_id << "(crtc " << crtc->crtc_id <<
-					"): type " << con->connector_type << ": " << crtc->width << "x" << crtc->height;
-			}
-		}
-
-		if (!s->conId) {
-			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] no suitable enabled connector found";
-			return -1;;
-		}
-	}
-
-	s->crtcIdx = -1;
-
-	for (i = 0; i < res->count_crtcs; ++i) {
-		if (s->crtcId == res->crtcs[i]) {
-			s->crtcIdx = i;
-			break;
-		}
-	}
-
-	if (s->crtcIdx == -1) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drm: CRTC "<< s->crtcId << " not found";
-		goto fail_res;
-	}
-
-	if (res->count_connectors <= 0) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drm: no connectors";
-		goto fail_res;
-	}
-
-	c = drmModeGetConnector(drmfd, s->conId);
-	if (!c) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetConnector failed: " << ERRSTR;
-		goto fail_res;
-	}
-
-	if (!c->count_modes) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] connector supports no mode";
-		goto fail_conn;
-	}
-
-	{
-		drmModeCrtc* crtc = drmModeGetCrtc(drmfd, s->crtcId);
-		if (compose.x < 0) {
-			s->compose.x = crtc->x;
-		}
-		else {
-			s->compose.x = compose.x;
-		}
-		if (compose.y < 0) {
-			s->compose.y = crtc->y;
-		}
-		else {
-			s->compose.y = compose.y;
-		}
-		if (compose.width < 0) {
-			s->compose.width = crtc->width;
-		}
-		else {
-			s->compose.width = compose.width;
-		}
-		if (compose.height < 0) {
-			s->compose.height = crtc->height;
-		}
-		else {
-			s->compose.height = compose.height;
-		}
-		drmModeFreeCrtc(crtc);
-	}
-
-	if (pConId) *pConId = c->connector_id;
-	ret = 0;
-
-fail_conn:
-	drmModeFreeConnector(c);
-
-fail_res:
-	drmModeFreeResources(res);
-
-	return ret;
-}
 
 int DRMPrimeOut::displayFrame(struct AVFrame* src_frame)
 {
@@ -364,13 +245,13 @@ DRMPrimeOut::DRMPrimeOut(compose_t compose)
 
 	const char* drm_module = DRM_MODULE;
 
-	drm_fd = cgetDRMDeviceFd();
+	drmFd = DRMHelper::getDRMDeviceFd(); // TODO: Move some parts of this into drmhelper
 	con_id = 0;
 	setup = (struct drm_setup){ 0 };
 	terminate = false;
 	show_all = 1;
 
-	if (find_crtc(drm_fd, &setup, &con_id, compose) != 0) {
+	if (find_crtc(drmFd, &setup, &con_id, compose) != 0) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] failed to find valid mode";
 	}
 
@@ -406,7 +287,7 @@ void DRMPrimeOut::renderLoop()
 
 		semaphoreRendererReady.post();
 
-		do_display(frame);
+		renderFrame(frame);
 	}
 
 	for (i = 0; i != AUX_SIZE; ++i)

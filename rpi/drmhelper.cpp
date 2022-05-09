@@ -212,3 +212,127 @@ extern "C" int cgetDRMDeviceFdForDisplay(int displayNumber)
 extern "C" int cgetDRMDeviceFd() {
 	return cgetDRMDeviceFdForDisplay(-1);
 }
+
+
+
+
+int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, compose_t compose)
+{
+	int ret = -1;
+	int i;
+	drmModeRes* res = drmModeGetResources(drmfd);
+	drmModeConnector* c;
+
+	if (!res) {
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetResources failed";
+		return -1;
+	}
+
+	if (res->count_crtcs <= 0) {
+		printf("drm: no crts\n");
+		goto fail_res;
+	}
+
+	if (!s->conId) {
+		BOOST_LOG_TRIVIAL(info) << "[drmprime_out] no connector ID specified, choosing default";
+
+		for (i = 0; i < res->count_connectors; i++) {
+			drmModeConnector* con =
+				drmModeGetConnector(drmfd, res->connectors[i]);
+			drmModeEncoder* enc = NULL;
+			drmModeCrtc* crtc = NULL;
+
+			if (con->encoder_id) {
+				enc = drmModeGetEncoder(drmfd, con->encoder_id);
+				if (enc->crtc_id) {
+					crtc = drmModeGetCrtc(drmfd, enc->crtc_id);
+				}
+			}
+
+			if (!s->conId && crtc) {
+				s->conId = con->connector_id;
+				s->crtcId = crtc->crtc_id;
+			}
+
+			if (crtc) {
+				BOOST_LOG_TRIVIAL(info) << "[drmprime_out] connector " << con->connector_id << "(crtc " << crtc->crtc_id <<
+					"): type " << con->connector_type << ": " << crtc->width << "x" << crtc->height;
+			}
+		}
+
+		if (!s->conId) {
+			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] no suitable enabled connector found";
+			return -1;;
+		}
+	}
+
+	s->crtcIdx = -1;
+
+	for (i = 0; i < res->count_crtcs; ++i) {
+		if (s->crtcId == res->crtcs[i]) {
+			s->crtcIdx = i;
+			break;
+		}
+	}
+
+	if (s->crtcIdx == -1) {
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drm: CRTC " << s->crtcId << " not found";
+		goto fail_res;
+	}
+
+	if (res->count_connectors <= 0) {
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drm: no connectors";
+		goto fail_res;
+	}
+
+	c = drmModeGetConnector(drmfd, s->conId);
+	if (!c) {
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetConnector failed";
+		goto fail_res;
+	}
+
+	if (!c->count_modes) {
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] connector supports no mode";
+		goto fail_conn;
+	}
+
+	{
+		drmModeCrtc* crtc = drmModeGetCrtc(drmfd, s->crtcId);
+		if (compose.x < 0) {
+			s->compose.x = crtc->x;
+		}
+		else {
+			s->compose.x = compose.x;
+		}
+		if (compose.y < 0) {
+			s->compose.y = crtc->y;
+		}
+		else {
+			s->compose.y = compose.y;
+		}
+		if (compose.width < 0) {
+			s->compose.width = crtc->width;
+		}
+		else {
+			s->compose.width = compose.width;
+		}
+		if (compose.height < 0) {
+			s->compose.height = crtc->height;
+		}
+		else {
+			s->compose.height = compose.height;
+		}
+		drmModeFreeCrtc(crtc);
+	}
+
+	if (pConId) *pConId = c->connector_id;
+	ret = 0;
+
+fail_conn:
+	drmModeFreeConnector(c);
+
+fail_res:
+	drmModeFreeResources(res);
+
+	return ret;
+}

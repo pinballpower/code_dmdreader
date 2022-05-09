@@ -39,9 +39,7 @@ extern "C" {
 
 #include <boost/log/trivial.hpp>
 
-#include "drmhelper.h"
 #include "videoplayer.h"
-
 
 using namespace std;
 

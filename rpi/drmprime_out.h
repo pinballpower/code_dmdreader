@@ -11,31 +11,17 @@ extern "C" {
 #include "libavutil/hwcontext.h"
 #include "libavutil/hwcontext_drm.h"
 #include "libavutil/pixdesc.h"
-
-#include "drmhelper.h" 
 }
+
+#include "drmhelper.hpp"
 
 using namespace std;
 using namespace boost::interprocess;
 
 
-struct compose_t {
-	int x, y, width, height;
-};
-
-
 // Aux size should only need to be 2, but on a few streams (Hobbit) under FKMS
 // we get initial flicker probably due to dodgy drm timing
 #define AUX_SIZE 3
-struct drm_setup
-{
-	int conId;
-	uint32_t crtcId;
-	int crtcIdx;
-	uint32_t planeId;
-	unsigned int out_fourcc;
-	compose_t compose;
-};
 
 typedef struct drm_aux_s
 {
@@ -59,11 +45,9 @@ public:
 private:
 	void renderLoop();
 	void da_uninit(drm_aux_t* da);
-	int do_display(AVFrame* frame);
+	int renderFrame(AVFrame* frame);
 
-	AVClass* avClass;
-
-	int drm_fd;
+	int drmFd;
 	uint32_t con_id;
 	struct drm_setup setup;
 	enum AVPixelFormat avfmt;

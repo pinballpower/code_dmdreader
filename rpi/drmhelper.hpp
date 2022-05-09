@@ -10,10 +10,13 @@
 
 using namespace std;
 
-
 struct ScreenSize {
 	int width;
 	int height;
+};
+
+struct compose_t {
+	int x, y, width, height;
 };
 
 class DRMException : public std::exception
@@ -72,3 +75,17 @@ private:
 
 	static map<int, shared_ptr<DRMHelper>> displayToDRM;
 };
+
+// TODO: Refacturing
+
+struct drm_setup
+{
+	int conId;
+	uint32_t crtcId;
+	int crtcIdx;
+	uint32_t planeId;
+	unsigned int out_fourcc;
+	compose_t compose;
+};
+
+int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, compose_t compose);
