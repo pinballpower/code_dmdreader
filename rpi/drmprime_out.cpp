@@ -418,7 +418,7 @@ int drmprime_out_display(drmprime_out_env_t* de, struct AVFrame* src_frame)
 	int ret;
 
 	if ((src_frame->flags & AV_FRAME_FLAG_CORRUPT) != 0) {
-		fprintf(stderr, "Discard corrupt frame: fmt=%d, ts=%" PRId64 "\n", src_frame->format, src_frame->pts);
+		BOOST_LOG_TRIVIAL(debug) << "[drmprime_out] discard corrupt frame: fmt=" << src_frame->format << ", ts = " << src_frame->pts;
 		return 0;
 	}
 
@@ -430,13 +430,13 @@ int drmprime_out_display(drmprime_out_env_t* de, struct AVFrame* src_frame)
 		frame = av_frame_alloc();
 		frame->format = AV_PIX_FMT_DRM_PRIME;
 		if (av_hwframe_map(frame, src_frame, 0) != 0) {
-			fprintf(stderr, "Failed to map frame (format=%d) to DRM_PRiME\n", src_frame->format);
+			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] failed to map frame (format=" << src_frame->format << ") to DRM_PRiME";
 			av_frame_free(&frame);
 			return AVERROR(EINVAL);
 		}
 	}
 	else {
-		fprintf(stderr, "Frame (format=%d) not DRM_PRiME\n", src_frame->format);
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] frame (format="<< src_frame->format << ") not DRM_PRiME";
 		return AVERROR(EINVAL);
 	}
 
@@ -481,7 +481,7 @@ drmprime_out_env_t* drmprime_out_new(compose_t compose)
 	de->show_all = 1;
 
 	if (find_crtc(de->drm_fd, &de->setup, &de->con_id, compose) != 0) {
-		fprintf(stderr, "failed to find valid mode\n");
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] failed to find valid mode";
 		rv = AVERROR(EINVAL);
 		goto fail_close;
 	}
@@ -490,7 +490,7 @@ drmprime_out_env_t* drmprime_out_new(compose_t compose)
 	sem_init(&de->q_sem_in, 0, 0);
 	sem_init(&de->q_sem_out, 0, 0);
 	if (pthread_create(&de->q_thread, NULL, display_thread, (void*)de)) {
-		fprintf(stderr, "Failed to create display thread");
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] failed to create display thread";
 		goto fail_close;
 	}
 
