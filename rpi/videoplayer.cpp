@@ -56,8 +56,6 @@ extern "C" {
 using namespace std;
 
 static enum AVPixelFormat hw_pix_fmt;
-static FILE* output_file = NULL;
-static long frames = 0;
 
 
 static int hw_decoder_init(AVCodecContext* ctx, const enum AVHWDeviceType type)
@@ -125,8 +123,6 @@ static int decode_write(AVCodecContext* const avctx,
 
 		drmprime_out_display(dpo, frame);
 
-		if (frames == 0 || --frames == 0)
-			ret = -1;
 
 	fail:
 		av_frame_free(&frame);
@@ -148,14 +144,10 @@ bool playVideo(string filename)
 	AVCodec* decoder = NULL;
 	AVPacket packet;
 	enum AVHWDeviceType type;
-	unsigned int in_count;
-	unsigned int in_n = 0;
 	const char* hwdev = "drm";
 	int i;
 	drmprime_out_env_t* dpo;
 	long loop_count = 2; // just for debugging
-	long frame_count = 200;// just for debugging
-	const char* out_name = NULL;
 
 	type = av_hwdevice_find_type_by_name(hwdev);
 	if (type == AV_HWDEVICE_TYPE_NONE) {
@@ -241,7 +233,6 @@ loopy:
 	}
 
 	/* actual decoding */
-	frames = frame_count;
 	while (ret >= 0) {
 		if ((ret = av_read_frame(input_ctx, &packet)) < 0)
 			break;
