@@ -52,11 +52,11 @@ extern "C" {
 }
 
 #include "drmhelper.h"
+#include "videoplayer.h"
 
 using namespace std;
 
 static enum AVPixelFormat hw_pix_fmt;
-
 
 static int hw_decoder_init(AVCodecContext* ctx, const enum AVHWDeviceType type)
 {
@@ -135,7 +135,10 @@ static int decode_write(AVCodecContext* const avctx,
 }
 
 
-bool playVideo(string filename)
+
+
+
+bool VideoPlayer::playLoop(int loopCount)
 {
 	AVFormatContext* input_ctx = NULL;
 	int video_stream, ret;
@@ -147,7 +150,6 @@ bool playVideo(string filename)
 	const char* hwdev = "drm";
 	int i;
 	drmprime_out_env_t* dpo;
-	long loop_count = 2; // just for debugging
 
 	type = av_hwdevice_find_type_by_name(hwdev);
 	if (type == AV_HWDEVICE_TYPE_NONE) {
@@ -233,6 +235,7 @@ loopy:
 	}
 
 	/* actual decoding */
+	playing = true;
 	while (ret >= 0) {
 		if ((ret = av_read_frame(input_ctx, &packet)) < 0)
 			break;
@@ -252,10 +255,30 @@ loopy:
 	avcodec_free_context(&decoder_ctx);
 	avformat_close_input(&input_ctx);
 
-	if (--loop_count > 0)
+	playing = false;
+
+	if (loopCount != 0) {
+		loopCount--;
 		goto loopy;
+	}
 
 	drmprime_out_delete(dpo);
 
 	return true;
+}
+
+VideoPlayer::VideoPlayer(const string filename)
+{
+	this->filename = filename;
+	playing = false;
+}
+
+void VideoPlayer::play()
+{
+	playLoop();
+}
+
+bool VideoPlayer::isPlaying()
+{
+	return playing;
 }

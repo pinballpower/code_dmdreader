@@ -22,10 +22,6 @@
 #include "dmdsource/dmdsource.h"
 #include "util/objectfactory.h"
 
-extern "C" {
-#include "rpi/drmdemo.h"
-}
-
 #include "rpi/videoplayer.h"
 
 using namespace std;
@@ -226,7 +222,8 @@ int main(int argc, char** argv)
 	}
 	std::time_t t1 = std::time(nullptr);
 
-	playVideo("/home/matuschd/code_dmdreader/samples/jellyfish-3-mbps-hd-hevc.mkv");
+	VideoPlayer pl = VideoPlayer("/home/matuschd/code_dmdreader/samples/jellyfish-3-mbps-hd-hevc.mkv");
+	pl.play();
 
 	if (!read_config(config_file)) {
 		BOOST_LOG_TRIVIAL(error) << "[dmdreader]couldn't configure DMDReader, aborting";
