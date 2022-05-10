@@ -30,6 +30,8 @@ struct DRMConnectionData
 	uint32_t crtcId = 0;
 	int crtcIndex = 0;
 	uint32_t planeId = 0;
+	int connectorWidth = 0;
+	int connectorHeight = 0;
 	/// <summary>
 	/// This is a 4-character pixel format encoded in a 32bit work, e.g. '21VN'-> 0x3231564E
 	/// </summary>

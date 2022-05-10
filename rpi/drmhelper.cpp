@@ -304,6 +304,8 @@ DRMConnectionData DRMHelper::getConnectionData(int screenNumber)
 			if (screenNumber == currentScreen) {
 				result.connectionId = con->connector_id;
 				result.crtcId = crtc->crtc_id;
+				result.connectorHeight = con->modes->vdisplay;
+				result.connectorWidth = con->modes->hdisplay;
 				usingMsg = "(selected)";
 			}
 			else {
