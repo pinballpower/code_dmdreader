@@ -245,8 +245,10 @@ loopy:
 	return true;
 }
 
-VideoPlayer::VideoPlayer()
+VideoPlayer::VideoPlayer(int screenNumber, int planeNumber)
 {
+	this->screenNumber = screenNumber;
+	this->planeNumber = planeNumber;
 	playing = false;
 }
 
@@ -254,7 +256,7 @@ bool VideoPlayer::openScreen()
 {
 	if (!(screenOpened)) {
 		compose_t compose{ x,y,width,height };
-		dpo = new DRMPrimeOut(compose);
+		dpo = new DRMPrimeOut(compose, screenNumber, planeNumber);
 		if (dpo == NULL) {
 			BOOST_LOG_TRIVIAL(error) << "[videoplayer] failed to open drmprime output";
 			return false;

@@ -46,7 +46,7 @@ class DRMPrimeOut
 {
 
 public: 
-	DRMPrimeOut(compose_t compose, int screenNumber=0);
+	DRMPrimeOut(compose_t compose, int screenNumber=0, int planeNumber = 0);
 	~DRMPrimeOut();
 
 	int displayFrame(struct AVFrame* frame);
@@ -63,6 +63,8 @@ private:
 	struct drm_setup setup;
 	enum AVPixelFormat avfmt;
 	int show_all;
+
+	int planeNumber = 0;
 
 	unsigned int ano;
 	drm_aux_t aux[AUX_SIZE];

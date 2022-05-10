@@ -134,13 +134,14 @@ fail_res:
 	return ret;
 }
 
-static int findPlane(const int drmFd, const int crtcIndex, const uint32_t format, uint32_t* const pplaneId)
+static int findPlane(const int drmFd, const int crtcIndex, const uint32_t format, uint32_t* const pplaneId, const int planeNumber)
 {
 	drmModePlaneResPtr planes;
 	drmModePlanePtr plane;
 	unsigned int i;
 	unsigned int j;
 	int ret = 0;
+	int currentPlane = 0;
 
 	planes = drmModeGetPlaneResources(drmFd);
 	if (!planes) {
@@ -162,8 +163,12 @@ static int findPlane(const int drmFd, const int crtcIndex, const uint32_t format
 
 		for (j = 0; j < plane->count_formats; ++j) {
 			if (plane->formats[j] == format) {
-				if (!(DRMHelper::isPlaneInUse(plane->plane_id))) {
+				if (currentPlane == planeNumber) {
+					BOOST_LOG_TRIVIAL(error) << "[drmprime_out] plane " << currentPlane;
 					break;
+				}
+				else {
+					currentPlane++;
 				}
 			}
 		}
@@ -173,8 +178,7 @@ static int findPlane(const int drmFd, const int crtcIndex, const uint32_t format
 			continue;
 		}
 
-		*pplaneId = plane->plane_id;
-		DRMHelper::usePlane(plane->plane_id);
+		*pplaneId = plane->plane_id;		
 		drmModeFreePlane(plane);
 		break;
 	}
@@ -213,7 +217,7 @@ int DRMPrimeOut::renderFrame(AVFrame* frame)
 	int ret = 0;
 
 	if (setup.out_fourcc != format) {
-		if (findPlane(drmFd, setup.crtcIndex, format, &setup.planeId)) {
+		if (findPlane(drmFd, setup.crtcIndex, format, &setup.planeId, planeNumber)) {
 			av_frame_free(&frame);
 			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] No plane for format " << format;
 			return -1;
@@ -295,8 +299,6 @@ int DRMPrimeOut::renderFrame(AVFrame* frame)
 
 	ano = ano + 1 >= AUX_SIZE ? 0 : ano + 1;
 
-	DRMHelper::unusePlane(setup.planeId);
-
 	return ret;
 }
 
@@ -350,7 +352,7 @@ int DRMPrimeOut::displayFrame(struct AVFrame* src_frame)
 	return 0;
 }
 
-DRMPrimeOut::DRMPrimeOut(compose_t compose, int screenNumber)
+DRMPrimeOut::DRMPrimeOut(compose_t compose, int screenNumber, int planeNumber)
 {
 	int rv;
 
@@ -361,6 +363,7 @@ DRMPrimeOut::DRMPrimeOut(compose_t compose, int screenNumber)
 	setup = (struct drm_setup){ 0 };
 	terminate = false;
 	show_all = 1;
+	this->planeNumber = planeNumber;
 
 	if (findCRTC(drmFd, &setup, &con_id, screenNumber) != 0) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] failed to find valid mode";

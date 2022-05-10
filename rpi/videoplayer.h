@@ -12,7 +12,7 @@ class VideoPlayer {
 
 public: 
 
-	VideoPlayer();
+	VideoPlayer(int screenNumber=0, int planeNumber=0);
 
 	// open/close connection to DRM
 	bool openScreen();
@@ -33,6 +33,9 @@ private:
 	int y = -1;
 	int width = -1;
 	int height = -1;
+
+	int screenNumber = 0;
+	int planeNumber = 0;
 
 	bool playing = false;
 	bool screenOpened = false;
