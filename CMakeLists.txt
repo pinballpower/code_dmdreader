@@ -96,14 +96,6 @@ else()
 message(FATAL_ERROR "libavcodec/avcodec.h not found, you might need to install libavcodec-dev")
 endif()
 
-find_path(LIBAVFILTER_INCLUDE_DIR "libavfilter/buffersink.h")
-if (LIBAVFILTER_INCLUDE_DIR)
-include_directories(${LIBAVFILTER_INCLUDE_DIR})
-message(STATUS "libavfilter/buffersink.h found in ${LIBAVFILTER_INCLUDE_DIR}")
-else()
-message(FATAL_ERROR "libavfilter/buffersink.h not found, you might need to install libavfilter-dev")
-endif()
-
 endif()
 
 #
