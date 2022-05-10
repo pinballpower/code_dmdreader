@@ -28,7 +28,7 @@ struct drm_aux_t
 	unsigned int framebufferHandle;
 	uint32_t boHandles[AV_DRM_MAX_PLANES];
 
-	AVFrame* frame;
+	AVFrame* frame = nullptr;
 };
 
 struct drm_setup
