@@ -31,6 +31,16 @@ typedef struct drm_aux_s
 	AVFrame* frame;
 } drm_aux_t;
 
+struct drm_setup
+{
+	int conId;
+	uint32_t crtcId;
+	int crtcIdx;
+	uint32_t planeId;
+	unsigned int out_fourcc;
+	compose_t compose;
+};
+
 
 class DRMPrimeOut
 {

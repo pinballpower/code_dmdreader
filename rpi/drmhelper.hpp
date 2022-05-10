@@ -4,6 +4,7 @@
 #include <exception>
 #include <map>
 #include <memory>
+#include <set>
 
 #include <xf86drm.h>
 #include <xf86drmMode.h>
@@ -54,6 +55,10 @@ public:
 
 	void setPreviousCrtc();
 
+	static void usePlane(uint32_t planeId);
+	static void unusePlane(uint32_t planeId);
+	static bool isPlaneInUse(uint32_t planeId);
+
 protected:
 
 	static int drmDeviceFd;
@@ -74,18 +79,5 @@ private:
 	drmModeModeInfo drmMode;
 
 	static map<int, shared_ptr<DRMHelper>> displayToDRM;
+	static set<uint32_t> planesInUse;
 };
-
-// TODO: Refacturing
-
-struct drm_setup
-{
-	int conId;
-	uint32_t crtcId;
-	int crtcIdx;
-	uint32_t planeId;
-	unsigned int out_fourcc;
-	compose_t compose;
-};
-
-int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, compose_t compose);
