@@ -1,10 +1,44 @@
 #include <fcntl.h>
 
+#include <string>
+#include <map>
+
 #include <boost/log/trivial.hpp>
 
 #include "drmhelper.hpp"
 
-// DRMHelper drmHelper; // singleton DRMHelper object
+std::map<unsigned int, string > connectorTypeNames = {
+	{ DRM_MODE_CONNECTOR_Unknown, "unknown" },
+	{ DRM_MODE_CONNECTOR_VGA, "VGA" },
+	{ DRM_MODE_CONNECTOR_DVII, "DVI-I" },
+	{ DRM_MODE_CONNECTOR_DVID, "DVI-D" },
+	{ DRM_MODE_CONNECTOR_DVIA, "DVI-A" },
+	{ DRM_MODE_CONNECTOR_Composite, "composite" },
+	{ DRM_MODE_CONNECTOR_SVIDEO, "s-video" },
+	{ DRM_MODE_CONNECTOR_LVDS, "LVDS" },
+	{ DRM_MODE_CONNECTOR_Component, "component" },
+	{ DRM_MODE_CONNECTOR_9PinDIN, "9-pin DIN" },
+	{ DRM_MODE_CONNECTOR_DisplayPort, "DP" },
+	{ DRM_MODE_CONNECTOR_HDMIA, "HDMI-A" },
+	{ DRM_MODE_CONNECTOR_HDMIB, "HDMI-B" },
+	{ DRM_MODE_CONNECTOR_TV, "TV" },
+	{ DRM_MODE_CONNECTOR_eDP, "eDP" },
+	{ DRM_MODE_CONNECTOR_VIRTUAL, "Virtual" },
+	{ DRM_MODE_CONNECTOR_DSI, "DSI" },
+	{ DRM_MODE_CONNECTOR_DPI, "DPI" },
+};
+
+std::map<unsigned int, string > encoderTypeNames = {
+	{ DRM_MODE_ENCODER_DAC, "VGA" },
+	{ DRM_MODE_ENCODER_TMDS, "DVI, HDMI, DP" },
+	{ DRM_MODE_ENCODER_LVDS, "LVDS" },
+	{ DRM_MODE_ENCODER_TVDAC, "Composite" },
+	{ DRM_MODE_ENCODER_VIRTUAL, "Virtual" },
+	{ DRM_MODE_ENCODER_DSI, "DSI" },
+	{ DRM_MODE_ENCODER_DPI, "DPI" },
+	{ DRM_MODE_ENCODER_DPMST, "fake" }
+};
+
 
 const vector<string> devicesToTry = { "/dev/dri/card0","/dev/dri/card1" };
 
@@ -241,16 +275,16 @@ DRMConnectionData DRMHelper::getConnectionData(int screenNumber)
 	int currentScreen = 0;
 
 	if (!res) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetResources failed";
+		BOOST_LOG_TRIVIAL(error) << "[drmhelper] drmModeGetResources failed";
 		return result;
 	}
 
 	if (res->count_crtcs <= 0) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] no crts";
+		BOOST_LOG_TRIVIAL(error) << "[drmhelper] no crts";
 		goto fail_res;
 	}
 
-	BOOST_LOG_TRIVIAL(info) << "[drmprime_out] no connector ID specified, choosing default";
+	BOOST_LOG_TRIVIAL(info) << "[drmhelper] no connector ID specified, choosing default";
 
 	for (i = 0; i < res->count_connectors; i++) {
 		drmModeConnector* con =
@@ -275,12 +309,12 @@ DRMConnectionData DRMHelper::getConnectionData(int screenNumber)
 			else {
 				currentScreen++;
 			}
-			BOOST_LOG_TRIVIAL(info) << "[drmprime_out] connector " << con->connector_id << "(crtc " << crtc->crtc_id <<
+			BOOST_LOG_TRIVIAL(info) << "[drmhelper] connector " << con->connector_id << "(crtc " << crtc->crtc_id <<
 				"): type " << con->connector_type << ": " << crtc->width << "x" << crtc->height << " " << usingMsg;
 		}
 
 		if (!result.connectionId) {
-			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] no suitable enabled connector found";
+			BOOST_LOG_TRIVIAL(error) << "[drmhelper] no suitable enabled connector found";
 			return result;
 		}
 	}
@@ -295,23 +329,23 @@ DRMConnectionData DRMHelper::getConnectionData(int screenNumber)
 	}
 
 	if (result.crtcIndex == -1) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drm: CRTC " << result.crtcId << " not found";
+		BOOST_LOG_TRIVIAL(error) << "[drmhelper] drm: CRTC " << result.crtcId << " not found";
 		goto fail_res;
 	}
 
 	if (res->count_connectors <= 0) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drm: no connectors";
+		BOOST_LOG_TRIVIAL(error) << "[drmhelper] drm: no connectors";
 		goto fail_res;
 	}
 
 	c = drmModeGetConnector(DRMHelper::drmDeviceFd, result.connectionId);
 	if (!c) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetConnector failed";
+		BOOST_LOG_TRIVIAL(error) << "[drmhelper] drmModeGetConnector failed";
 		goto fail_res;
 	}
 
 	if (!c->count_modes) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] connector supports no mode";
+		BOOST_LOG_TRIVIAL(error) << "[drmhelper] connector supports no mode";
 		goto fail_conn;
 	}
 
@@ -348,14 +382,14 @@ bool DRMHelper::findPlane(const int crtcIndex, const uint32_t format, uint32_t* 
 
 	planes = drmModeGetPlaneResources(DRMHelper::drmDeviceFd);
 	if (!planes) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetPlaneResources failed";
+		BOOST_LOG_TRIVIAL(error) << "[drmhelper] drmModeGetPlaneResources failed";
 		return false;
 	}
 
 	for (i = 0; i < planes->count_planes; ++i) {
 		plane = drmModeGetPlane(DRMHelper::drmDeviceFd, planes->planes[i]);
 		if (!planes) {
-			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetPlane failed";
+			BOOST_LOG_TRIVIAL(error) << "[drmhelper] drmModeGetPlane failed";
 			break;
 		}
 
@@ -391,4 +425,32 @@ bool DRMHelper::findPlane(const int crtcIndex, const uint32_t format, uint32_t* 
 
 	drmModeFreePlaneResources(planes);
 	return ret;
+}
+
+void DRMHelper::logResources()
+{
+	DRMHelper::openDRMDevice();
+	drmModeRes* res = drmModeGetResources(DRMHelper::drmDeviceFd);
+
+	for (int i = 0; i < res->count_connectors; i++) {
+		drmModeConnector* con =
+			drmModeGetConnector(DRMHelper::drmDeviceFd, res->connectors[i]);
+
+		BOOST_LOG_TRIVIAL(error) << "[drmhelper] DRM connector " << con->connector_id << ": " << con->modes->hdisplay << "x" << con->modes->vdisplay << " " << connectorTypeNames[con->connector_type];
+
+		drmModeEncoder* enc = NULL;
+		drmModeCrtc* crtc = NULL;
+
+		if (con->encoder_id) {
+			enc = drmModeGetEncoder(DRMHelper::drmDeviceFd, con->encoder_id);
+			BOOST_LOG_TRIVIAL(error) << "[drmhelper]   " << encoderTypeNames[enc->encoder_type];
+			if (enc->crtc_id) {
+				crtc = drmModeGetCrtc(DRMHelper::drmDeviceFd, enc->crtc_id);
+				BOOST_LOG_TRIVIAL(error) << "[drmhelper]   " << crtc->width << "x" << crtc->height;
+				int i = 0;
+			}
+		}
+	}
+
+	drmModeFreeResources(res);
 }

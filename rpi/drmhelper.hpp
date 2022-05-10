@@ -80,6 +80,8 @@ public:
 	static DRMConnectionData getConnectionData(int displayNumber);
 	static bool findPlane(const int crtcIndex, const uint32_t format, uint32_t* const pplaneId, const int planeNumber);
 
+	static void logResources();
+
 protected:
 
 	static int drmDeviceFd;
