@@ -438,6 +438,10 @@ void DRMHelper::logResources()
 		drmModeConnector* con =
 			drmModeGetConnector(DRMHelper::drmDeviceFd, res->connectors[i]);
 
+		if (con->count_modes == 0) {
+			continue;
+		}
+
 		BOOST_LOG_TRIVIAL(error) << "[drmhelper] DRM connector " << con->connector_id << ": " << con->modes->hdisplay << "x" << con->modes->vdisplay << " " << connectorTypeNames[con->connector_type];
 
 		drmModeEncoder* enc = NULL;
