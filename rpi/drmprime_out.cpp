@@ -192,10 +192,6 @@ int DRMPrimeOut::displayFrame(struct AVFrame* src_frame)
 
 DRMPrimeOut::DRMPrimeOut(CompositionGeometry compositionGeometry, int screenNumber, int planeNumber)
 {
-	int rv;
-
-	const char* drm_module = DRM_MODULE;
-
 	drmFd = DRMHelper::getDRMDeviceFd(); // Cache it
 	setup = (struct drm_setup){ 0 };
 	terminate = false;
