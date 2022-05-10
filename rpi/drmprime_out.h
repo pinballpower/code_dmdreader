@@ -32,13 +32,11 @@ struct drm_aux_t
 };
 
 
-
-
 class DRMPrimeOut
 {
 
 public: 
-	DRMPrimeOut(compose_t compose, int screenNumber=0, int planeNumber = 0);
+	DRMPrimeOut(CompositionGeometry compositionGeometry, int screenNumber=0, int planeNumber = 0);
 	~DRMPrimeOut();
 
 	int displayFrame(struct AVFrame* frame);

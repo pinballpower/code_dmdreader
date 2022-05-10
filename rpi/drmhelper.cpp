@@ -322,10 +322,10 @@ bool DRMHelper::findCRTC(struct drm_setup* s, uint32_t* const pConId, int screen
 
 	{
 		drmModeCrtc* crtc = drmModeGetCrtc(DRMHelper::drmDeviceFd, s->crtcId);
-		s->compose.x = crtc->x;
-		s->compose.y = crtc->y;
-		s->compose.width = crtc->width;
-		s->compose.height = crtc->height;
+		s->compositionGeometry.x = crtc->x;
+		s->compositionGeometry.y = crtc->y;
+		s->compositionGeometry.width = crtc->width;
+		s->compositionGeometry.height = crtc->height;
 		drmModeFreeCrtc(crtc);
 	}
 
@@ -340,4 +340,62 @@ fail_res:
 	drmModeFreeResources(res);
 
 	return returnCode;
+}
+
+
+bool DRMHelper::findPlane(const int crtcIndex, const uint32_t format, uint32_t* const pplaneId, const int planeNumber)
+{
+	drmModePlaneResPtr planes;
+	drmModePlanePtr plane;
+	unsigned int i;
+	unsigned int j;
+	int ret = 0;
+	int currentPlane = 0;
+	bool returnCode = true;
+
+	planes = drmModeGetPlaneResources(DRMHelper::drmDeviceFd);
+	if (!planes) {
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetPlaneResources failed";
+		return false;
+	}
+
+	for (i = 0; i < planes->count_planes; ++i) {
+		plane = drmModeGetPlane(DRMHelper::drmDeviceFd, planes->planes[i]);
+		if (!planes) {
+			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetPlane failed";
+			break;
+		}
+
+		if (!(plane->possible_crtcs & (1 << crtcIndex))) {
+			drmModeFreePlane(plane);
+			continue;
+		}
+
+		for (j = 0; j < plane->count_formats; ++j) {
+			if (plane->formats[j] == format) {
+				if (currentPlane == planeNumber) {
+					break;
+				}
+				else {
+					currentPlane++;
+				}
+			}
+		}
+
+		if (j == plane->count_formats) {
+			drmModeFreePlane(plane);
+			continue;
+		}
+
+		*pplaneId = plane->plane_id;
+		drmModeFreePlane(plane);
+		break;
+	}
+
+	if (i == planes->count_planes) {
+		returnCode = false;
+	}
+
+	drmModeFreePlaneResources(planes);
+	return ret;
 }

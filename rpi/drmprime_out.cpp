@@ -27,61 +27,6 @@
 
 #define ERRSTR strerror(errno)
 
-static int findPlane(const int drmFd, const int crtcIndex, const uint32_t format, uint32_t* const pplaneId, const int planeNumber)
-{
-	drmModePlaneResPtr planes;
-	drmModePlanePtr plane;
-	unsigned int i;
-	unsigned int j;
-	int ret = 0;
-	int currentPlane = 0;
-
-	planes = drmModeGetPlaneResources(drmFd);
-	if (!planes) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetPlaneResources failed: " << ERRSTR;
-		return -1;
-	}
-
-	for (i = 0; i < planes->count_planes; ++i) {
-		plane = drmModeGetPlane(drmFd, planes->planes[i]);
-		if (!planes) {
-			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetPlane failed: " << ERRSTR;
-			break;
-		}
-
-		if (!(plane->possible_crtcs & (1 << crtcIndex))) {
-			drmModeFreePlane(plane);
-			continue;
-		}
-
-		for (j = 0; j < plane->count_formats; ++j) {
-			if (plane->formats[j] == format) {
-				if (currentPlane == planeNumber) {
-					BOOST_LOG_TRIVIAL(error) << "[drmprime_out] plane " << currentPlane;
-					break;
-				}
-				else {
-					currentPlane++;
-				}
-			}
-		}
-
-		if (j == plane->count_formats) {
-			drmModeFreePlane(plane);
-			continue;
-		}
-
-		*pplaneId = plane->plane_id;		
-		drmModeFreePlane(plane);
-		break;
-	}
-
-	if (i == planes->count_planes) ret = -1;
-
-	drmModeFreePlaneResources(planes);
-	return ret;
-}
-
 void DRMPrimeOut::da_uninit(drm_aux_t* da)
 {
 	unsigned int i;
@@ -109,13 +54,13 @@ int DRMPrimeOut::renderFrame(AVFrame* frame)
 	const uint32_t format = desc->layers[0].format;
 	int ret = 0;
 
-	if (setup.out_fourcc != format) {
-		if (findPlane(drmFd, setup.crtcIndex, format, &setup.planeId, planeNumber)) {
+	if (setup.outputFourCC != format) {
+		if (DRMHelper::findPlane(setup.crtcIndex, format, &setup.planeId, planeNumber)) {
 			av_frame_free(&frame);
 			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] No plane for format " << format;
 			return -1;
 		}
-		setup.out_fourcc = format;
+		setup.outputFourCC = format;
 	}
 
 	{
@@ -180,8 +125,8 @@ int DRMPrimeOut::renderFrame(AVFrame* frame)
 
 	ret = drmModeSetPlane(drmFd, setup.planeId, setup.crtcId,
 		da->framebufferHandle, 0,
-		setup.compose.x, setup.compose.y,
-		setup.compose.width, setup.compose.height,
+		setup.compositionGeometry.x, setup.compositionGeometry.y,
+		setup.compositionGeometry.width, setup.compositionGeometry.height,
 		0, 0,
 		av_frame_cropped_width(frame) << 16,
 		av_frame_cropped_height(frame) << 16);
@@ -245,7 +190,7 @@ int DRMPrimeOut::displayFrame(struct AVFrame* src_frame)
 	return 0;
 }
 
-DRMPrimeOut::DRMPrimeOut(compose_t compose, int screenNumber, int planeNumber)
+DRMPrimeOut::DRMPrimeOut(CompositionGeometry compositionGeometry, int screenNumber, int planeNumber)
 {
 	int rv;
 
@@ -264,17 +209,17 @@ DRMPrimeOut::DRMPrimeOut(compose_t compose, int screenNumber, int planeNumber)
 	}
 
 	// override fullscreen if compose values are given
-	if (compose.x >= 0) {
-		setup.compose.x = compose.x;
+	if (compositionGeometry.x >= 0) {
+		setup.compositionGeometry.x = compositionGeometry.x;
 	}
-	if (compose.y >= 0) {
-		setup.compose.y = compose.y;
+	if (compositionGeometry.y >= 0) {
+		setup.compositionGeometry.y = compositionGeometry.y;
 	}
-	if (compose.width >= 0) {
-		setup.compose.width = compose.width;
+	if (compositionGeometry.width >= 0) {
+		setup.compositionGeometry.width = compositionGeometry.width;
 	}
-	if (compose.height >= 0) {
-		setup.compose.height = compose.height;
+	if (compositionGeometry.height >= 0) {
+		setup.compositionGeometry.height = compositionGeometry.height;
 	}
 
 	renderThread = thread(&DRMPrimeOut::renderLoop, this);

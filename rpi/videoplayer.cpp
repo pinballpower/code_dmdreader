@@ -255,8 +255,8 @@ VideoPlayer::VideoPlayer(int screenNumber, int planeNumber)
 bool VideoPlayer::openScreen()
 {
 	if (!(screenOpened)) {
-		compose_t compose{ x,y,width,height };
-		dpo = new DRMPrimeOut(compose, screenNumber, planeNumber);
+		CompositionGeometry compositionGeometry{ x,y,width,height };
+		dpo = new DRMPrimeOut(compositionGeometry, screenNumber, planeNumber);
 		if (dpo == NULL) {
 			BOOST_LOG_TRIVIAL(error) << "[videoplayer] failed to open drmprime output";
 			return false;

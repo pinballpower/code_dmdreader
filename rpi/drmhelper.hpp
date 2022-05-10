@@ -16,9 +16,26 @@ struct ScreenSize {
 	int height;
 };
 
-struct compose_t {
-	int x, y, width, height;
+struct CompositionGeometry {
+	int x = -1;
+	int y = -1;
+	int width = -1;
+	int height = -1;
 };
+
+struct drm_setup
+{
+	int connectionId;
+	uint32_t crtcId;
+	int crtcIndex;
+	uint32_t planeId;
+	/// <summary>
+	/// This is a 4-character pixel format encoded in a 32bit work, e.g. '21VN'-> 0x3231564E
+	/// </summary>
+	uint32_t outputFourCC;
+	CompositionGeometry compositionGeometry;
+};
+
 
 class DRMException : public std::exception
 {
@@ -60,6 +77,7 @@ public:
 	static bool isPlaneInUse(uint32_t planeId);
 
 	static bool findCRTC(struct drm_setup* s, uint32_t* const pConId, int screenNumber);
+	static bool findPlane(const int crtcIndex, const uint32_t format, uint32_t* const pplaneId, const int planeNumber);
 
 protected:
 
@@ -86,13 +104,5 @@ private:
 	
 };
 
-struct drm_setup
-{
-	int connectionId;
-	uint32_t crtcId;
-	int crtcIndex;
-	uint32_t planeId;
-	unsigned int out_fourcc;
-	compose_t compose;
-};
+
 
