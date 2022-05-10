@@ -75,7 +75,7 @@ add_definitions(-DUSE_SPI)
 set (PI_LIBRARIES EGL drm gbm GLESv2)
 set (OPENGL_SRC "render/pi4renderer.h" "render/pi4renderer.cpp" "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h" "render/openglshader.cpp")
 set (SPI_SRC "dmdsource/spisource.h" "dmdsource/spisource.cpp" )
-set (RPI_SRC "rpi/drmhelper.hpp" "rpi/drmhelper.cpp" "rpi/spi.h" "rpi/spi.cpp" "rpi/gpio.h" "rpi/gpio.cpp")
+set (RPI_SRC "rpi/drmhelper.hpp" "rpi/drmhelper.cpp" "rpi/spi.h" "rpi/spi.cpp" "rpi/gpio.h" "rpi/gpio.cpp" "rpi/drmframebuffer.hpp" "rpi/drmframebuffer.cpp")
 
 # libavutil
 find_path(LIBAV_INCLUDE_DIR "libavutil/hwcontext_drm.h")
