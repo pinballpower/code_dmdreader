@@ -199,12 +199,12 @@ DRMPrimeOut::DRMPrimeOut(CompositionGeometry compositionGeometry, int screenNumb
 		return;
 	}
 
-	setup = (struct drm_setup){ 0 };
 	terminate = false;
 	show_all = 1;
 	this->planeNumber = planeNumber;
 
-	if (! DRMHelper::findCRTC(&setup, screenNumber)) {
+	setup = drmHelper.getConnectionData(screenNumber);
+	if (! setup.connected) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] failed to to initialize display";
 		terminate = true;
 		return;

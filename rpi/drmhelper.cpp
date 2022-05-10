@@ -230,8 +230,10 @@ extern "C" int cgetDRMDeviceFd() {
 }
 
 
-bool DRMHelper::findCRTC(struct drm_setup* s, int screenNumber)
+DRMConnectionData DRMHelper::getConnectionData(int screenNumber)
 {
+	DRMConnectionData result;
+
 	int i;
 	bool returnCode = false;
 	drmModeRes* res = drmModeGetResources(DRMHelper::drmDeviceFd);
@@ -240,7 +242,7 @@ bool DRMHelper::findCRTC(struct drm_setup* s, int screenNumber)
 
 	if (!res) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetResources failed";
-		return false;
+		return result;
 	}
 
 	if (res->count_crtcs <= 0) {
@@ -248,54 +250,52 @@ bool DRMHelper::findCRTC(struct drm_setup* s, int screenNumber)
 		goto fail_res;
 	}
 
-	if (!s->connectionId) {
-		BOOST_LOG_TRIVIAL(info) << "[drmprime_out] no connector ID specified, choosing default";
+	BOOST_LOG_TRIVIAL(info) << "[drmprime_out] no connector ID specified, choosing default";
 
-		for (i = 0; i < res->count_connectors; i++) {
-			drmModeConnector* con =
-				drmModeGetConnector(DRMHelper::drmDeviceFd, res->connectors[i]);
-			drmModeEncoder* enc = NULL;
-			drmModeCrtc* crtc = NULL;
+	for (i = 0; i < res->count_connectors; i++) {
+		drmModeConnector* con =
+			drmModeGetConnector(DRMHelper::drmDeviceFd, res->connectors[i]);
+		drmModeEncoder* enc = NULL;
+		drmModeCrtc* crtc = NULL;
 
-			if (con->encoder_id) {
-				enc = drmModeGetEncoder(DRMHelper::drmDeviceFd, con->encoder_id);
-				if (enc->crtc_id) {
-					crtc = drmModeGetCrtc(DRMHelper::drmDeviceFd, enc->crtc_id);
-				}
-			}
-
-			string usingMsg = "";
-			if (!s->connectionId && crtc) {
-				if (screenNumber == currentScreen) {
-					s->connectionId = con->connector_id;
-					s->crtcId = crtc->crtc_id;
-					usingMsg = "(selected)";
-				}
-				else {
-					currentScreen++;
-				}
-				BOOST_LOG_TRIVIAL(info) << "[drmprime_out] connector " << con->connector_id << "(crtc " << crtc->crtc_id <<
-					"): type " << con->connector_type << ": " << crtc->width << "x" << crtc->height << " " << usingMsg;
+		if (con->encoder_id) {
+			enc = drmModeGetEncoder(DRMHelper::drmDeviceFd, con->encoder_id);
+			if (enc->crtc_id) {
+				crtc = drmModeGetCrtc(DRMHelper::drmDeviceFd, enc->crtc_id);
 			}
 		}
 
-		if (!s->connectionId) {
+		string usingMsg = "";
+		if (!result.connectionId && crtc) {
+			if (screenNumber == currentScreen) {
+				result.connectionId = con->connector_id;
+				result.crtcId = crtc->crtc_id;
+				usingMsg = "(selected)";
+			}
+			else {
+				currentScreen++;
+			}
+			BOOST_LOG_TRIVIAL(info) << "[drmprime_out] connector " << con->connector_id << "(crtc " << crtc->crtc_id <<
+				"): type " << con->connector_type << ": " << crtc->width << "x" << crtc->height << " " << usingMsg;
+		}
+
+		if (!result.connectionId) {
 			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] no suitable enabled connector found";
-			return false;
+			return result;
 		}
 	}
 
-	s->crtcIndex = -1;
+	result.crtcIndex = -1;
 
 	for (i = 0; i < res->count_crtcs; ++i) {
-		if (s->crtcId == res->crtcs[i]) {
-			s->crtcIndex = i;
+		if (result.crtcId == res->crtcs[i]) {
+			result.crtcIndex = i;
 			break;
 		}
 	}
 
-	if (s->crtcIndex == -1) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drm: CRTC " << s->crtcId << " not found";
+	if (result.crtcIndex == -1) {
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drm: CRTC " << result.crtcId << " not found";
 		goto fail_res;
 	}
 
@@ -304,7 +304,7 @@ bool DRMHelper::findCRTC(struct drm_setup* s, int screenNumber)
 		goto fail_res;
 	}
 
-	c = drmModeGetConnector(DRMHelper::drmDeviceFd, s->connectionId);
+	c = drmModeGetConnector(DRMHelper::drmDeviceFd, result.connectionId);
 	if (!c) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetConnector failed";
 		goto fail_res;
@@ -316,15 +316,15 @@ bool DRMHelper::findCRTC(struct drm_setup* s, int screenNumber)
 	}
 
 	{
-		drmModeCrtc* crtc = drmModeGetCrtc(DRMHelper::drmDeviceFd, s->crtcId);
-		s->compositionGeometry.x = crtc->x;
-		s->compositionGeometry.y = crtc->y;
-		s->compositionGeometry.width = crtc->width;
-		s->compositionGeometry.height = crtc->height;
+		drmModeCrtc* crtc = drmModeGetCrtc(DRMHelper::drmDeviceFd, result.crtcId);
+		result.compositionGeometry.x = crtc->x;
+		result.compositionGeometry.y = crtc->y;
+		result.compositionGeometry.width = crtc->width;
+		result.compositionGeometry.height = crtc->height;
 		drmModeFreeCrtc(crtc);
 	}
 
-	returnCode = true;
+	result.connected = true;
 
 fail_conn:
 	drmModeFreeConnector(c);
@@ -332,7 +332,7 @@ fail_conn:
 fail_res:
 	drmModeFreeResources(res);
 
-	return returnCode;
+	return result;
 }
 
 

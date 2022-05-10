@@ -23,16 +23,17 @@ struct CompositionGeometry {
 	int height = -1;
 };
 
-struct drm_setup
+struct DRMConnectionData
 {
-	int connectionId;
-	uint32_t crtcId;
-	int crtcIndex;
-	uint32_t planeId;
+	bool connected = false;
+	int connectionId = 0;
+	uint32_t crtcId = 0;
+	int crtcIndex = 0;
+	uint32_t planeId = 0;
 	/// <summary>
 	/// This is a 4-character pixel format encoded in a 32bit work, e.g. '21VN'-> 0x3231564E
 	/// </summary>
-	uint32_t outputFourCC;
+	uint32_t outputFourCC = 0;
 	CompositionGeometry compositionGeometry;
 };
 
@@ -76,7 +77,7 @@ public:
 	static void unusePlane(uint32_t planeId);
 	static bool isPlaneInUse(uint32_t planeId);
 
-	static bool findCRTC(struct drm_setup* s, int screenNumber);
+	static DRMConnectionData getConnectionData(int displayNumber);
 	static bool findPlane(const int crtcIndex, const uint32_t format, uint32_t* const pplaneId, const int planeNumber);
 
 protected:
