@@ -193,6 +193,12 @@ int DRMPrimeOut::displayFrame(struct AVFrame* src_frame)
 DRMPrimeOut::DRMPrimeOut(CompositionGeometry compositionGeometry, int screenNumber, int planeNumber)
 {
 	drmFd = DRMHelper::getDRMDeviceFd(); // Cache it
+	if (!drmHelper.initFullscreen(screenNumber)) {
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] failed to initialize display on screen " << screenNumber;
+		terminate = true;
+		return;
+	}
+
 	setup = (struct drm_setup){ 0 };
 	terminate = false;
 	show_all = 1;
