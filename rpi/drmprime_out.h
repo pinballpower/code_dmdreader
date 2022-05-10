@@ -25,8 +25,8 @@ using namespace boost::interprocess;
 
 struct drm_aux_t
 {
-	unsigned int fb_handle;
-	uint32_t bo_handles[AV_DRM_MAX_PLANES];
+	unsigned int framebufferHandle;
+	uint32_t boHandles[AV_DRM_MAX_PLANES];
 
 	AVFrame* frame;
 };

@@ -189,16 +189,16 @@ void DRMPrimeOut::da_uninit(drm_aux_t* da)
 {
 	unsigned int i;
 
-	if (da->fb_handle != 0) {
-		drmModeRmFB(drmFd, da->fb_handle);
-		da->fb_handle = 0;
+	if (da->framebufferHandle != 0) {
+		drmModeRmFB(drmFd, da->framebufferHandle);
+		da->framebufferHandle = 0;
 	}
 
 	for (i = 0; i != AV_DRM_MAX_PLANES; ++i) {
-		if (da->bo_handles[i]) {
-			struct drm_gem_close gem_close = { .handle = da->bo_handles[i] };
+		if (da->boHandles[i]) {
+			struct drm_gem_close gem_close = { .handle = da->boHandles[i] };
 			drmIoctl(drmFd, DRM_IOCTL_GEM_CLOSE, &gem_close);
-			da->bo_handles[i] = 0;
+			da->boHandles[i] = 0;
 		}
 	}
 
@@ -249,9 +249,9 @@ int DRMPrimeOut::renderFrame(AVFrame* frame)
 
 		da->frame = frame;
 
-		memset(da->bo_handles, 0, sizeof(da->bo_handles));
+		memset(da->boHandles, 0, sizeof(da->boHandles));
 		for (i = 0; i < desc->nb_objects; ++i) {
-			if (drmPrimeFDToHandle(drmFd, desc->objects[i].fd, da->bo_handles + i) != 0) {
+			if (drmPrimeFDToHandle(drmFd, desc->objects[i].fd, da->boHandles + i) != 0) {
 				BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmPrimeFDToHandle failed:", ERRSTR;
 				return -1;
 			}
@@ -265,7 +265,7 @@ int DRMPrimeOut::renderFrame(AVFrame* frame)
 				pitches[n] = p->pitch;
 				offsets[n] = p->offset;
 				modifiers[n] = obj->format_modifier;
-				bo_handles[n] = da->bo_handles[p->object_index];
+				bo_handles[n] = da->boHandles[p->object_index];
 				++n;
 			}
 		}
@@ -275,14 +275,14 @@ int DRMPrimeOut::renderFrame(AVFrame* frame)
 			av_frame_cropped_height(frame),
 			desc->layers[0].format, bo_handles,
 			pitches, offsets, modifiers,
-			&da->fb_handle, DRM_MODE_FB_MODIFIERS /** 0 if no mods */) != 0) {
+			&da->framebufferHandle, DRM_MODE_FB_MODIFIERS /** 0 if no mods */) != 0) {
 			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeAddFB2WithModifiers failed: ", ERRSTR;
 			return -1;
 		}
 	}
 
 	ret = drmModeSetPlane(drmFd, setup.planeId, setup.crtcId,
-		da->fb_handle, 0,
+		da->framebufferHandle, 0,
 		setup.compose.x, setup.compose.y,
 		setup.compose.width, setup.compose.height,
 		0, 0,
