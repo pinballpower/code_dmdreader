@@ -37,3 +37,4 @@ Below is a list of links to different documentation, sample code and more that h
 ### DRM/MKS
 
 - https://events.static.linuxfound.org/sites/events/files/slides/brezillon-drm-kms.pdf
+- https://github.com/embear-engineering/drm-framebuffer
