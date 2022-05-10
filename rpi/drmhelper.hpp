@@ -76,7 +76,7 @@ public:
 	static void unusePlane(uint32_t planeId);
 	static bool isPlaneInUse(uint32_t planeId);
 
-	static bool findCRTC(struct drm_setup* s, uint32_t* const pConId, int screenNumber);
+	static bool findCRTC(struct drm_setup* s, int screenNumber);
 	static bool findPlane(const int crtcIndex, const uint32_t format, uint32_t* const pplaneId, const int planeNumber);
 
 protected:

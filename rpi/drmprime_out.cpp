@@ -202,7 +202,7 @@ DRMPrimeOut::DRMPrimeOut(CompositionGeometry compositionGeometry, int screenNumb
 	show_all = 1;
 	this->planeNumber = planeNumber;
 
-	if (! DRMHelper::findCRTC(&setup, nullptr, screenNumber)) {
+	if (! DRMHelper::findCRTC(&setup, screenNumber)) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] failed to to initialize display";
 		terminate = true;
 		return;

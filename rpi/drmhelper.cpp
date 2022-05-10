@@ -230,10 +230,10 @@ extern "C" int cgetDRMDeviceFd() {
 }
 
 
-bool DRMHelper::findCRTC(struct drm_setup* s, uint32_t* const pConId, int screenNumber)
+bool DRMHelper::findCRTC(struct drm_setup* s, int screenNumber)
 {
 	int i;
-	bool returnCode = true;
+	bool returnCode = false;
 	drmModeRes* res = drmModeGetResources(DRMHelper::drmDeviceFd);
 	drmModeConnector* c;
 	int currentScreen = 0;
@@ -245,7 +245,6 @@ bool DRMHelper::findCRTC(struct drm_setup* s, uint32_t* const pConId, int screen
 
 	if (res->count_crtcs <= 0) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] no crts";
-		returnCode = false;
 		goto fail_res;
 	}
 
@@ -297,26 +296,22 @@ bool DRMHelper::findCRTC(struct drm_setup* s, uint32_t* const pConId, int screen
 
 	if (s->crtcIndex == -1) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drm: CRTC " << s->crtcId << " not found";
-		returnCode = false;
 		goto fail_res;
 	}
 
 	if (res->count_connectors <= 0) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drm: no connectors";
-		returnCode = false;
 		goto fail_res;
 	}
 
 	c = drmModeGetConnector(DRMHelper::drmDeviceFd, s->connectionId);
 	if (!c) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetConnector failed";
-		returnCode = false;
 		goto fail_res;
 	}
 
 	if (!c->count_modes) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] connector supports no mode";
-		returnCode = false;
 		goto fail_conn;
 	}
 
@@ -329,8 +324,6 @@ bool DRMHelper::findCRTC(struct drm_setup* s, uint32_t* const pConId, int screen
 		drmModeFreeCrtc(crtc);
 	}
 
-
-	if (pConId) *pConId = c->connector_id;
 	returnCode = true;
 
 fail_conn:
