@@ -12,4 +12,8 @@ private:
 	int screenNumber = 0;
 	int planeNumber = 0;
 
+	int drmFd = 0;
+
+	DRMConnectionData connectionData;
+
 };
