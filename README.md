@@ -28,5 +28,12 @@ When displaying graphics, DMDReader uses OpenGL ES 3 and access the display usin
 process can access the DRM. That means that even on a two-screen setup, you can't have two independent accessing the screens at the same time. 
 This complicates stuff as the video player that is needed for PubPacks need to be included directly into the main process.
 
-If you want to understand the different Raspberry Pi/Linux graphics drivers/subsystems/protocols have a look here:
-https://forums.raspberrypi.com/viewtopic.php?t=317511
+Below is a list of links to different documentation, sample code and more that helped during the development of the RPI graphical interface.
+
+### General
+
+- https://forums.raspberrypi.com/viewtopic.php?t=317511
+
+### DRM/MKS
+
+- https://events.static.linuxfound.org/sites/events/files/slides/brezillon-drm-kms.pdf
