@@ -33,9 +33,9 @@ typedef struct drm_aux_s
 
 struct drm_setup
 {
-	int conId;
+	int connectionId;
 	uint32_t crtcId;
-	int crtcIdx;
+	int crtcIndex;
 	uint32_t planeId;
 	unsigned int out_fourcc;
 	compose_t compose;
@@ -46,7 +46,7 @@ class DRMPrimeOut
 {
 
 public: 
-	DRMPrimeOut(compose_t compose);
+	DRMPrimeOut(compose_t compose, int screenNumber=0);
 	~DRMPrimeOut();
 
 	int displayFrame(struct AVFrame* frame);
@@ -58,6 +58,7 @@ private:
 	int renderFrame(AVFrame* frame);
 
 	int drmFd;
+	int screenNumber;
 	uint32_t con_id;
 	struct drm_setup setup;
 	enum AVPixelFormat avfmt;

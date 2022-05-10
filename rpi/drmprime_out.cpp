@@ -27,12 +27,13 @@
 
 #define ERRSTR strerror(errno)
 
-int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, compose_t compose)
+int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, compose_t compose, int screenNumber)
 {
 	int ret = -1;
 	int i;
 	drmModeRes* res = drmModeGetResources(drmfd);
 	drmModeConnector* c;
+	int currentScreen = 0;
 
 	if (!res) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetResources failed";
@@ -40,11 +41,11 @@ int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, compose_t 
 	}
 
 	if (res->count_crtcs <= 0) {
-		printf("drm: no crts\n");
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] no crts";
 		goto fail_res;
 	}
 
-	if (!s->conId) {
+	if (!s->connectionId) {
 		BOOST_LOG_TRIVIAL(info) << "[drmprime_out] no connector ID specified, choosing default";
 
 		for (i = 0; i < res->count_connectors; i++) {
@@ -60,33 +61,37 @@ int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, compose_t 
 				}
 			}
 
-			if (!s->conId && crtc) {
-				s->conId = con->connector_id;
-				s->crtcId = crtc->crtc_id;
-			}
-
-			if (crtc) {
+			string usingMsg = "";
+			if (!s->connectionId && crtc) {
+				if (screenNumber == currentScreen) {
+					s->connectionId = con->connector_id;
+					s->crtcId = crtc->crtc_id;
+					usingMsg = "(selected)";
+				}
+				else {
+					currentScreen++;
+				}
 				BOOST_LOG_TRIVIAL(info) << "[drmprime_out] connector " << con->connector_id << "(crtc " << crtc->crtc_id <<
-					"): type " << con->connector_type << ": " << crtc->width << "x" << crtc->height;
+					"): type " << con->connector_type << ": " << crtc->width << "x" << crtc->height << " " << usingMsg;
 			}
 		}
 
-		if (!s->conId) {
+		if (!s->connectionId) {
 			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] no suitable enabled connector found";
 			return -1;;
 		}
 	}
 
-	s->crtcIdx = -1;
+	s->crtcIndex = -1;
 
 	for (i = 0; i < res->count_crtcs; ++i) {
 		if (s->crtcId == res->crtcs[i]) {
-			s->crtcIdx = i;
+			s->crtcIndex = i;
 			break;
 		}
 	}
 
-	if (s->crtcIdx == -1) {
+	if (s->crtcIndex == -1) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drm: CRTC " << s->crtcId << " not found";
 		goto fail_res;
 	}
@@ -96,7 +101,7 @@ int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, compose_t 
 		goto fail_res;
 	}
 
-	c = drmModeGetConnector(drmfd, s->conId);
+	c = drmModeGetConnector(drmfd, s->connectionId);
 	if (!c) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetConnector failed";
 		goto fail_res;
@@ -107,34 +112,33 @@ int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, compose_t 
 		goto fail_conn;
 	}
 
-	{
-		drmModeCrtc* crtc = drmModeGetCrtc(drmfd, s->crtcId);
-		if (compose.x < 0) {
-			s->compose.x = crtc->x;
-		}
-		else {
-			s->compose.x = compose.x;
-		}
-		if (compose.y < 0) {
-			s->compose.y = crtc->y;
-		}
-		else {
-			s->compose.y = compose.y;
-		}
-		if (compose.width < 0) {
-			s->compose.width = crtc->width;
-		}
-		else {
-			s->compose.width = compose.width;
-		}
-		if (compose.height < 0) {
-			s->compose.height = crtc->height;
-		}
-		else {
-			s->compose.height = compose.height;
-		}
-		drmModeFreeCrtc(crtc);
+	drmModeCrtc* crtc = drmModeGetCrtc(drmfd, s->crtcId);
+	if (compose.x < 0) {
+		s->compose.x = crtc->x;
 	}
+	else {
+		s->compose.x = compose.x;
+	}
+	if (compose.y < 0) {
+		s->compose.y = crtc->y;
+	}
+	else {
+		s->compose.y = compose.y;
+	}
+	if (compose.width < 0) {
+		s->compose.width = crtc->width;
+	}
+	else {
+		s->compose.width = compose.width;
+	}
+	if (compose.height < 0) {
+		s->compose.height = crtc->height;
+	}
+	else {
+		s->compose.height = compose.height;
+	}
+	drmModeFreeCrtc(crtc);
+
 
 	if (pConId) *pConId = c->connector_id;
 	ret = 0;
@@ -176,7 +180,7 @@ static int find_plane(const int drmfd, const int crtcidx, const uint32_t format,
 
 		for (j = 0; j < plane->count_formats; ++j) {
 			if (plane->formats[j] == format) {
-				if (! (DRMHelper::isPlaneInUse(plane->plane_id))) {
+				if (!(DRMHelper::isPlaneInUse(plane->plane_id))) {
 					break;
 				}
 			}
@@ -227,7 +231,7 @@ int DRMPrimeOut::renderFrame(AVFrame* frame)
 	int ret = 0;
 
 	if (setup.out_fourcc != format) {
-		if (find_plane(drmFd, setup.crtcIdx, format, &setup.planeId)) {
+		if (find_plane(drmFd, setup.crtcIndex, format, &setup.planeId)) {
 			av_frame_free(&frame);
 			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] No plane for format " << format;
 			return -1;
@@ -339,7 +343,7 @@ int DRMPrimeOut::displayFrame(struct AVFrame* src_frame)
 		}
 	}
 	else {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] frame (format="<< src_frame->format << ") not DRM_PRiME";
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] frame (format=" << src_frame->format << ") not DRM_PRiME";
 		return AVERROR(EINVAL);
 	}
 
@@ -364,7 +368,7 @@ int DRMPrimeOut::displayFrame(struct AVFrame* src_frame)
 	return 0;
 }
 
-DRMPrimeOut::DRMPrimeOut(compose_t compose)
+DRMPrimeOut::DRMPrimeOut(compose_t compose, int screenNumber)
 {
 	int rv;
 
@@ -376,7 +380,7 @@ DRMPrimeOut::DRMPrimeOut(compose_t compose)
 	terminate = false;
 	show_all = 1;
 
-	if (find_crtc(drmFd, &setup, &con_id, compose) != 0) {
+	if (find_crtc(drmFd, &setup, &con_id, compose, screenNumber) != 0) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] failed to find valid mode";
 	}
 
