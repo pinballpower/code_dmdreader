@@ -27,7 +27,7 @@
 
 #define ERRSTR strerror(errno)
 
-int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, compose_t compose, int screenNumber)
+int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, int screenNumber)
 {
 	int ret = -1;
 	int i;
@@ -112,32 +112,14 @@ int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, compose_t 
 		goto fail_conn;
 	}
 
-	drmModeCrtc* crtc = drmModeGetCrtc(drmfd, s->crtcId);
-	if (compose.x < 0) {
+	{
+		drmModeCrtc* crtc = drmModeGetCrtc(drmfd, s->crtcId);
 		s->compose.x = crtc->x;
-	}
-	else {
-		s->compose.x = compose.x;
-	}
-	if (compose.y < 0) {
 		s->compose.y = crtc->y;
-	}
-	else {
-		s->compose.y = compose.y;
-	}
-	if (compose.width < 0) {
 		s->compose.width = crtc->width;
-	}
-	else {
-		s->compose.width = compose.width;
-	}
-	if (compose.height < 0) {
 		s->compose.height = crtc->height;
+		drmModeFreeCrtc(crtc); 
 	}
-	else {
-		s->compose.height = compose.height;
-	}
-	drmModeFreeCrtc(crtc);
 
 
 	if (pConId) *pConId = c->connector_id;
@@ -380,8 +362,22 @@ DRMPrimeOut::DRMPrimeOut(compose_t compose, int screenNumber)
 	terminate = false;
 	show_all = 1;
 
-	if (find_crtc(drmFd, &setup, &con_id, compose, screenNumber) != 0) {
+	if (find_crtc(drmFd, &setup, &con_id, screenNumber) != 0) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] failed to find valid mode";
+	}
+
+	// override fullscreen if compose values are given
+	if (compose.x >= 0) {
+		setup.compose.x = compose.x;
+	}
+	if (compose.y >= 0) {
+		setup.compose.y = compose.y;
+	}
+	if (compose.width >= 0) {
+		setup.compose.width = compose.width;
+	}
+	if (compose.height >= 0) {
+		setup.compose.height = compose.height;
 	}
 
 	renderThread = thread(&DRMPrimeOut::renderLoop, this);
