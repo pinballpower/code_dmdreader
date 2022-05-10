@@ -27,11 +27,11 @@
 
 #define ERRSTR strerror(errno)
 
-int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, int screenNumber)
+int findCRTC(int drmFd, struct drm_setup* s, uint32_t* const pConId, int screenNumber)
 {
 	int ret = -1;
 	int i;
-	drmModeRes* res = drmModeGetResources(drmfd);
+	drmModeRes* res = drmModeGetResources(drmFd);
 	drmModeConnector* c;
 	int currentScreen = 0;
 
@@ -50,14 +50,14 @@ int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, int screen
 
 		for (i = 0; i < res->count_connectors; i++) {
 			drmModeConnector* con =
-				drmModeGetConnector(drmfd, res->connectors[i]);
+				drmModeGetConnector(drmFd, res->connectors[i]);
 			drmModeEncoder* enc = NULL;
 			drmModeCrtc* crtc = NULL;
 
 			if (con->encoder_id) {
-				enc = drmModeGetEncoder(drmfd, con->encoder_id);
+				enc = drmModeGetEncoder(drmFd, con->encoder_id);
 				if (enc->crtc_id) {
-					crtc = drmModeGetCrtc(drmfd, enc->crtc_id);
+					crtc = drmModeGetCrtc(drmFd, enc->crtc_id);
 				}
 			}
 
@@ -101,7 +101,7 @@ int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, int screen
 		goto fail_res;
 	}
 
-	c = drmModeGetConnector(drmfd, s->connectionId);
+	c = drmModeGetConnector(drmFd, s->connectionId);
 	if (!c) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetConnector failed";
 		goto fail_res;
@@ -113,7 +113,7 @@ int find_crtc(int drmfd, struct drm_setup* s, uint32_t* const pConId, int screen
 	}
 
 	{
-		drmModeCrtc* crtc = drmModeGetCrtc(drmfd, s->crtcId);
+		drmModeCrtc* crtc = drmModeGetCrtc(drmFd, s->crtcId);
 		s->compose.x = crtc->x;
 		s->compose.y = crtc->y;
 		s->compose.width = crtc->width;
@@ -134,7 +134,7 @@ fail_res:
 	return ret;
 }
 
-static int find_plane(const int drmfd, const int crtcidx, const uint32_t format, uint32_t* const pplane_id)
+static int findPlane(const int drmFd, const int crtcIndex, const uint32_t format, uint32_t* const pplaneId)
 {
 	drmModePlaneResPtr planes;
 	drmModePlanePtr plane;
@@ -142,20 +142,20 @@ static int find_plane(const int drmfd, const int crtcidx, const uint32_t format,
 	unsigned int j;
 	int ret = 0;
 
-	planes = drmModeGetPlaneResources(drmfd);
+	planes = drmModeGetPlaneResources(drmFd);
 	if (!planes) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetPlaneResources failed: " << ERRSTR;
 		return -1;
 	}
 
 	for (i = 0; i < planes->count_planes; ++i) {
-		plane = drmModeGetPlane(drmfd, planes->planes[i]);
+		plane = drmModeGetPlane(drmFd, planes->planes[i]);
 		if (!planes) {
 			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetPlane failed: " << ERRSTR;
 			break;
 		}
 
-		if (!(plane->possible_crtcs & (1 << crtcidx))) {
+		if (!(plane->possible_crtcs & (1 << crtcIndex))) {
 			drmModeFreePlane(plane);
 			continue;
 		}
@@ -173,7 +173,7 @@ static int find_plane(const int drmfd, const int crtcidx, const uint32_t format,
 			continue;
 		}
 
-		*pplane_id = plane->plane_id;
+		*pplaneId = plane->plane_id;
 		DRMHelper::usePlane(plane->plane_id);
 		drmModeFreePlane(plane);
 		break;
@@ -213,7 +213,7 @@ int DRMPrimeOut::renderFrame(AVFrame* frame)
 	int ret = 0;
 
 	if (setup.out_fourcc != format) {
-		if (find_plane(drmFd, setup.crtcIndex, format, &setup.planeId)) {
+		if (findPlane(drmFd, setup.crtcIndex, format, &setup.planeId)) {
 			av_frame_free(&frame);
 			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] No plane for format " << format;
 			return -1;
@@ -362,7 +362,7 @@ DRMPrimeOut::DRMPrimeOut(compose_t compose, int screenNumber)
 	terminate = false;
 	show_all = 1;
 
-	if (find_crtc(drmFd, &setup, &con_id, screenNumber) != 0) {
+	if (findCRTC(drmFd, &setup, &con_id, screenNumber) != 0) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] failed to find valid mode";
 	}
 

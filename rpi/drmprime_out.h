@@ -23,13 +23,13 @@ using namespace boost::interprocess;
 // we get initial flicker probably due to dodgy drm timing
 #define AUX_SIZE 3
 
-typedef struct drm_aux_s
+struct drm_aux_t
 {
 	unsigned int fb_handle;
 	uint32_t bo_handles[AV_DRM_MAX_PLANES];
 
 	AVFrame* frame;
-} drm_aux_t;
+};
 
 struct drm_setup
 {
