@@ -175,7 +175,11 @@ static int find_plane(const int drmfd, const int crtcidx, const uint32_t format,
 		}
 
 		for (j = 0; j < plane->count_formats; ++j) {
-			if (plane->formats[j] == format) break;
+			if (plane->formats[j] == format) {
+				if (! (DRMHelper::isPlaneInUse(plane->plane_id))) {
+					break;
+				}
+			}
 		}
 
 		if (j == plane->count_formats) {
@@ -184,6 +188,7 @@ static int find_plane(const int drmfd, const int crtcidx, const uint32_t format,
 		}
 
 		*pplane_id = plane->plane_id;
+		DRMHelper::usePlane(plane->plane_id);
 		drmModeFreePlane(plane);
 		break;
 	}
@@ -304,11 +309,10 @@ int DRMPrimeOut::renderFrame(AVFrame* frame)
 
 	ano = ano + 1 >= AUX_SIZE ? 0 : ano + 1;
 
+	DRMHelper::unusePlane(setup.planeId);
+
 	return ret;
 }
-
-
-
 
 
 int DRMPrimeOut::displayFrame(struct AVFrame* src_frame)
