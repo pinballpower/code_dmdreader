@@ -31,15 +31,7 @@ struct drm_aux_t
 	AVFrame* frame = nullptr;
 };
 
-struct drm_setup
-{
-	int connectionId;
-	uint32_t crtcId;
-	int crtcIndex;
-	uint32_t planeId;
-	unsigned int out_fourcc;
-	compose_t compose;
-};
+
 
 
 class DRMPrimeOut
@@ -57,9 +49,8 @@ private:
 	void da_uninit(drm_aux_t* da);
 	int renderFrame(AVFrame* frame);
 
-	int drmFd;
 	int screenNumber;
-	uint32_t con_id;
+	int drmFd;
 	struct drm_setup setup;
 	enum AVPixelFormat avfmt;
 	int show_all;

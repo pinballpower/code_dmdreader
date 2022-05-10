@@ -59,6 +59,8 @@ public:
 	static void unusePlane(uint32_t planeId);
 	static bool isPlaneInUse(uint32_t planeId);
 
+	static bool findCRTC(struct drm_setup* s, uint32_t* const pConId, int screenNumber);
+
 protected:
 
 	static int drmDeviceFd;
@@ -80,4 +82,17 @@ private:
 
 	static map<int, shared_ptr<DRMHelper>> displayToDRM;
 	static set<uint32_t> planesInUse;
+
+	
 };
+
+struct drm_setup
+{
+	int connectionId;
+	uint32_t crtcId;
+	int crtcIndex;
+	uint32_t planeId;
+	unsigned int out_fourcc;
+	compose_t compose;
+};
+

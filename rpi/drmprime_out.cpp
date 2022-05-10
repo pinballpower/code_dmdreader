@@ -27,113 +27,6 @@
 
 #define ERRSTR strerror(errno)
 
-int findCRTC(int drmFd, struct drm_setup* s, uint32_t* const pConId, int screenNumber)
-{
-	int ret = -1;
-	int i;
-	drmModeRes* res = drmModeGetResources(drmFd);
-	drmModeConnector* c;
-	int currentScreen = 0;
-
-	if (!res) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetResources failed";
-		return -1;
-	}
-
-	if (res->count_crtcs <= 0) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] no crts";
-		goto fail_res;
-	}
-
-	if (!s->connectionId) {
-		BOOST_LOG_TRIVIAL(info) << "[drmprime_out] no connector ID specified, choosing default";
-
-		for (i = 0; i < res->count_connectors; i++) {
-			drmModeConnector* con =
-				drmModeGetConnector(drmFd, res->connectors[i]);
-			drmModeEncoder* enc = NULL;
-			drmModeCrtc* crtc = NULL;
-
-			if (con->encoder_id) {
-				enc = drmModeGetEncoder(drmFd, con->encoder_id);
-				if (enc->crtc_id) {
-					crtc = drmModeGetCrtc(drmFd, enc->crtc_id);
-				}
-			}
-
-			string usingMsg = "";
-			if (!s->connectionId && crtc) {
-				if (screenNumber == currentScreen) {
-					s->connectionId = con->connector_id;
-					s->crtcId = crtc->crtc_id;
-					usingMsg = "(selected)";
-				}
-				else {
-					currentScreen++;
-				}
-				BOOST_LOG_TRIVIAL(info) << "[drmprime_out] connector " << con->connector_id << "(crtc " << crtc->crtc_id <<
-					"): type " << con->connector_type << ": " << crtc->width << "x" << crtc->height << " " << usingMsg;
-			}
-		}
-
-		if (!s->connectionId) {
-			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] no suitable enabled connector found";
-			return -1;;
-		}
-	}
-
-	s->crtcIndex = -1;
-
-	for (i = 0; i < res->count_crtcs; ++i) {
-		if (s->crtcId == res->crtcs[i]) {
-			s->crtcIndex = i;
-			break;
-		}
-	}
-
-	if (s->crtcIndex == -1) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drm: CRTC " << s->crtcId << " not found";
-		goto fail_res;
-	}
-
-	if (res->count_connectors <= 0) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drm: no connectors";
-		goto fail_res;
-	}
-
-	c = drmModeGetConnector(drmFd, s->connectionId);
-	if (!c) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeGetConnector failed";
-		goto fail_res;
-	}
-
-	if (!c->count_modes) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] connector supports no mode";
-		goto fail_conn;
-	}
-
-	{
-		drmModeCrtc* crtc = drmModeGetCrtc(drmFd, s->crtcId);
-		s->compose.x = crtc->x;
-		s->compose.y = crtc->y;
-		s->compose.width = crtc->width;
-		s->compose.height = crtc->height;
-		drmModeFreeCrtc(crtc); 
-	}
-
-
-	if (pConId) *pConId = c->connector_id;
-	ret = 0;
-
-fail_conn:
-	drmModeFreeConnector(c);
-
-fail_res:
-	drmModeFreeResources(res);
-
-	return ret;
-}
-
 static int findPlane(const int drmFd, const int crtcIndex, const uint32_t format, uint32_t* const pplaneId, const int planeNumber)
 {
 	drmModePlaneResPtr planes;
@@ -358,15 +251,16 @@ DRMPrimeOut::DRMPrimeOut(compose_t compose, int screenNumber, int planeNumber)
 
 	const char* drm_module = DRM_MODULE;
 
-	drmFd = DRMHelper::getDRMDeviceFd(); // TODO: Move some parts of this into drmhelper
-	con_id = 0;
+	drmFd = DRMHelper::getDRMDeviceFd(); // Cache it
 	setup = (struct drm_setup){ 0 };
 	terminate = false;
 	show_all = 1;
 	this->planeNumber = planeNumber;
 
-	if (findCRTC(drmFd, &setup, &con_id, screenNumber) != 0) {
-		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] failed to find valid mode";
+	if (! DRMHelper::findCRTC(&setup, nullptr, screenNumber)) {
+		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] failed to to initialize display";
+		terminate = true;
+		return;
 	}
 
 	// override fullscreen if compose values are given
