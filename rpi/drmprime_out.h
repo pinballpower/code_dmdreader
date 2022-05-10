@@ -25,8 +25,8 @@ using namespace boost::interprocess;
 
 struct drm_aux_t
 {
-	unsigned int framebufferHandle;
-	uint32_t boHandles[AV_DRM_MAX_PLANES];
+	unsigned int framebufferHandle = 0;
+	uint32_t boHandles[AV_DRM_MAX_PLANES]{ 0 };
 
 	AVFrame* frame = nullptr;
 };
@@ -55,7 +55,7 @@ private:
 
 	int planeNumber = 0;
 
-	unsigned int ano;
+	unsigned int ano = 0;
 	drm_aux_t aux[AUX_SIZE];
 
 	thread renderThread;
@@ -63,6 +63,8 @@ private:
 	interprocess_semaphore semaphoreRendererReady = interprocess_semaphore(0);
 	bool terminate = false;
 	AVFrame* q_next;
+
+	DRMHelper drmHelper;
 
 };
 
