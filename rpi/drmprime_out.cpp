@@ -52,13 +52,13 @@ int DRMPrimeOut::renderFrame(AVFrame* frame)
 	const uint32_t format = desc->layers[0].format;
 	int ret = 0;
 
-	if (setup.outputFourCC != format) {
-		if (DRMHelper::findPlane(setup.crtcIndex, format, &setup.planeId, planeNumber)) {
+	if (connectionData.outputFourCC != format) {
+		if (DRMHelper::findPlane(connectionData.crtcIndex, format, &connectionData.planeId, planeNumber)) {
 			av_frame_free(&frame);
 			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] No plane for format " << format;
 			return -1;
 		}
-		setup.outputFourCC = format;
+		connectionData.outputFourCC = format;
 	}
 
 	{
@@ -72,7 +72,6 @@ int DRMPrimeOut::renderFrame(AVFrame* frame)
 		while (drmWaitVBlank(drmFd, &vbl)) {
 			if (errno != EINTR) {
 				// This always fails - don't know why
-				//                fprintf(stderr, "drmWaitVBlank failed: %s\n", ERRSTR);
 				break;
 			}
 		}
@@ -121,10 +120,10 @@ int DRMPrimeOut::renderFrame(AVFrame* frame)
 		}
 	}
 
-	ret = drmModeSetPlane(drmFd, setup.planeId, setup.crtcId,
+	ret = drmModeSetPlane(drmFd, connectionData.planeId, connectionData.crtcId,
 		da->framebufferHandle, 0,
-		setup.compositionGeometry.x, setup.compositionGeometry.y,
-		setup.compositionGeometry.width, setup.compositionGeometry.height,
+		connectionData.compositionGeometry.x, connectionData.compositionGeometry.y,
+		connectionData.compositionGeometry.width, connectionData.compositionGeometry.height,
 		0, 0,
 		av_frame_cropped_width(frame) << 16,
 		av_frame_cropped_height(frame) << 16);
@@ -201,8 +200,8 @@ DRMPrimeOut::DRMPrimeOut(CompositionGeometry compositionGeometry, int screenNumb
 	show_all = 1;
 	this->planeNumber = planeNumber;
 
-	setup = drmHelper.getConnectionData(screenNumber);
-	if (! setup.connected) {
+	connectionData = drmHelper.getConnectionData(screenNumber);
+	if (! connectionData.connected) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] failed to to initialize display";
 		terminate = true;
 		return;
@@ -210,16 +209,16 @@ DRMPrimeOut::DRMPrimeOut(CompositionGeometry compositionGeometry, int screenNumb
 
 	// override fullscreen if compose values are given
 	if (compositionGeometry.x >= 0) {
-		setup.compositionGeometry.x = compositionGeometry.x;
+		connectionData.compositionGeometry.x = compositionGeometry.x;
 	}
 	if (compositionGeometry.y >= 0) {
-		setup.compositionGeometry.y = compositionGeometry.y;
+		connectionData.compositionGeometry.y = compositionGeometry.y;
 	}
 	if (compositionGeometry.width >= 0) {
-		setup.compositionGeometry.width = compositionGeometry.width;
+		connectionData.compositionGeometry.width = compositionGeometry.width;
 	}
 	if (compositionGeometry.height >= 0) {
-		setup.compositionGeometry.height = compositionGeometry.height;
+		connectionData.compositionGeometry.height = compositionGeometry.height;
 	}
 
 	renderThread = thread(&DRMPrimeOut::renderLoop, this);
