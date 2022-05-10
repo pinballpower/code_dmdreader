@@ -1,8 +1,8 @@
 #include <filesystem> 
 #include <boost/log/trivial.hpp>
 
-#include "openglshader.h"
-#include "openglrenderer.h"
+#include "openglshader.hpp"
+#include "openglrenderer.hpp"
 
 OpenGLRenderer::OpenGLRenderer()
 {

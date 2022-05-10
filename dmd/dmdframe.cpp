@@ -6,10 +6,10 @@
 #include <string>
 #include <cassert>
 
-#include "../util/crc32.h"
-#include "../util/bmp.h"
+#include "../util/crc32.hpp"
+#include "../util/bmp.hpp"
 
-#include "dmdframe.h"
+#include "dmdframe.hpp"
 
 DMDFrame::DMDFrame(int width, int height, int bitsperpixel, uint8_t* data, bool packed)
 {

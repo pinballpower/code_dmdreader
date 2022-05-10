@@ -2,7 +2,7 @@
 
 #include <boost/log/trivial.hpp>
 
-#include "framestore.h"
+#include "framestore.hpp"
 
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;

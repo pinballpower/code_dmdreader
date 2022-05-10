@@ -7,9 +7,9 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/log/trivial.hpp>
 
-#include "pubcapture.h"
-#include "../util/image.h"
-#include "../util/bmp.h"
+#include "pubcapture.hpp"
+#include "../util/image.hpp"
+#include "../util/bmp.hpp"
 
 using namespace std;
 

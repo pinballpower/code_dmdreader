@@ -1,7 +1,15 @@
-#pragma once#
+#pragma once
 
-#include "drmhelper.h"
+#include "drmhelper.hpp"
 
-Class DRMFrameBuffer{
+class DRMFrameBuffer {
 
-}
+public:
+	DRMFrameBuffer(int screenNumber, int planeNumber);
+	~DRMFrameBuffer();
+
+private:
+	int screenNumber = 0;
+	int planeNumber = 0;
+
+};

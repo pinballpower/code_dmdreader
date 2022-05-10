@@ -2,8 +2,8 @@
 
 #include <boost/log/trivial.hpp>
 
-#include "spisource.h"
-#include "../rpi/spi.h"
+#include "spisource.hpp"
+#include "../rpi/spi.hpp"
 
 uint16_t parse_u16(uint8_t* buf) {
 	return buf[1] + 256 * buf[0];

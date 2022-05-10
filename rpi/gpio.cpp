@@ -12,7 +12,7 @@
 #include <poll.h>
 
 #include <boost/log/trivial.hpp>
-#include "gpio.h"
+#include "gpio.hpp"
 
 using namespace std;
 

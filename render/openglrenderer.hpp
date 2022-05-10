@@ -3,11 +3,11 @@
 //#define GLFW_INCLUDE_NONE
 //#include <GLFW/glfw3.h>
 
-#include "../dmd/color.h"
-#include "../dmd/palette.h"
-#include "framerenderer.h"
+#include "../dmd/color.hpp"
+#include "../dmd/palette.hpp"
+#include "framerenderer.hpp"
 
-#include "openglshader.h"
+#include "openglshader.hpp"
 
 static const int tx_buf_len = 256 * 256 * 4;
 

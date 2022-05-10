@@ -19,11 +19,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "drmprime_out.h"
+#include "drmprime_out.hpp"
 
 #include <boost/log/trivial.hpp>
-
-#define DRM_MODULE "vc4"
 
 #define ERRSTR strerror(errno)
 

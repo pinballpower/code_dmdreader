@@ -18,11 +18,11 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
-#include "dmd/dmdframe.h"
-#include "dmdsource/dmdsource.h"
-#include "util/objectfactory.h"
+#include "dmd/dmdframe.hpp"
+#include "dmdsource/dmdsource.hpp"
+#include "util/objectfactory.hpp"
 
-#include "rpi/videoplayer.h"
+#include "rpi/videoplayer.hpp"
 
 using namespace std;
 
@@ -213,6 +213,8 @@ int main(int argc, char** argv)
 
 	BOOST_LOG_TRIVIAL(trace) << "[dmdreader] cwd: " << filesystem::current_path();
 
+	DRMHelper::logResources();
+
 	string config_file;
 	if (argc >= 2) {
 		config_file = argv[1];
@@ -239,10 +241,21 @@ int main(int argc, char** argv)
 	int activeSourceIndex = 0;
 	DMDSource* source = sources[activeSourceIndex];
 
-	VideoPlayer pl = VideoPlayer();
-	pl.setScaling(100, 100, 400, 300);
-	pl.openScreen();
-	pl.playBackground("/home/matuschd/code_dmdreader/samples/jellyfish-3-mbps-hd-hevc.mkv" ,-1);
+
+	VideoPlayer p2 = VideoPlayer(0,1);
+	p2.setScaling(200, 200, 400, 300);
+	p2.openScreen();
+	p2.playBackground("/home/matuschd/code_dmdreader/samples/jellyfish-3-mbps-hd-hevc.mkv", 0);
+
+	VideoPlayer p3 = VideoPlayer(0, 2);
+	p3.setScaling(300, 300, 400, 300);
+	p3.openScreen();
+	p3.playBackground("/home/matuschd/code_dmdreader/samples/jellyfish-3-mbps-hd-hevc.mkv", 0);
+
+	VideoPlayer p4 = VideoPlayer(0, 3);
+	p4.setScaling(400, 400, 400, 300);
+	p4.openScreen();
+	p4.playBackground("/home/matuschd/code_dmdreader/samples/jellyfish-3-mbps-hd-hevc.mkv", 0);
 
 	while ((!(sourcesFinished) && (! isFinished))) {
 

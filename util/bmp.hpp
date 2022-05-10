@@ -1,5 +1,5 @@
 #pragma once
 
-#include "image.h"
+#include "image.hpp"
 
 RGBBuffer readBMP(std::string filename);

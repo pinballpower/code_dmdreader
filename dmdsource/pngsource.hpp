@@ -1,19 +1,11 @@
-#pragma once
-
 #include <queue>
 
-#include "../dmd/dmdframe.h"
-#include "dmdsource.h"
+#include "dmdsource.hpp"
 
-class DATDMDSource : public DMDSource {
+using namespace std;
 
+class PNGSource : public DMDSource{
 public:
-
-	DATDMDSource();
-	DATDMDSource(string filename);
-	~DATDMDSource();
-
-	bool readFile(string filename);
 
 	virtual DMDFrame getNextFrame() override;
 
@@ -22,10 +14,9 @@ public:
 
 	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) override;
 
-	virtual SourceProperties getProperties() override;
-
 private:
 
-	DMDFrame readFromDatFile(std::ifstream& fis);
 	queue<DMDFrame> frames;
+	int currentFrame = 0;
+
 };

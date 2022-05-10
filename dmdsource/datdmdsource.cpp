@@ -1,6 +1,6 @@
 #include <boost/log/trivial.hpp>
 
-#include "datdmdsource.h"
+#include "datdmdsource.hpp"
 
 DATDMDSource::DATDMDSource()
 {

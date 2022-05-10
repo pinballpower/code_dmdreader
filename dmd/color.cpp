@@ -3,7 +3,7 @@
 #include <vector>
 #include <assert.h>
 
-#include "color.h"
+#include "color.hpp"
 
 using namespace std;
 

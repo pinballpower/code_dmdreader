@@ -1,6 +1,6 @@
 #include <cassert>
 
-#include "maskeddmdframe.h"
+#include "maskeddmdframe.hpp"
 
 
 MaskedDMDFrame::MaskedDMDFrame() {

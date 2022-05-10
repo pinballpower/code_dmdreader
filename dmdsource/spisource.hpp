@@ -4,10 +4,10 @@
 #include <thread>
 #include <boost/interprocess/sync/interprocess_semaphore.hpp>
 
-#include "dmdsource.h"
+#include "dmdsource.hpp"
 
-#include "../rpi/gpio.h"
-#include "../rpi/spi.h"
+#include "../rpi/gpio.hpp"
+#include "../rpi/spi.hpp"
 
 using namespace std;
 

@@ -3,7 +3,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/log/trivial.hpp>
 
-#include "frameinfologger.h"
+#include "frameinfologger.hpp"
 
 FrameInfoLogger::FrameInfoLogger()
 {

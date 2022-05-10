@@ -2,8 +2,8 @@
 
 #include <fstream>
 
-#include "../dmd/dmdframe.h"
-#include "dmdsource.h"
+#include "../dmd/dmdframe.hpp"
+#include "dmdsource.hpp"
 
 class TXTDMDSource : public DMDSource {
 

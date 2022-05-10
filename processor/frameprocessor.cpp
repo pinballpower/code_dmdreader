@@ -1,4 +1,4 @@
-#include "frameprocessor.h"
+#include "frameprocessor.hpp"
 
 DMDFrameProcessor::~DMDFrameProcessor()
 {

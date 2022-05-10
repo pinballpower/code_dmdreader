@@ -1,4 +1,4 @@
-#include "framerenderer.h"
+#include "framerenderer.hpp"
 
 FrameRenderer::FrameRenderer() {
 }

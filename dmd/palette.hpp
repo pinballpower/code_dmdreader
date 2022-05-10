@@ -2,7 +2,7 @@
 
 #include <optional>
 
-#include "color.h"
+#include "color.hpp"
 
 class DMDPalette {
 

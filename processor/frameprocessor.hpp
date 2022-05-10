@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../dmd/dmdframe.h"
+#include "../dmd/dmdframe.hpp"
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/log/trivial.hpp>

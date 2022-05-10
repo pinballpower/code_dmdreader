@@ -5,8 +5,8 @@
 #include <fstream>
 #include <string> 
 
-#include "bmp.h"
-#include "image.h"
+#include "bmp.hpp"
+#include "image.hpp"
 
 using namespace std;
 

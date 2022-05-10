@@ -1,5 +1,5 @@
-#include "dmdsource.h"
-#include "../dmd/dmdframe.h"
+#include "dmdsource.hpp"
+#include "../dmd/dmdframe.hpp"
 
 DMDFrame DMDSource::getNextFrame()
 {

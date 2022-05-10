@@ -1,6 +1,6 @@
 #include <boost/log/trivial.hpp>
 
-#include "gladopenglrenderer.h"
+#include "gladopenglrenderer.hpp"
 
 GladOpenGLRenderer::GladOpenGLRenderer() {
 	shader_prefix = "ogl";

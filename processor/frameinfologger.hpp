@@ -2,8 +2,8 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include "../dmd/dmdframe.h"
-#include "frameprocessor.h"
+#include "../dmd/dmdframe.hpp"
+#include "frameprocessor.hpp"
 
 class FrameInfoLogger : public DMDFrameProcessor {
 

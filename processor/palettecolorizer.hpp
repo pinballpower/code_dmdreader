@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "../dmd/color.h"
-#include "frameprocessor.h"
+#include "../dmd/color.hpp"
+#include "frameprocessor.hpp"
 
 class PaletteColorizer : public DMDFrameProcessor {
 

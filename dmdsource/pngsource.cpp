@@ -2,8 +2,8 @@
 
 #include <boost/log/trivial.hpp>
 
-#include "pngsource.h"
-#include "../util/image.h"
+#include "pngsource.hpp"
+#include "../util/image.hpp"
 
 DMDFrame PNGSource::getNextFrame()
 {

@@ -1,6 +1,6 @@
 #include <cassert>
 
-#include "palette.h"
+#include "palette.hpp"
 
 
 DMDPalette::DMDPalette(const DMDColor end_color, int bitsperpixel, string name)

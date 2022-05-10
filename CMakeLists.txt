@@ -73,16 +73,16 @@ add_definitions(-DUSE_OPENGLPI4)
 add_definitions(-DUSE_SPI)
 # set (PI_INCLUDE_DIRS "/usr/include:/usr/include/stb:/usr/include/libdrm")
 set (PI_LIBRARIES EGL drm gbm GLESv2)
-set (OPENGL_SRC "render/pi4renderer.h" "render/pi4renderer.cpp" "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h" "render/openglshader.cpp")
-set (SPI_SRC "dmdsource/spisource.h" "dmdsource/spisource.cpp" )
-set (RPI_SRC "rpi/drmhelper.hpp" "rpi/drmhelper.cpp" "rpi/spi.h" "rpi/spi.cpp" "rpi/gpio.h" "rpi/gpio.cpp" "rpi/drmframebuffer.hpp" "rpi/drmframebuffer.cpp")
+set (OPENGL_SRC "render/pi4renderer.hpp" "render/pi4renderer.cpp" "render/openglrenderer.hpp" "render/openglrenderer.cpp" "render/openglshader.hpp" "render/openglshader.cpp")
+set (SPI_SRC "dmdsource/spisource.hpp" "dmdsource/spisource.cpp" )
+set (RPI_SRC "rpi/drmhelper.hpp" "rpi/drmhelper.cpp" "rpi/spi.hpp" "rpi/spi.cpp" "rpi/gpio.hpp" "rpi/gpio.cpp" "rpi/drmframebuffer.hpp" "rpi/drmframebuffer.cpp")
 
 # libavutil
 find_path(LIBAV_INCLUDE_DIR "libavutil/hwcontext_drm.h")
 if (LIBAV_INCLUDE_DIR)
 message(STATUS "libavutil/hwcontext_drm.h found in ${LIBAV_INCLUDE_DIR}")
 include_directories(${LIBAV_INCLUDE_DIR})
-set (VIDEO_SRC "rpi/drmprime_out.cpp" "rpi/drmprime_out.h" "rpi/videoplayer.cpp" "rpi/videoplayer.h"  )
+set (VIDEO_SRC "rpi/drmprime_out.cpp" "rpi/drmprime_out.hpp" "rpi/videoplayer.cpp" "rpi/videoplayer.hpp"  )
 set (VIDEO_LIBRARIES avcodec avfilter avutil avformat drm)
 else()
 message(FATAL_ERROR "libavutil/hwcontext_drm.h not found, you might need to install libavutil-dev ")
@@ -149,7 +149,7 @@ endif()
 
 if (OPENGL)
 add_definitions(-DUSE_OPENGLGLAD)
-set (OPENGL_SRC "render/openglrenderer.h" "render/openglrenderer.cpp" "render/openglshader.h" "render/openglshader.cpp" "render/gladopenglrenderer.h" "render/gladopenglrenderer.cpp")
+set (OPENGL_SRC "render/openglrenderer.hpp" "render/openglrenderer.cpp" "render/openglshader.hpp" "render/openglshader.cpp" "render/gladopenglrenderer.hpp" "render/gladopenglrenderer.cpp")
 set(OPENGL_LIBRARIES fmt::fmt
     fmt::fmt-header-only
     glfw
@@ -192,11 +192,11 @@ else()
 message(STATUS "not enabling colorisation module")
 endif()
 
-set (UTIL_SRC "util/crc32.cpp" "util/crc32.h" "util/bmp.h" "util/bmp.cpp"  "dmd/color.cpp" "util/endian.h" "util/endian.cpp" "util/image.h" "util/image.cpp" "util/objectfactory.h" "util/objectfactory.cpp" "util/endian.cpp" "util/bithelper.cpp"  "stb/stb_image.h")
-set (RENDER_SRC "render/framerenderer.h"  "render/framerenderer.cpp" )
-set (DMDSOURCE_SRC  "dmdsource/pngsource.h" "dmdsource/pngsource.cpp" "dmdsource/dmdsource.h" "dmdsource/dmdsource.cpp" "dmdsource/datdmdsource.h" "dmdsource/datdmdsource.cpp" "dmdsource/nullsource.cpp" "dmdsource/txtdmdsource.h" "dmdsource/txtdmdsource.cpp")
-set (DMD_SRC "dmd/palette.h" "dmd/maskeddmdframe.h" "dmd/maskedmdframe.cpp" "dmd/dmdframe.cpp" "dmd/dmdframe.h"  "dmd/palette.cpp"  )
-set (PROCESSOR_SRC "processor/pubcapture.cpp" "processor/frameprocessor.h" "processor/frameprocessor.cpp" "processor/frameinfologger.h" "processor/frameinfologger.cpp" "processor/palettecolorizer.h" "processor/palettecolorizer.cpp" "processor/framestore.h" "processor/framestore.cpp")
+set (UTIL_SRC "util/crc32.cpp" "util/crc32.hpp" "util/bmp.hpp" "util/bmp.cpp"  "dmd/color.cpp" "util/image.hpp" "util/image.cpp" "util/objectfactory.hpp" "util/objectfactory.cpp" "util/bithelper.cpp" "util/bithelper.hpp" "stb/stb_image.h")
+set (RENDER_SRC "render/framerenderer.hpp"  "render/framerenderer.cpp" )
+set (DMDSOURCE_SRC  "dmdsource/pngsource.hpp" "dmdsource/pngsource.cpp" "dmdsource/dmdsource.hpp" "dmdsource/dmdsource.cpp" "dmdsource/datdmdsource.hpp" "dmdsource/datdmdsource.cpp" "dmdsource/nullsource.cpp" "dmdsource/txtdmdsource.hpp" "dmdsource/txtdmdsource.cpp")
+set (DMD_SRC "dmd/palette.hpp" "dmd/maskeddmdframe.hpp" "dmd/maskeddmdframe.cpp" "dmd/dmdframe.cpp" "dmd/dmdframe.hpp"  "dmd/palette.cpp"  )
+set (PROCESSOR_SRC "processor/pubcapture.cpp" "processor/frameprocessor.hpp" "processor/frameprocessor.cpp" "processor/frameinfologger.hpp" "processor/frameinfologger.cpp" "processor/palettecolorizer.hpp" "processor/palettecolorizer.cpp" "processor/framestore.hpp" "processor/framestore.cpp")
 
 add_executable (${PROJECT_NAME} "dmdreader.cpp" ${UTIL_SRC} ${RENDER_SRC} ${DMD_SRC} ${DMDSOURCE_SRC} ${PROCESSOR_SRC} ${COLOR_SRC} ${OPENGL_SRC} ${SPI_SRC} ${RPI_SRC} ${VIDEO_SRC})
 

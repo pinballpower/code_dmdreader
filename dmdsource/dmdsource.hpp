@@ -2,7 +2,7 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include "../dmd/dmdframe.h"
+#include "../dmd/dmdframe.hpp"
 
 using namespace std;
 

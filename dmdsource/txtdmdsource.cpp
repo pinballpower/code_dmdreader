@@ -8,7 +8,7 @@
 
 #include <boost/log/trivial.hpp>
 
-#include "txtdmdsource.h"
+#include "txtdmdsource.hpp"
 
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;

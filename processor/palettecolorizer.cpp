@@ -1,4 +1,4 @@
-#include "palettecolorizer.h"
+#include "palettecolorizer.hpp"
 
 DMDFrame PaletteColorizer::processFrame(DMDFrame& f)
 {

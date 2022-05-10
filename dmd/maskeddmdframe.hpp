@@ -1,7 +1,7 @@
 #pragma once
 
-#include "dmdframe.h"
-#include "palette.h"
+#include "dmdframe.hpp"
+#include "palette.hpp"
 
 class MaskedDMDFrame : public DMDFrame {
 

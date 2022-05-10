@@ -1,4 +1,4 @@
-#include "dmdsource.h"
+#include "dmdsource.hpp"
 
 class NullDMDSource: public DMDSource {
 public:

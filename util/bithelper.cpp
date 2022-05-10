@@ -1,4 +1,4 @@
-#include "bithelper.h"
+#include "bithelper.hpp"
 
 uint8_t reverse_byte(uint8_t x)
 {

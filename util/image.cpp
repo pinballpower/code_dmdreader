@@ -4,7 +4,7 @@
 #include "../stb/stb_image.h"
 
 
-#include "image.h"
+#include "image.hpp"
 
 RGBBuffer::RGBBuffer()
 {

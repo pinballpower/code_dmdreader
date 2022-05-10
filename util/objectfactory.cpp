@@ -1,32 +1,30 @@
 #include <string>
 
-#include "../dmdsource/dmdsource.h"
-#include "../dmdsource/datdmdsource.h"
-#include "../dmdsource/txtdmdsource.h"
-#include "../dmdsource/nullsource.h"
-#include "../dmdsource/pngsource.h"
-#include "../processor/pubcapture.h"
-#include "../processor/frameprocessor.h"
-#include "../processor/frameinfologger.h"
-#include "../processor/palettecolorizer.h"
-#include "../processor/framestore.h"
-#include "../render/framerenderer.h"
-#ifdef USE_RAYLIB
-#include "../render/raylibrenderer.h"
-#endif
+#include "../dmdsource/dmdsource.hpp"
+#include "../dmdsource/datdmdsource.hpp"
+#include "../dmdsource/txtdmdsource.hpp"
+#include "../dmdsource/nullsource.hpp"
+#include "../dmdsource/pngsource.hpp"
+#include "../processor/pubcapture.hpp"
+#include "../processor/frameprocessor.hpp"
+#include "../processor/frameinfologger.hpp"
+#include "../processor/palettecolorizer.hpp"
+#include "../processor/framestore.hpp"
+#include "../render/framerenderer.hpp"
+
 #ifdef USE_OPENGLGLAD
-#include "../render/gladopenglrenderer.h"
+#include "../render/gladopenglrenderer.hpp"
 #endif
 #ifdef USE_OPENGLPI4
-#include "../render/pi4renderer.h"
+#include "../render/pi4renderer.hpp"
 #endif
 #ifdef USE_SPI
-#include "../dmdsource/spisource.h"
+#include "../dmdsource/spisource.hpp"
 #endif
 
 #if __has_include("../colorize/config.h")
 #include "../colorize/config.h"
-#include "../colorize/pin2dmdcolorisation.h"
+#include "../colorize/pin2dmdcolorisation.hpp"
 #endif
 
 

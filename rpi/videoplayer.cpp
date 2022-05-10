@@ -39,7 +39,7 @@ extern "C" {
 
 #include <boost/log/trivial.hpp>
 
-#include "videoplayer.h"
+#include "videoplayer.hpp"
 
 using namespace std;
 
