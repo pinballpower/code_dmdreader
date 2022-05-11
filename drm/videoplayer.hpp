@@ -4,6 +4,7 @@
 #include <thread>
 
 #include "drmprimeout.hpp"
+#include "drmhelper.hpp"
 
 
 using namespace std;
@@ -12,7 +13,7 @@ class VideoPlayer {
 
 public: 
 
-	VideoPlayer(int screenNumber=0, int planeNumber=0);
+	VideoPlayer(int screenNumber=0, int planeNumber=0, CompositionGeometry composition = CompositionGeometry());
 
 	// open/close connection to DRM
 	bool openScreen();
@@ -25,15 +26,12 @@ public:
 	void stop();
 	void pause(bool paused=true);
 
-	void setScaling(int x, int y, int width, int height);
+	void setComposition(CompositionGeometry compositionGeometry);
 
 private:
 
 	// scaling (-1 means full-screen)
-	int x = -1;
-	int y = -1;
-	int width = -1;
-	int height = -1;
+	CompositionGeometry compositionGeometry;
 
 	int screenNumber = 0;
 	int planeNumber = 0;

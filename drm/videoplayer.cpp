@@ -252,17 +252,18 @@ loopy:
 	return true;
 }
 
-VideoPlayer::VideoPlayer(int screenNumber, int planeNumber)
+VideoPlayer::VideoPlayer(int screenNumber, int planeNumber, CompositionGeometry compositionGeometry)
 {
 	this->screenNumber = screenNumber;
 	this->planeNumber = planeNumber;
+	this->compositionGeometry = compositionGeometry;
 	playing = false;
+	paused = false;
 }
 
 bool VideoPlayer::openScreen()
 {
 	if (!(screenOpened)) {
-		CompositionGeometry compositionGeometry{ x,y,width,height };
 		dpo = new DRMPrimeOut(compositionGeometry, screenNumber, planeNumber);
 		if (dpo == NULL) {
 			BOOST_LOG_TRIVIAL(error) << "[videoplayer] failed to open drmprime output";
@@ -309,10 +310,7 @@ void VideoPlayer::pause(bool paused)
 	this->paused = paused;
 }
 
-void VideoPlayer::setScaling(int x, int y, int width, int height)
+void VideoPlayer::setComposition(CompositionGeometry compositionGeometry)
 {
-	this->x = x;
-	this->y = y;
-	this->width = width;
-	this->height = height;
+	this->compositionGeometry = compositionGeometry;
 }
