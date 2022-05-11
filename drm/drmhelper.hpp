@@ -74,7 +74,7 @@ public:
 	static bool isOpen();
 	static const string getDRMDeviceFilename();
 
-	bool initFullscreen(int displayNumber);
+	bool initFullscreen(int displayNumber, int width=0, int height=0);
 	const ScreenSize getScreenSize() const;
 
 	uint32_t addAndActivateFramebuffer(uint32_t pitch, uint32_t handle);

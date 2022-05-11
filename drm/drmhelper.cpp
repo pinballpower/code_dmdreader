@@ -107,7 +107,7 @@ drmModeEncoder* DRMHelper::findDRMEncoder(drmModeConnector* connector)
 	return NULL;
 }
 
-bool DRMHelper::initFullscreen(int displayNumber) {
+bool DRMHelper::initFullscreen(int displayNumber, int width, int height) {
 	drmModeRes* resources = drmModeGetResources(drmDeviceFd);
 	if (resources == NULL)
 	{
@@ -124,9 +124,21 @@ bool DRMHelper::initFullscreen(int displayNumber) {
 	}
 
 	drmConnectorId = connector->connector_id;
+	bool selectResolution = (width * height > 0);
+	bool modIndex = 0;
 	for (int i = 0; i < connector->count_modes; i++) {
+		string selected = "";
 		drmMode = connector->modes[i];
-		BOOST_LOG_TRIVIAL(info) << "[drmhelper] found supported resolution: " << drmMode.hdisplay << "x" << drmMode.vdisplay;
+		if (selectResolution) {
+			if ((drmMode.hdisplay == width) && (drmMode.vdisplay == height)) {
+				// found the correct resolution
+				modIndex = i;
+				selected = "(selected)";
+			}
+		} else {
+
+		}
+		BOOST_LOG_TRIVIAL(info) << "[drmhelper] found supported resolution: " << drmMode.hdisplay << "x" << drmMode.vdisplay << " " << selected;
 	}
 	drmMode = connector->modes[0];
 	currentScreenSize.width = drmMode.hdisplay;
@@ -284,8 +296,6 @@ DRMConnectionData DRMHelper::getConnectionData(int screenNumber)
 		goto fail_res;
 	}
 
-	BOOST_LOG_TRIVIAL(info) << "[drmhelper] no connector ID specified, choosing default";
-
 	for (i = 0; i < res->count_connectors; i++) {
 		drmModeConnector* con =
 			drmModeGetConnector(DRMHelper::drmDeviceFd, res->connectors[i]);
@@ -314,11 +324,11 @@ DRMConnectionData DRMHelper::getConnectionData(int screenNumber)
 			BOOST_LOG_TRIVIAL(info) << "[drmhelper] connector " << con->connector_id << "(crtc " << crtc->crtc_id <<
 				"): type " << con->connector_type << ": " << crtc->width << "x" << crtc->height << " " << usingMsg;
 		}
+	}
 
-		if (!result.connectionId) {
-			BOOST_LOG_TRIVIAL(error) << "[drmhelper] no suitable enabled connector found";
-			return result;
-		}
+	if (!result.connectionId) {
+		BOOST_LOG_TRIVIAL(error) << "[drmhelper] no suitable enabled connector found";
+		return result;
 	}
 
 	result.crtcIndex = -1;
