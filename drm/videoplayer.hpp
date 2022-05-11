@@ -23,6 +23,7 @@ public:
 	void playBackground(string filename, int loopCount=0);
 	bool isPlaying();
 	void stop();
+	void pause(bool paused=true);
 
 	void setScaling(int x, int y, int width, int height);
 
@@ -39,6 +40,7 @@ private:
 
 	bool playing = false;
 	bool screenOpened = false;
+	bool paused = false;
 
 	bool playLoop(string filename, int loopCount=0);
 

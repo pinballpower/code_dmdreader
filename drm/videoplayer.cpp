@@ -26,6 +26,8 @@
  */
 
 #include <string>
+#include <chrono>
+#include <thread>
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -218,6 +220,11 @@ loopy:
 		if ((ret = av_read_frame(input_ctx, &packet)) < 0)
 			break;
 
+		// very simplistic pause implementation
+		while (paused) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(25));
+		}
+
 		if (video_stream == packet.stream_index)
 			ret = decode_write(decoder_ctx, dpo, &packet);
 
@@ -295,6 +302,11 @@ bool VideoPlayer::isPlaying()
 void VideoPlayer::stop()
 {
 	playing = false;
+}
+
+void VideoPlayer::pause(bool paused)
+{
+	this->paused = paused;
 }
 
 void VideoPlayer::setScaling(int x, int y, int width, int height)
