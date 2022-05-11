@@ -8,6 +8,12 @@ public:
 	DRMFrameBuffer(int screenNumber, int planeNumber, const CompositionGeometry geometry);
 	~DRMFrameBuffer();
 
+	int getWidth() const;
+	int getHeight() const;
+	uint8_t* getBuffer() const;
+	const int getBufferLen() const;
+
+
 private:
 	int screenNumber = 0;
 	int planeNumber = 0;
@@ -25,3 +31,5 @@ private:
 	int height = 0;
 
 };
+
+void createDummyImage(uint8_t* framebufferData, int framebufferLen, int offset=0);

@@ -23,12 +23,13 @@ struct framebuffer {
 };
 
 
-void createDummyImage(uint8_t* framebufferData, int framebufferLen) {
-	for (int i = 0; i < framebufferLen; i += 4) {
-		framebufferData[i] = i & 0xff;
-		framebufferData[i + 1] = (i / 8) & 0xff;
-		framebufferData[i + 2] = (i / 256) & 0xff;
-		framebufferData[i + 3] = i & 0xff;
+void createDummyImage(uint8_t* framebufferData, int framebufferLen, int offset) {
+	int j = offset;
+	for (int i = 0; i < framebufferLen; i += 4, j++) {
+		framebufferData[i] = j & 0xff;
+		framebufferData[i + 1] = (j / 8) & 0xff;
+		framebufferData[i + 2] = (j / 256) & 0xff;
+		framebufferData[i + 3] = j & 0xff;
 	}
 }
 
@@ -80,8 +81,6 @@ void enableAlphaForPlane(int drmFd, uint32_t planeId) {
 DRMFrameBuffer::DRMFrameBuffer(int screenNumber, int planeNumber, const CompositionGeometry geometry)
 {
 	int err;
-
-
 
 	this->screenNumber = screenNumber;
 	this->planeNumber = planeNumber;
@@ -138,8 +137,6 @@ DRMFrameBuffer::DRMFrameBuffer(int screenNumber, int planeNumber, const Composit
 		goto cleanup;
 	}
 
-
-
 	{
 		uint32_t planeFormat = DRMHelper::planeformat("AR24");
 		bool planeFound = DRMHelper::findPlane(connectionData.crtcIndex, planeFormat, &planeId, 5);
@@ -167,8 +164,6 @@ DRMFrameBuffer::DRMFrameBuffer(int screenNumber, int planeNumber, const Composit
 
 	enableAlphaForPlane(drmFd, planeId);
 
-	err = 0;
-
 cleanup:
 
 	return;
@@ -179,6 +174,22 @@ DRMFrameBuffer::~DRMFrameBuffer()
 {
 }
 
+int DRMFrameBuffer::getHeight() const
+{
+	return height;
+}
 
+int DRMFrameBuffer::getWidth() const
+{
+	return width;
+}
 
+uint8_t* DRMFrameBuffer::getBuffer() const
+{
+	return framebufferData;
+}
 
+const int DRMFrameBuffer::getBufferLen() const
+{
+	return framebufferLen;
+}
