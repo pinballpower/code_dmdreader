@@ -36,7 +36,7 @@ class DRMPrimeOut
 {
 
 public: 
-	DRMPrimeOut(CompositionGeometry compositionGeometry, int screenNumber=0, int planeNumber = 0);
+	DRMPrimeOut(const CompositionGeometry compositionGeometry, int screenNumber=0, int planeNumber = 0);
 	~DRMPrimeOut();
 
 	int displayFrame(struct AVFrame* frame);
@@ -49,7 +49,9 @@ private:
 
 	int screenNumber;
 	int drmFd;
-	struct DRMConnectionData connectionData;
+	DRMConnectionData connectionData;
+	CompositionGeometry compositionGeometry;
+
 	enum AVPixelFormat avfmt;
 	int show_all;
 

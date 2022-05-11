@@ -109,8 +109,8 @@ int DRMPrimeOut::renderFrame(AVFrame* frame)
 
 	ret = drmModeSetPlane(drmFd, connectionData.planeId, connectionData.crtcId,
 		da->framebufferHandle, 0,
-		connectionData.compositionGeometry.x, connectionData.compositionGeometry.y,
-		connectionData.compositionGeometry.width, connectionData.compositionGeometry.height,
+		compositionGeometry.x, compositionGeometry.y,
+		compositionGeometry.width, compositionGeometry.height,
 		0, 0,
 		av_frame_cropped_width(frame) << 16,
 		av_frame_cropped_height(frame) << 16);
@@ -174,7 +174,7 @@ int DRMPrimeOut::displayFrame(struct AVFrame* src_frame)
 	return 0;
 }
 
-DRMPrimeOut::DRMPrimeOut(CompositionGeometry compositionGeometry, int screenNumber, int planeNumber)
+DRMPrimeOut::DRMPrimeOut(const CompositionGeometry compositionGeometry, int screenNumber, int planeNumber)
 {
 	drmFd = DRMHelper::getDRMDeviceFd(); // Cache it
 	if (!drmHelper.initFullscreen(screenNumber)) {
@@ -194,19 +194,8 @@ DRMPrimeOut::DRMPrimeOut(CompositionGeometry compositionGeometry, int screenNumb
 		return;
 	}
 
-	// override fullscreen if compose values are given
-	if (compositionGeometry.x >= 0) {
-		connectionData.compositionGeometry.x = compositionGeometry.x;
-	}
-	if (compositionGeometry.y >= 0) {
-		connectionData.compositionGeometry.y = compositionGeometry.y;
-	}
-	if (compositionGeometry.width >= 0) {
-		connectionData.compositionGeometry.width = compositionGeometry.width;
-	}
-	if (compositionGeometry.height >= 0) {
-		connectionData.compositionGeometry.height = compositionGeometry.height;
-	}
+	this->compositionGeometry = compositionGeometry;
+	this->compositionGeometry.fitInto(connectionData.fullscreenGeometry);
 
 	renderThread = thread(&DRMPrimeOut::renderLoop, this);
 }
