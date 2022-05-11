@@ -1,14 +1,31 @@
 #include "drmframebuffer.hpp"
 
 #include <sys/ioctl.h>
+#include <sys/mman.h>
 
 #include <boost/log/trivial.hpp>
+
+struct framebuffer {
+	int fd;
+	uint32_t buffer_id;
+	uint16_t res_x;
+	uint16_t res_y;
+	uint8_t* data;
+	uint32_t size;
+	struct drm_mode_create_dumb dumb_framebuffer;
+	drmModeCrtcPtr crtc;
+	drmModeConnectorPtr connector;
+	drmModeModeInfoPtr resolution;
+};
+
 
 DRMFrameBuffer::DRMFrameBuffer(int screenNumber, int planeNumber)
 {
 	drmModeConnector* connector = nullptr;
 	drmModeEncoder* encoder = nullptr;
 	drmModeCrtc* crtc_to_restore = nullptr;
+	uint8_t* framebufferData = nullptr;
+	int framebufferLen = 100 * 100 * 4;
 
 	int err;
 
@@ -56,27 +73,57 @@ DRMFrameBuffer::DRMFrameBuffer(int screenNumber, int planeNumber)
 		goto cleanup;
 	}
 
-	/* Backup the informations of the CRTC to restore when we're done.
-	 * The most important piece seems to currently be the buffer ID.
-	 */
-	crtc_to_restore =
-		drmModeGetCrtc(drmFd, connectionData.crtcId);
-	if (!crtc_to_restore) {
-		BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] could not retrieve the current CRTC with a valid ID";
+	framebufferLen = connectionData.compositionGeometry.width * connectionData.compositionGeometry.height * 4;
+	framebufferData = (uint8_t*)mmap(0, framebufferLen, PROT_READ | PROT_WRITE, MAP_SHARED, drmFd, mreq.offset);
+	if (framebufferData == MAP_FAILED) {
+		err = errno;
+		BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] mode map failed, err=" << err;
+		framebufferData = nullptr;
 		goto cleanup;
 	}
 
-	/* Set the CRTC so that it uses our new framebuffer */
-	err = drmModeSetCrtc(
-		drmFd, connectionData.crtcId, framebufferId,
+	//{
+	//	uint8_t* data = framebufferData;
+	//	for (int i = 0; i < connectionData.connectorWidth * connectionData.connectorHeight; i++, data += 4) {
+	//		data[0] = i & 0xff ; // b
+	//		data[1] = 0x00; // g 
+	//		data[2] = 0x00; // r
+	//		data[3] = 0xff;    
+	//	}
+	//}
+
+	memset(framebufferData, 0xff, framebufferLen);
+
+
+	{
+		uint32_t planeFormat = DRMHelper::planeformat("AR24");
+		bool planeFound = DRMHelper::findPlane(connectionData.crtcIndex, planeFormat, &connectionData.planeId, 5);
+		if (!planeFound) {
+			BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] No plane found for format " << DRMHelper::planeformatString(planeFormat);
+			goto cleanup;
+		}
+	}
+	err = drmModeSetPlane(drmFd, connectionData.planeId, connectionData.crtcId,
+		framebufferId, 0,
+		100,100,
+		200,200,
 		0, 0,
-		&connector->connector_id,
-		1,
-		&crtc_to_restore->mode);
+		connectionData.compositionGeometry.height << 16,
+		connectionData.compositionGeometry.height << 16);
 	if (err) {
-		BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] could not active screen: " << strerror(errno);
+		BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] Can't connect framebuffer to plane: " << strerror(errno);
 		goto cleanup;
 	}
+
+	/*
+
+	ret = drmModeSetPlane(drmFd, connectionData.planeId, connectionData.crtcId,
+		da->framebufferHandle, 0,
+		connectionData.compositionGeometry.x, connectionData.compositionGeometry.y,
+		connectionData.compositionGeometry.width, connectionData.compositionGeometry.height,
+		0, 0,
+		av_frame_cropped_width(frame) << 16,
+		av_frame_cropped_height(frame) << 16);*/
 
 	err = 0;
 
