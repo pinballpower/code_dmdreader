@@ -371,6 +371,26 @@ fail_res:
 	return result;
 }
 
+string DRMHelper::planeformatString(uint32_t format) {
+	string s;
+	s += char((format >> 0) & 0xff);
+	s += char((format >> 8) & 0xff);
+	s += char((format >> 16) & 0xff);
+	s += char((format >> 24) & 0xff);
+	return s;
+}
+
+uint32_t DRMHelper::planeformat(string s) {
+	if (s.length() < 4) {
+		return 0;
+	}
+	uint32_t res = 0;
+	for (int i = 3; i >= 0; i--) {
+		res = res << 8;
+		res += (uint8_t)s[i];
+	}
+	return res;
+}
 
 bool DRMHelper::findPlane(const int crtcIndex, const uint32_t format, uint32_t* const pplaneId, const int planeNumber)
 {
@@ -378,7 +398,6 @@ bool DRMHelper::findPlane(const int crtcIndex, const uint32_t format, uint32_t* 
 	drmModePlanePtr plane;
 	unsigned int i;
 	unsigned int j;
-	int ret = 0;
 	int currentPlane = 0;
 	bool returnCode = true;
 
@@ -403,10 +422,12 @@ bool DRMHelper::findPlane(const int crtcIndex, const uint32_t format, uint32_t* 
 		for (j = 0; j < plane->count_formats; ++j) {
 			if (plane->formats[j] == format) {
 				if (currentPlane == planeNumber) {
+					BOOST_LOG_TRIVIAL(trace) << "[drmhelper] found plane for format " << DRMHelper::planeformatString(format);
 					break;
 				}
 				else {
 					currentPlane++;
+					BOOST_LOG_TRIVIAL(trace) << "[drmhelper] found plane for format " << DRMHelper::planeformatString(format) << ", but planeIndex not yet reached";
 				}
 			}
 		}
@@ -426,7 +447,7 @@ bool DRMHelper::findPlane(const int crtcIndex, const uint32_t format, uint32_t* 
 	}
 
 	drmModeFreePlaneResources(planes);
-	return ret;
+	return returnCode;
 }
 
 void DRMHelper::logResources()

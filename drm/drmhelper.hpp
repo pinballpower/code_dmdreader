@@ -86,6 +86,9 @@ public:
 
 	static void waitVBlank();
 
+	static string planeformatString(uint32_t format);
+	static uint32_t planeformat(string formatString);
+
 protected:
 
 	static int drmDeviceFd;
