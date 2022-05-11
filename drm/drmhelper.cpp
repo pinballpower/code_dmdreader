@@ -353,10 +353,10 @@ DRMConnectionData DRMHelper::getConnectionData(int screenNumber)
 
 	{
 		drmModeCrtc* crtc = drmModeGetCrtc(DRMHelper::drmDeviceFd, result.crtcId);
-		result.compositionGeometry.x = crtc->x;
-		result.compositionGeometry.y = crtc->y;
-		result.compositionGeometry.width = crtc->width;
-		result.compositionGeometry.height = crtc->height;
+		result.fullscreenGeometry.x = crtc->x;
+		result.fullscreenGeometry.y = crtc->y;
+		result.fullscreenGeometry.width = crtc->width;
+		result.fullscreenGeometry.height = crtc->height;
 		drmModeFreeCrtc(crtc);
 	}
 

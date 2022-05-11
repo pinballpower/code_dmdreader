@@ -36,7 +36,7 @@ struct DRMConnectionData
 	/// This is a 4-character pixel format encoded in a 32bit work, e.g. '21VN'-> 0x3231564E
 	/// </summary>
 	uint32_t outputFourCC = 0;
-	CompositionGeometry compositionGeometry;
+	CompositionGeometry fullscreenGeometry;
 };
 
 
