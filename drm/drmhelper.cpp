@@ -531,7 +531,7 @@ void CompositionGeometry::fitInto(CompositionGeometry screenSize)
 	if (height > screenSize.height) {
 		height = screenSize.height;
 	}
-	if (width < screenSize.width) {
+	if (width > screenSize.width) {
 		width = screenSize.width;
 	}
 }
