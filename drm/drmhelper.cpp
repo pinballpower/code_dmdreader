@@ -460,3 +460,20 @@ void DRMHelper::logResources()
 
 	drmModeFreeResources(res);
 }
+
+void DRMHelper::waitVBlank()
+{
+	drmVBlank vbl = {
+		.request = {
+			.type = DRM_VBLANK_RELATIVE,
+			.sequence = 0
+		}
+	};
+
+	while (drmWaitVBlank(DRMHelper::drmDeviceFd, &vbl)) {
+		if (errno != EINTR) {
+			// This always fails - don't know why
+			break;
+		}
+	}
+}

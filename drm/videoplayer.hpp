@@ -3,7 +3,7 @@
 #include <string>
 #include <thread>
 
-#include "drmprime_out.hpp"
+#include "drmprimeout.hpp"
 
 
 using namespace std;

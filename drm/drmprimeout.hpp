@@ -49,7 +49,7 @@ private:
 
 	int screenNumber;
 	int drmFd;
-	struct DRMConnectionData setup;
+	struct DRMConnectionData connectionData;
 	enum AVPixelFormat avfmt;
 	int show_all;
 

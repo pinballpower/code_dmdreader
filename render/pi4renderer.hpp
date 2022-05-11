@@ -8,7 +8,7 @@
 
 #include "openglrenderer.hpp"
 
-#include "../rpi/drmhelper.hpp"
+#include "../drm/drmhelper.hpp"
 
 class Pi4Renderer : public OpenGLRenderer
 {

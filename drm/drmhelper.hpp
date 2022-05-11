@@ -84,6 +84,8 @@ public:
 
 	static void logResources();
 
+	static void waitVBlank();
+
 protected:
 
 	static int drmDeviceFd;

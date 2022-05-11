@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "drmprime_out.hpp"
+#include "drmprimeout.hpp"
 
 #include <boost/log/trivial.hpp>
 
@@ -61,21 +61,7 @@ int DRMPrimeOut::renderFrame(AVFrame* frame)
 		connectionData.outputFourCC = format;
 	}
 
-	{
-		drmVBlank vbl = {
-			.request = {
-				.type = DRM_VBLANK_RELATIVE,
-				.sequence = 0
-			}
-		};
-
-		while (drmWaitVBlank(drmFd, &vbl)) {
-			if (errno != EINTR) {
-				// This always fails - don't know why
-				break;
-			}
-		}
-	}
+	DRMHelper::waitVBlank();
 
 	da_uninit(da);
 
