@@ -53,9 +53,10 @@ int DRMPrimeOut::renderFrame(AVFrame* frame)
 	int ret = 0;
 
 	if (connectionData.outputFourCC != format) {
-		if (DRMHelper::findPlane(connectionData.crtcIndex, format, &connectionData.planeId, planeNumber)) {
+		bool foundPlane = DRMHelper::findPlane(connectionData.crtcIndex, format, &connectionData.planeId, planeNumber);
+		if (! foundPlane) {
 			av_frame_free(&frame);
-			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] No plane for format " << format;
+			BOOST_LOG_TRIVIAL(error) << "[drmprime_out] No plane found that supports format " << DRMHelper::planeformatString(format);
 			return -1;
 		}
 		connectionData.outputFourCC = format;
@@ -162,7 +163,7 @@ int DRMPrimeOut::displayFrame(struct AVFrame* src_frame)
 	}
 
 	if (readyForNextFrame) {
-		q_next = frame;
+		nextFrame = frame;
 		semaphoreNextFrameReady.post();
 	}
 	else {
@@ -216,7 +217,7 @@ DRMPrimeOut::~DRMPrimeOut() {
 	semaphoreNextFrameReady.post();
 	renderThread.join();
 
-	av_frame_free(&q_next);
+	av_frame_free(&nextFrame);
 }
 
 
@@ -234,8 +235,8 @@ void DRMPrimeOut::renderLoop()
 		if (terminate)
 			break;
 
-		frame = q_next;
-		q_next = NULL;
+		frame = nextFrame;
+		nextFrame = NULL;
 
 		semaphoreRendererReady.post();
 
@@ -245,7 +246,7 @@ void DRMPrimeOut::renderLoop()
 	for (i = 0; i != AUX_SIZE; ++i)
 		da_uninit(aux + i);
 
-	av_frame_free(&q_next);
+	av_frame_free(&nextFrame);
 }
 
 

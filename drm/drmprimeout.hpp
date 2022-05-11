@@ -62,7 +62,7 @@ private:
 	interprocess_semaphore semaphoreNextFrameReady = interprocess_semaphore(0);
 	interprocess_semaphore semaphoreRendererReady = interprocess_semaphore(0);
 	bool terminate = false;
-	AVFrame* q_next;
+	AVFrame* nextFrame;
 
 	DRMHelper drmHelper;
 
