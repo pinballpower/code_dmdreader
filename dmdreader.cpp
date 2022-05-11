@@ -22,7 +22,8 @@
 #include "dmdsource/dmdsource.hpp"
 #include "util/objectfactory.hpp"
 
-#include "rpi/videoplayer.hpp"
+#include "drm/videoplayer.hpp"
+#include "drm/drmframebuffer.hpp"
 
 using namespace std;
 
@@ -241,21 +242,19 @@ int main(int argc, char** argv)
 	int activeSourceIndex = 0;
 	DMDSource* source = sources[activeSourceIndex];
 
+	DRMFrameBuffer dfb = DRMFrameBuffer(1, 0, CompositionGeometry(0,0,400,400));
 
-	VideoPlayer p2 = VideoPlayer(0,1);
-	p2.setScaling(200, 200, 400, 300);
+	VideoPlayer p1 = VideoPlayer(1, 1, CompositionGeometry(100, 100, 600, 500));
+	p1.openScreen();
+	p1.playBackground("/home/matuschd/code_dmdreader/samples/jellyfish-3-mbps-hd-hevc.mkv", 0);
+
+	VideoPlayer p2 = VideoPlayer(1,2, CompositionGeometry(200, 200, 400, 300));
 	p2.openScreen();
 	p2.playBackground("/home/matuschd/code_dmdreader/samples/jellyfish-3-mbps-hd-hevc.mkv", 0);
 
-	VideoPlayer p3 = VideoPlayer(0, 2);
-	p3.setScaling(300, 300, 400, 300);
-	p3.openScreen();
-	p3.playBackground("/home/matuschd/code_dmdreader/samples/jellyfish-3-mbps-hd-hevc.mkv", 0);
+	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+	p1.pause();
 
-	VideoPlayer p4 = VideoPlayer(0, 3);
-	p4.setScaling(400, 400, 400, 300);
-	p4.openScreen();
-	p4.playBackground("/home/matuschd/code_dmdreader/samples/jellyfish-3-mbps-hd-hevc.mkv", 0);
 
 	while ((!(sourcesFinished) && (! isFinished))) {
 
