@@ -16,11 +16,18 @@ struct ScreenSize {
 	int height;
 };
 
-struct CompositionGeometry {
+class CompositionGeometry {
+
+public: 
+
+	CompositionGeometry(int x = -1, int y = -1, int width = -1, int height = -1);
+
 	int x = -1;
 	int y = -1;
 	int width = -1;
 	int height = -1;
+
+	void fitInto(const CompositionGeometry screenSize);
 };
 
 struct DRMConnectionData
@@ -113,6 +120,4 @@ private:
 
 	
 };
-
-
 

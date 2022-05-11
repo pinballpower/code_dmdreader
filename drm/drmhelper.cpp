@@ -498,3 +498,40 @@ void DRMHelper::waitVBlank()
 		}
 	}
 }
+
+CompositionGeometry::CompositionGeometry(int x, int y, int width, int height)
+{
+	this->x = x;
+	this->y = y;
+	this->width = width;
+	this->height = height;
+}
+
+void CompositionGeometry::fitInto(CompositionGeometry screenSize)
+{
+	if (x < 0) {
+		x = screenSize.x;
+	}
+	if (y < 0) {
+		y = screenSize.y;
+	}
+	if (width < 0) {
+		width = screenSize.width;
+	}	
+	if (height < 0) {
+		height = screenSize.height;
+	}
+
+	if (x < screenSize.x) {
+		x = screenSize.x;
+	}
+	if (y < screenSize.y) {
+		y = screenSize.y;
+	}
+	if (height > screenSize.height) {
+		height = screenSize.height;
+	}
+	if (width < screenSize.width) {
+		width = screenSize.width;
+	}
+}
