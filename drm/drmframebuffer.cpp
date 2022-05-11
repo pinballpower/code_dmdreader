@@ -5,6 +5,10 @@
 
 #include <boost/log/trivial.hpp>
 
+#define NAME_ALPHA "alpha"
+#define NAME_PIXEL_BLEND "pixel blend mode"
+#define VALUE_PIXEL_BLEND "Coverage"
+
 struct framebuffer {
 	int fd;
 	uint32_t buffer_id;
@@ -19,18 +23,69 @@ struct framebuffer {
 };
 
 
-DRMFrameBuffer::DRMFrameBuffer(int screenNumber, int planeNumber)
-{
-	drmModeConnector* connector = nullptr;
-	drmModeEncoder* encoder = nullptr;
-	drmModeCrtc* crtc_to_restore = nullptr;
-	uint8_t* framebufferData = nullptr;
-	int framebufferLen = 100 * 100 * 4;
+void createDummyImage(uint8_t* framebufferData, int framebufferLen) {
+	for (int i = 0; i < framebufferLen; i += 4) {
+		framebufferData[i] = i & 0xff;
+		framebufferData[i + 1] = (i / 8) & 0xff;
+		framebufferData[i + 2] = (i / 256) & 0xff;
+		framebufferData[i + 3] = i & 0xff;
+	}
+}
 
+
+void enableAlphaForPlane(int drmFd, uint32_t planeId) {
+	drmModeObjectPropertiesPtr props;
+	props = drmModeObjectGetProperties(drmFd, planeId,
+		DRM_MODE_OBJECT_PLANE);
+	if (!props) {
+		BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] no plane properties found";
+	}
+
+	for (int i = 0; i < props->count_props; i++) {
+		drmModePropertyPtr prop;
+
+		prop = drmModeGetProperty(drmFd, props->props[i]);
+		if (prop) {
+			if (strcmp(prop->name, NAME_PIXEL_BLEND) == 0) {
+
+				drm_mode_property_enum* pEnum = prop->enums;
+				for (int j = 0; j < prop->count_enums; j++) {
+					if (strcmp(pEnum->name, VALUE_PIXEL_BLEND) == 0) {
+						BOOST_LOG_TRIVIAL(info) << "[drmframebuffer] setting " << NAME_PIXEL_BLEND << " to " << VALUE_PIXEL_BLEND;
+						if (drmModeObjectSetProperty(drmFd, planeId, DRM_MODE_OBJECT_PLANE, prop->prop_id, pEnum->value)) {
+							BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] could not set pixel blending property";
+						}
+					}
+					pEnum++;
+				}
+			}
+
+			if (strcmp(prop->name, NAME_ALPHA) == 0) {
+				BOOST_LOG_TRIVIAL(info) << "[drmframebuffer] setting " << NAME_ALPHA;
+				if (drmModeObjectSetProperty(drmFd, planeId, DRM_MODE_OBJECT_PLANE, prop->prop_id, 0xffff)) {
+					BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] could not set alpha property";
+				}
+			}
+
+			drmModeFreeProperty(prop);
+		}
+	}
+	drmModeFreeObjectProperties(props);
+}
+
+
+
+
+
+DRMFrameBuffer::DRMFrameBuffer(int screenNumber, int planeNumber, const CompositionGeometry geometry)
+{
 	int err;
+
+
 
 	this->screenNumber = screenNumber;
 	this->planeNumber = planeNumber;
+	this->compositionGeometry = geometry;
 
 	drmFd = DRMHelper::getDRMDeviceFd(); // Cache it
 	connectionData = DRMHelper::getConnectionData(screenNumber);
@@ -38,9 +93,12 @@ DRMFrameBuffer::DRMFrameBuffer(int screenNumber, int planeNumber)
 		BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] could not connect to screen " << screenNumber;
 	}
 
+	width = connectionData.connectorWidth;
+	height = connectionData.connectorHeight;
+
 	drm_mode_create_dumb dumbBufferConfig;
-	dumbBufferConfig.width = connectionData.connectorWidth;
-	dumbBufferConfig.height = connectionData.connectorHeight;
+	dumbBufferConfig.width = width;
+	dumbBufferConfig.height = height;
 	dumbBufferConfig.bpp = 32;
 
 	err = ioctl(drmFd, DRM_IOCTL_MODE_CREATE_DUMB, &dumbBufferConfig);
@@ -49,17 +107,12 @@ DRMFrameBuffer::DRMFrameBuffer(int screenNumber, int planeNumber)
 	}
 
 	uint32_t framebufferId;
-	err = drmModeAddFB(drmFd,connectionData.compositionGeometry.width, connectionData.compositionGeometry.height, 24, 32,
+	// frame buffer size has to match the resolution of the connector!
+	// also make sure, depth is 32 as we use an alpha channel
+	err = drmModeAddFB(drmFd, width, height, 32, 32,
 		dumbBufferConfig.pitch, dumbBufferConfig.handle, &framebufferId);
 	if (err) {
 		BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] could not add framebuffer to drm: " << strerror(errno);
-		goto cleanup;
-	}
-
-	connector = drmModeGetConnector(drmFd, connectionData.connectionId);
-	encoder = drmModeGetEncoder(drmFd, connector->encoder_id);
-	if (!encoder) {
-		BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] could not get encoder";
 		goto cleanup;
 	}
 
@@ -73,70 +126,59 @@ DRMFrameBuffer::DRMFrameBuffer(int screenNumber, int planeNumber)
 		goto cleanup;
 	}
 
-	framebufferLen = connectionData.compositionGeometry.width * connectionData.compositionGeometry.height * 4;
+	this->compositionGeometry.fitInto(connectionData.fullscreenGeometry);
+
+	framebufferLen = width * height * 4;
 	framebufferData = (uint8_t*)mmap(0, framebufferLen, PROT_READ | PROT_WRITE, MAP_SHARED, drmFd, mreq.offset);
 	if (framebufferData == MAP_FAILED) {
 		err = errno;
 		BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] mode map failed, err=" << err;
 		framebufferData = nullptr;
+		framebufferLen = 0;
 		goto cleanup;
 	}
 
-	//{
-	//	uint8_t* data = framebufferData;
-	//	for (int i = 0; i < connectionData.connectorWidth * connectionData.connectorHeight; i++, data += 4) {
-	//		data[0] = i & 0xff ; // b
-	//		data[1] = 0x00; // g 
-	//		data[2] = 0x00; // r
-	//		data[3] = 0xff;    
-	//	}
-	//}
-
-	memset(framebufferData, 0xff, framebufferLen);
 
 
 	{
 		uint32_t planeFormat = DRMHelper::planeformat("AR24");
-		bool planeFound = DRMHelper::findPlane(connectionData.crtcIndex, planeFormat, &connectionData.planeId, 5);
+		bool planeFound = DRMHelper::findPlane(connectionData.crtcIndex, planeFormat, &planeId, 5);
 		if (!planeFound) {
 			BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] No plane found for format " << DRMHelper::planeformatString(planeFormat);
 			goto cleanup;
 		}
 	}
-	err = drmModeSetPlane(drmFd, connectionData.planeId, connectionData.crtcId,
+
+	enableAlphaForPlane(drmFd, planeId);
+
+	err = drmModeSetPlane(drmFd, planeId, connectionData.crtcId,
 		framebufferId, 0,
-		100,100,
-		200,200,
+		this->compositionGeometry.x,
+		this->compositionGeometry.y,
+		this->compositionGeometry.width,
+		this->compositionGeometry.height,
 		0, 0,
-		connectionData.compositionGeometry.height << 16,
-		connectionData.compositionGeometry.height << 16);
+		connectionData.connectorWidth << 16,
+		connectionData.connectorHeight << 16);
 	if (err) {
 		BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] Can't connect framebuffer to plane: " << strerror(errno);
 		goto cleanup;
 	}
 
-	/*
-
-	ret = drmModeSetPlane(drmFd, connectionData.planeId, connectionData.crtcId,
-		da->framebufferHandle, 0,
-		connectionData.compositionGeometry.x, connectionData.compositionGeometry.y,
-		connectionData.compositionGeometry.width, connectionData.compositionGeometry.height,
-		0, 0,
-		av_frame_cropped_width(frame) << 16,
-		av_frame_cropped_height(frame) << 16);*/
+	enableAlphaForPlane(drmFd, planeId);
 
 	err = 0;
 
 cleanup:
 
-	// cleanup connector
-	// cleanup encoder
-	// cleanup framebuffer
-
-	err = 0;
+	return;
 
 }
 
 DRMFrameBuffer::~DRMFrameBuffer()
 {
 }
+
+
+
+
