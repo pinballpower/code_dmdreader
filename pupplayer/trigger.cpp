@@ -1,13 +1,11 @@
 #include "trigger.hpp"
 
 #include <vector>
-
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/log/trivial.hpp>
 
 using namespace std;
-
 
 static int flex_stoi(const string s, int defaultValue = -1) {
     if (s == "") {
@@ -55,4 +53,9 @@ PUPTrigger::PUPTrigger(string configLine)
 
     }
 
+}
+
+bool PUPTrigger::isValid()
+{
+    return id >= 0;
 }

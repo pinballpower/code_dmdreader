@@ -10,6 +10,8 @@ public:
 
     PUPTrigger(string configLine);
 
+    bool isValid();
+
     int id = -1;
     bool active;
     string description;
