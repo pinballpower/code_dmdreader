@@ -291,17 +291,23 @@ void VideoPlayer::closeScreen() {
 
 void VideoPlayer::startPlayback(string filename,  bool loop)
 {
+	stop();
 	playerThread = thread(&VideoPlayer::playLoop, this, filename, loop);
 }
 
 bool VideoPlayer::isPlaying()
 {
-	return playing;
+	return playerThread.joinable();
 }
 
 void VideoPlayer::stop()
 {
-	playing = false;
+	terminate = true;
+
+	// finish player thread
+	if (playerThread.joinable()) {
+		playerThread.join();
+	}
 }
 
 void VideoPlayer::pause(bool paused)
