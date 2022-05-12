@@ -14,6 +14,7 @@ class VideoPlayer {
 public: 
 
 	VideoPlayer(int screenNumber=0, int planeNumber=0, CompositionGeometry composition = CompositionGeometry());
+	~VideoPlayer();
 
 	// open/close connection to DRM
 	bool openScreen();

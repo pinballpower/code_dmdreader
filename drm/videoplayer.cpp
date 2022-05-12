@@ -264,6 +264,12 @@ VideoPlayer::VideoPlayer(int screenNumber, int planeNumber, CompositionGeometry 
 	paused = false;
 }
 
+VideoPlayer::~VideoPlayer()
+{
+	stop();
+	closeScreen();
+}
+
 bool VideoPlayer::openScreen()
 {
 	if (!(screenOpened)) {
