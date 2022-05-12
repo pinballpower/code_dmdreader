@@ -4,8 +4,9 @@
 
 - https://forums.raspberrypi.com/viewtopic.php?t=317511
 
-## V4L2
+## Video playback/V4L2
 
+- https://github.com/egnor/pivid (Pi video player that is scriptable)
 - https://github.com/Fredrum/rpi_v4l2_tests/tree/master/include (camera to OpenGL)
 
 ### DRM/MKS
