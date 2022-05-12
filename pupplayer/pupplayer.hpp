@@ -12,6 +12,8 @@ public:
 	PUPPlayer(int screenNumber = 0);
 	~PUPPlayer();
 
+	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) override;
+
 	void playEvent(int event);
 
 private:
