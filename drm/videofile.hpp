@@ -4,6 +4,7 @@
 
 extern "C" {
 #include <libavformat/avformat.h>
+#include <libavcodec/avcodec.h>
 }
 
 using namespace std;
@@ -20,8 +21,16 @@ public:
 
 	bool isReady() const;
 
+	int videoStream; 
+	AVCodec* decoder = nullptr;
+	AVFormatContext* inputContext = nullptr;
+
 private:
+	// VideoFile can't be copied as is contains pointers to AV contexts
+	VideoFile(const VideoFile&) = delete;
+	VideoFile& operator=(const VideoFile&) = delete;
+
+	string filename;
 	bool ready = false;
-	AVFormatContext* formatContext = nullptr;
 
 };

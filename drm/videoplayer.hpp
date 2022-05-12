@@ -5,6 +5,7 @@
 
 #include "drmprimeout.hpp"
 #include "drmhelper.hpp"
+#include "videofile.hpp"
 
 
 using namespace std;
@@ -21,7 +22,7 @@ public:
 	void closeScreen();
 
 	// Playback
-	void startPlayback(string filename, bool loop = false);
+	void startPlayback(VideoFile &videoFile, bool loop = false);
 	bool isPlaying();
 	void stop();
 	void pause(bool paused=true);
@@ -40,7 +41,7 @@ private:
 	bool screenOpened = false;
 	bool paused = false;
 
-	bool playLoop(string filename, bool loop);
+	bool playLoop(VideoFile *videoFile, bool loop);
 
 	thread playerThread;
 

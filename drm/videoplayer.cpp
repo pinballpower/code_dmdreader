@@ -123,13 +123,12 @@ static int decode_write(AVCodecContext* const avctx,
 }
 
 
-bool VideoPlayer::playLoop(string filename, bool loop)
+bool VideoPlayer::playLoop(VideoFile *videoFile, bool loop)
 {
-	AVFormatContext* input_ctx = NULL;
-	int video_stream, ret;
+	int ret;
 	AVStream* video = NULL;
 	AVCodecContext* decoder_ctx = NULL;
-	AVCodec* decoder = NULL;
+	
 	AVPacket packet;
 	enum AVHWDeviceType type;
 	const char* hwdev = "drm";
@@ -151,27 +150,10 @@ bool VideoPlayer::playLoop(string filename, bool loop)
 
 	while (!terminate) {
 
-		/* open the input file */
-		if (avformat_open_input(&input_ctx, filename.c_str(), NULL, NULL) != 0) {
-			BOOST_LOG_TRIVIAL(error) << "[videoplayer] cannot open input file " << filename;
-			return false;
-		}
+		BOOST_LOG_TRIVIAL(error) << "[t4]" << duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
-		if (avformat_find_stream_info(input_ctx, NULL) < 0) {
-			BOOST_LOG_TRIVIAL(error) << "[videoplayer] cannot find input stream information.";
-			return false;
-		}
-
-		/* find the video stream information */
-		ret = av_find_best_stream(input_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, &decoder, 0);
-		if (ret < 0) {
-			BOOST_LOG_TRIVIAL(error) << "[videoplayer] cannot find a video stream in the input file";
-			return false;
-		}
-		video_stream = ret;
-
-		if (decoder->id == AV_CODEC_ID_H264) {
-			if ((decoder = avcodec_find_decoder_by_name("h264_v4l2m2m")) == NULL) {
+		if (videoFile->decoder->id == AV_CODEC_ID_H264) {
+			if ((videoFile->decoder = avcodec_find_decoder_by_name("h264_v4l2m2m")) == NULL) {
 				BOOST_LOG_TRIVIAL(error) << "[videoplayer] cannot find the h264 v4l2m2m decoder";
 				return false;
 			}
@@ -179,9 +161,9 @@ bool VideoPlayer::playLoop(string filename, bool loop)
 		}
 		else {
 			for (i = 0;; i++) {
-				const AVCodecHWConfig* config = avcodec_get_hw_config(decoder, i);
+				const AVCodecHWConfig* config = avcodec_get_hw_config(videoFile->decoder, i);
 				if (!config) {
-					BOOST_LOG_TRIVIAL(error) << "[videoplayer] decoder " << decoder->name << " does not support device type " << av_hwdevice_get_type_name(type);
+					BOOST_LOG_TRIVIAL(error) << "[videoplayer] decoder " << videoFile->decoder->name << " does not support device type " << av_hwdevice_get_type_name(type);
 					return false;
 				}
 				if (config->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX &&
@@ -191,17 +173,20 @@ bool VideoPlayer::playLoop(string filename, bool loop)
 				}
 			}
 		}
+		BOOST_LOG_TRIVIAL(error) << "[t1]" << duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
-		if (!(decoder_ctx = avcodec_alloc_context3(decoder))) {
+		if (!(decoder_ctx = avcodec_alloc_context3(videoFile->decoder))) {
 			BOOST_LOG_TRIVIAL(error) << "[videoplayer] couldn't allocate AV codec";
 			return false;
 		}
+		BOOST_LOG_TRIVIAL(error) << "[t2]" << duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
-		video = input_ctx->streams[video_stream];
+		video = videoFile->inputContext->streams[videoFile->videoStream];
 		if (avcodec_parameters_to_context(decoder_ctx, video->codecpar) < 0) {
 			BOOST_LOG_TRIVIAL(error) << "[videoplayer] couldn't get context";
 			return false;
 		}
+		BOOST_LOG_TRIVIAL(error) << "[t3]" << duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
 		decoder_ctx->get_format = get_hw_format;
 
@@ -210,17 +195,22 @@ bool VideoPlayer::playLoop(string filename, bool loop)
 			return false;
 		}
 
+		BOOST_LOG_TRIVIAL(error) << "[t4]" << duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
 		decoder_ctx->thread_count = 3;
 
-		if ((ret = avcodec_open2(decoder_ctx, decoder, NULL)) < 0) {
-			BOOST_LOG_TRIVIAL(error) << "[videoplayer] failed to open codec for stream #" << video_stream;
+		if ((ret = avcodec_open2(decoder_ctx, videoFile->decoder, NULL)) < 0) {
+			BOOST_LOG_TRIVIAL(error) << "[videoplayer] failed to open codec for stream #" << videoFile->videoStream;
 			return -1;
 		}
+
+		BOOST_LOG_TRIVIAL(error) << "[t5]" << duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
 
 		/* actual decoding */
 		playing = true;
 		while ((ret >= 0) and (playing)) {
-			if ((ret = av_read_frame(input_ctx, &packet)) < 0)
+			if ((ret = av_read_frame(videoFile->inputContext, &packet)) < 0)
 				break;
 
 			// very simplistic pause implementation
@@ -228,7 +218,7 @@ bool VideoPlayer::playLoop(string filename, bool loop)
 				std::this_thread::sleep_for(std::chrono::milliseconds(25));
 			}
 
-			if (video_stream == packet.stream_index)
+			if (videoFile->videoStream == packet.stream_index)
 				ret = decode_write(decoder_ctx, dpo, &packet);
 
 			av_packet_unref(&packet);
@@ -241,7 +231,7 @@ bool VideoPlayer::playLoop(string filename, bool loop)
 		av_packet_unref(&packet);
 
 		avcodec_free_context(&decoder_ctx);
-		avformat_close_input(&input_ctx);
+		// avformat_close_input(&input_ctx);
 
 		if (!loop) {
 			terminate = true;
@@ -295,10 +285,10 @@ void VideoPlayer::closeScreen() {
 }
 
 
-void VideoPlayer::startPlayback(string filename,  bool loop)
+void VideoPlayer::startPlayback(VideoFile &videoFile,  bool loop)
 {
 	stop();
-	playerThread = thread(&VideoPlayer::playLoop, this, filename, loop);
+	playerThread = thread(&VideoPlayer::playLoop, this, &videoFile, loop);
 }
 
 bool VideoPlayer::isPlaying()
