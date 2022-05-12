@@ -193,7 +193,7 @@ else()
 message(STATUS "not enabling colorisation module")
 endif()
 
-set (UTIL_SRC "util/crc32.cpp" "util/crc32.hpp" "util/bmp.hpp" "util/bmp.cpp"  "dmd/color.cpp" "util/image.hpp" "util/image.cpp" "util/objectfactory.hpp" "util/objectfactory.cpp" "util/bithelper.cpp" "util/bithelper.hpp" "stb/stb_image.h")
+set (UTIL_SRC "util/crc32.cpp" "util/crc32.hpp" "util/bmp.hpp" "util/bmp.cpp"  "dmd/color.cpp" "util/image.hpp" "util/image.cpp" "util/objectfactory.hpp" "util/objectfactory.cpp" "util/bithelper.cpp" "util/bithelper.hpp" "stb/stb_image.h" "util/glob.hpp" "util/glob.cpp")
 set (RENDER_SRC "render/framerenderer.hpp"  "render/framerenderer.cpp" )
 set (DMDSOURCE_SRC  "dmdsource/pngsource.hpp" "dmdsource/pngsource.cpp" "dmdsource/dmdsource.hpp" "dmdsource/dmdsource.cpp" "dmdsource/datdmdsource.hpp" "dmdsource/datdmdsource.cpp" "dmdsource/nullsource.cpp" "dmdsource/txtdmdsource.hpp" "dmdsource/txtdmdsource.cpp")
 set (DMD_SRC "dmd/palette.hpp" "dmd/maskeddmdframe.hpp" "dmd/maskeddmdframe.cpp" "dmd/dmdframe.cpp" "dmd/dmdframe.hpp"  "dmd/palette.cpp"  )
