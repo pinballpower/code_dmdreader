@@ -13,6 +13,7 @@ public:
 	~PUPPlayer();
 
 	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) override;
+	bool start() override;
 
 	void playEvent(int event);
 
