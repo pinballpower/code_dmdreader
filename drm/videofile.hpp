@@ -9,6 +9,16 @@ extern "C" {
 
 using namespace std;
 
+
+// Lifecycle of the object
+enum class VideoPlaybackState {
+	UNINITIALIZED,
+	OPENED,
+	PARSED,
+	DECODER_CONNECTED,
+	CLOSED,
+};
+
 /// <summary>
 /// A wrapper for video files that allows some pre-processing (e.g. header/stream parsing) before starting playback
 /// It uses FFMPEGs av library.
@@ -16,10 +26,14 @@ using namespace std;
 class VideoFile {
 
 public:
-	VideoFile(const string filename);
+	VideoFile(const string filename, bool preparse=true);
 	~VideoFile();
 
-	bool isReady() const;
+	VideoPlaybackState getPlaybackState() const;
+
+	void parseStreams();
+	void connectToDecoder();
+	void close();
 
 	int videoStream; 
 	AVCodec* decoder = nullptr;
@@ -34,6 +48,6 @@ private:
 	VideoFile& operator=(const VideoFile&) = delete;
 
 	string filename;
-	bool ready = false;
+	VideoPlaybackState playbackState = VideoPlaybackState::UNINITIALIZED;
 
 };

@@ -45,21 +45,6 @@ extern "C" {
 
 using namespace std;
 
-static int hw_decoder_init(AVCodecContext* ctx, const enum AVHWDeviceType type)
-{
-	int err = 0;
-
-	ctx->hw_frames_ctx = NULL;
-	// ctx->hw_device_ctx gets freed when we call avcodec_free_context
-	if ((err = av_hwdevice_ctx_create(&ctx->hw_device_ctx, type,
-		NULL, NULL, 0)) < 0) {
-		BOOST_LOG_TRIVIAL(error) << "[videoplayer] failed to create specified HW device.";
-		return err;
-	}
-
-	return err;
-}
-
 
 
 static int decode_write(AVCodecContext* const avctx,
@@ -126,23 +111,6 @@ bool VideoPlayer::playLoop(VideoFile *videoFile, bool loop)
 
 
 
-		if (hw_decoder_init(videoFile->decoderContext, AV_HWDEVICE_TYPE_DRM) < 0) {
-			BOOST_LOG_TRIVIAL(error) << "[videoplayer] couldn't initialize HW decoder";
-			return false;
-		}
-
-		BOOST_LOG_TRIVIAL(error) << "[t4]" << duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-
-		videoFile->decoderContext->thread_count = 3;
-
-		if ((ret = avcodec_open2(videoFile->decoderContext, videoFile->decoder, NULL)) < 0) {
-			BOOST_LOG_TRIVIAL(error) << "[videoplayer] failed to open codec for stream #" << videoFile->videoStream;
-			return -1;
-		}
-
-		BOOST_LOG_TRIVIAL(error) << "[t5]" << duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-
-
 
 
 		/* actual decoding */
@@ -168,8 +136,7 @@ bool VideoPlayer::playLoop(VideoFile *videoFile, bool loop)
 		ret = decode_write(videoFile->decoderContext, dpo, &packet);
 		av_packet_unref(&packet);
 
-		//avcodec_free_context(&decoder_ctx);
-		// avformat_close_input(&input_ctx);
+		videoFile->close();
 
 		if (!loop) {
 			terminate = true;
@@ -225,6 +192,11 @@ void VideoPlayer::closeScreen() {
 
 void VideoPlayer::startPlayback(VideoFile &videoFile,  bool loop)
 {
+	videoFile.connectToDecoder();
+	if (videoFile.getPlaybackState() != VideoPlaybackState::DECODER_CONNECTED) {
+		BOOST_LOG_TRIVIAL(trace) << "[videoplayer] couldn't connect to video decoder";
+		return;
+	}
 	stop();
 	playerThread = thread(&VideoPlayer::playLoop, this, &videoFile, loop);
 }

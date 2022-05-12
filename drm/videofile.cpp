@@ -20,13 +20,41 @@ static enum AVPixelFormat get_hw_format(AVCodecContext* ctx,
 }
 
 
+static int hw_decoder_init(AVCodecContext* ctx, const enum AVHWDeviceType type)
+{
+	int err = 0;
 
-VideoFile::VideoFile(const string filename)
+	ctx->hw_frames_ctx = NULL;
+	// ctx->hw_device_ctx gets freed when we call avcodec_free_context
+	if ((err = av_hwdevice_ctx_create(&ctx->hw_device_ctx, type,
+		NULL, NULL, 0)) < 0) {
+		BOOST_LOG_TRIVIAL(error) << "[videoplayer] failed to create specified HW device.";
+		return err;
+	}
+
+	return err;
+}
+
+
+VideoFile::VideoFile(const string filename, bool preparse)
 {
 	this->filename = filename;
 
 	if (avformat_open_input(&inputContext, filename.c_str(), NULL, NULL) != 0) {
-		BOOST_LOG_TRIVIAL(error) << "[videofile] cannot open input file " << filename;
+		BOOST_LOG_TRIVIAL(debug) << "[videofile] cannot open input file " << filename;
+		return;
+	}
+
+	playbackState = VideoPlaybackState::OPENED;
+
+	if (preparse) {
+		parseStreams();
+	}
+}
+
+void VideoFile::parseStreams() {
+
+	if (playbackState == VideoPlaybackState::PARSED) {
 		return;
 	}
 
@@ -34,9 +62,6 @@ VideoFile::VideoFile(const string filename)
 		BOOST_LOG_TRIVIAL(error) << "[videofile] cannot find input stream information.";
 		return;
 	}
-
-	BOOST_LOG_TRIVIAL(trace) << "[videofile] opened and pre-parsed " << filename;
-	ready = true;
 
 	/* find the video stream information */
 	videoStream = av_find_best_stream(inputContext, AVMEDIA_TYPE_VIDEO, -1, -1, &decoder, 0);
@@ -80,18 +105,49 @@ VideoFile::VideoFile(const string filename)
 
 	decoderContext->get_format = get_hw_format;
 
-	ready = true;
-
-
+	BOOST_LOG_TRIVIAL(trace) << "[videofile] opened " << filename;
+	playbackState = VideoPlaybackState::PARSED;
 }
 
-VideoFile::~VideoFile()
+void VideoFile::connectToDecoder() {
+
+	if (playbackState == VideoPlaybackState::DECODER_CONNECTED) {
+		return;
+	}
+
+	if (playbackState != VideoPlaybackState::PARSED) {
+		BOOST_LOG_TRIVIAL(error) << "[videoplayer] can't connect to decoder as the video has not been parsed";
+		return;
+	}
+
+	if (hw_decoder_init(decoderContext, AV_HWDEVICE_TYPE_DRM) < 0) {
+		BOOST_LOG_TRIVIAL(error) << "[videoplayer] couldn't initialize HW decoder";
+		return;
+	}
+
+	decoderContext->thread_count = 3; // should not be needed here as it should run on hardware
+
+	if (avcodec_open2(decoderContext, decoder, NULL) < 0) {
+		BOOST_LOG_TRIVIAL(error) << "[videoplayer] failed to open codec for stream #" << videoStream;
+		return;
+	}
+
+	playbackState = VideoPlaybackState::DECODER_CONNECTED;
+}
+
+void VideoFile::close()
 {
 	avcodec_free_context(&decoderContext);
 	avformat_close_input(&inputContext);
 }
 
-bool VideoFile::isReady() const
+
+VideoFile::~VideoFile()
 {
-	return ready;
+	close();
+}
+
+VideoPlaybackState VideoFile::getPlaybackState() const
+{
+	return playbackState;
 }
