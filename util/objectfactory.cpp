@@ -32,27 +32,27 @@
 #endif
 
 
-DMDSource* createSource(string name) {
+std::shared_ptr<DMDSource> createSource(string name) {
 
 	if (name == "dat") {
-		return (DMDSource*)(new DATDMDSource());
+		return std::make_shared<DMDSource>();
 	} else if (name == "txt") {
-		return (DMDSource*)(new TXTDMDSource());
+		return std::make_shared<TXTDMDSource>();
 	}
 	else if (name == "null") {
-		return (DMDSource*)(new NullDMDSource());
+		return std::make_shared<NullDMDSource>();
 	}
 	else if (name == "png") {
-		return (DMDSource*)(new PNGSource());
+		return std::make_shared<PNGSource>();
 	}
 #ifdef USE_SPI
 	else if (name == "spi") {
-		return (DMDSource*)(new SPISource());
+		return std::make_shared<SPISource>();
 	}
 #endif
 #ifdef VNICOLORING
 	else if (name == "vni") {
-		return (DMDSource*)(new Pin2DMDColorisation());
+		return std::make_shared<Pin2DMDColorisation>();
 	}
 #endif
 	else {
@@ -62,24 +62,24 @@ DMDSource* createSource(string name) {
 
 }
 
-DMDFrameProcessor* createProcessor(string name) {
+std::shared_ptr<DMDFrameProcessor> createProcessor(string name) {
 
 	if (name == "pubcapture") {
-		return (DMDFrameProcessor*)(new PubCapture());
+		return std::make_shared<PubCapture>();
 	}
 #ifdef VNICOLORING
 	else if (name == "pin2dmd") {
-		return (DMDFrameProcessor*)(new Pin2DMDColorisation());
+		return std::make_shared<Pin2DMDColorisation>();
 	}
 #endif
 	else if (name == "frameinfo") {
-		return (DMDFrameProcessor*)(new FrameInfoLogger());
+		return std::make_shared<FrameInfoLogger>();
 	}
 	else if (name == "palette") {
-		return (DMDFrameProcessor*)(new PaletteColorizer());
+		return std::make_shared<PaletteColorizer>();
 	}
 	else if (name == "store") {
-		return (DMDFrameProcessor*)(new FrameStore());
+		return std::make_shared<FrameStore>();
 	}
 	else {
 		BOOST_LOG_TRIVIAL(error) << "processor name " << name << " unknown";
@@ -88,24 +88,18 @@ DMDFrameProcessor* createProcessor(string name) {
 
 }
 
-
-FrameRenderer* createRenderer(string name) {
+std::shared_ptr<FrameRenderer> createRenderer(string name) {
 	if (name == "null") {
-		return new FrameRenderer();
+		return std::make_shared<FrameRenderer>();
 	} 
-#ifdef USE_RAYLIB
-	else if (name == "raylib") {
-		return (FrameRenderer*)(new RaylibRenderer());
-	}
-#endif
 #ifdef USE_OPENGLGLAD
 	else if (name == "opengl") {
-		return (FrameRenderer*)(new GladOpenGLRenderer());
+		return std::make_shared<GladOpenGLRenderer>();
 	}
 #endif
 #ifdef USE_OPENGLPI4
 	else if (name == "opengl") {
-		return (FrameRenderer*)(new Pi4Renderer());
+		return std::make_shared<Pi4Renderer>();
 	}
 #endif
 	else {

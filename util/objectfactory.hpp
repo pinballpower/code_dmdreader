@@ -11,7 +11,7 @@
 #include "../render/framerenderer.hpp"
 #include "../services/service.hpp"
 
-DMDSource* createSource(string name);
-DMDFrameProcessor* createProcessor(string name);
-FrameRenderer* createRenderer(string name);
+std::shared_ptr<DMDSource> createSource(string name);
+std::shared_ptr<DMDFrameProcessor> createProcessor(string name);
+std::shared_ptr<FrameRenderer> createRenderer(string name);
 std::shared_ptr<Service> createService(string name);

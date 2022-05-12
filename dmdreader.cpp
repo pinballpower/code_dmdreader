@@ -26,9 +26,9 @@
 
 using namespace std;
 
-vector<DMDSource*> sources = vector<DMDSource*>();
-vector<DMDFrameProcessor*> processors = vector<DMDFrameProcessor*>();
-vector<FrameRenderer*> renderers = vector<FrameRenderer*>();
+vector<std::shared_ptr<DMDSource>> sources;
+vector<std::shared_ptr<DMDFrameProcessor>> processors;
+vector<std::shared_ptr<FrameRenderer>> renderers;
 map<string, std::shared_ptr<Service>> services;
 
 bool terminateWhenFinished = true;
@@ -114,7 +114,7 @@ bool read_config(string filename) {
 	try {
 		BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("source")) {
 
-			DMDSource* source = createSource(v.first);
+			std::shared_ptr<DMDSource> source = createSource(v.first);
 			if (source) {
 				if (source->configureFromPtree(pt_general, v.second)) {
 					BOOST_LOG_TRIVIAL(info) << "[readconfig] successfully initialized input type " << v.first;
@@ -141,14 +141,11 @@ bool read_config(string filename) {
 	//
 	try {
 		BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("processor")) {
-			DMDFrameProcessor* proc = createProcessor(v.first);
+			std::shared_ptr<DMDFrameProcessor> proc = createProcessor(v.first);
 			if (proc) {
 				if (proc->configureFromPtree(pt_general, v.second)) {
 					BOOST_LOG_TRIVIAL(info) << "[readconfig] successfully initialized processor " << v.first;
 					processors.push_back(proc);
-				}
-				else {
-					delete proc;
 				}
 			}
 			else {
@@ -166,7 +163,7 @@ bool read_config(string filename) {
 	//
 	try {
 		BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("renderer")) {
-			FrameRenderer* renderer = createRenderer(v.first);
+			std::shared_ptr<FrameRenderer> renderer = createRenderer(v.first);
 			if (renderer) {
 				if (renderer->configureFromPtree(pt_general, v.second)) {
 					BOOST_LOG_TRIVIAL(info) << "[readconfig] successfully initialized renderer " << v.first;
@@ -174,7 +171,6 @@ bool read_config(string filename) {
 				}
 				else {
 					BOOST_LOG_TRIVIAL(info) << "[readconfig] could not initialize renderer " << v.first << ", ignoring";
-					delete renderer;
 				}
 			}
 			else {
@@ -270,9 +266,7 @@ int main(int argc, char** argv)
 	int skippedFrames = 0;
 	bool sourcesFinished = false;
 	int activeSourceIndex = 0;
-	DMDSource* source = sources[activeSourceIndex];
-
-	PUPPlayer pp = PUPPlayer(0);
+	auto source = sources[activeSourceIndex];
 
 	while ((!(sourcesFinished) && (! isFinished))) {
 
@@ -302,12 +296,12 @@ int main(int argc, char** argv)
 
 		assert(frame.isValid());
 
-		for (DMDFrameProcessor* proc : processors) {
+		for (auto proc : processors) {
 			frame = proc->processFrame(frame);
 			assert(frame.isValid());
 		}
 
-		for (FrameRenderer* renderer : renderers) {
+		for (auto renderer : renderers) {
 			renderer->renderFrame(frame);
 			assert(frame.isValid());
 		}
@@ -329,23 +323,29 @@ int main(int argc, char** argv)
 	}
 
 	// Finishing
-	for (DMDSource* s : sources) {
+	BOOST_LOG_TRIVIAL(debug) << "[dmdreader] closing sources";
+	for (auto s : sources) {
 		s->close();
-		delete(s);
 	}
 	sources.clear();
 
-	for (DMDFrameProcessor* proc : processors) {
+	BOOST_LOG_TRIVIAL(debug) << "[dmdreader] closing processors";
+	for (auto proc : processors) {
 		proc->close();
-		delete(proc);
 	}
 	processors.clear();
 
-	for (FrameRenderer* renderer : renderers) {
+	BOOST_LOG_TRIVIAL(debug) << "[dmdreader] closing renderers";
+	for (auto renderer : renderers) {
 		renderer->close();
-		delete renderer;
 	}
 	renderers.clear();
+
+	BOOST_LOG_TRIVIAL(debug) << "[dmdreader] stopping services";
+	for (auto servicepair : services) {
+		servicepair.second->stop();
+	}
+	services.clear();
 
 	BOOST_LOG_TRIVIAL(info) << "[dmdreader] exiting";
 
