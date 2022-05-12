@@ -29,6 +29,8 @@ using namespace std;
 vector<DMDSource*> sources = vector<DMDSource*>();
 vector<DMDFrameProcessor*> processors = vector<DMDFrameProcessor*>();
 vector<FrameRenderer*> renderers = vector<FrameRenderer*>();
+map<string, std::shared_ptr<Service>> services;
+
 bool terminateWhenFinished = true;
 
 bool skip_unmodified_frames = true;
@@ -183,6 +185,35 @@ bool read_config(string filename) {
 
 	catch (const boost::property_tree::ptree_bad_path& e) {
 		BOOST_LOG_TRIVIAL(info) << "[readconfig] no renderers defined";
+	}
+
+	//
+	// Services
+	//
+	try {
+		BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("service")) {
+			std::shared_ptr<Service> service = createService(v.first);
+			if (service) {
+				if (service->configureFromPtree(pt_general, v.second)) {
+					if (service->start()) {
+						services[service->name()] = service;
+					}
+					else {
+						BOOST_LOG_TRIVIAL(info) << "[error] could not start service " << v.first;
+					}
+				}
+				else {
+					BOOST_LOG_TRIVIAL(info) << "[readconfig] could not initialize service " << v.first << ", ignoring";
+				}
+			}
+			else {
+				BOOST_LOG_TRIVIAL(error) << "[readconfig] don't know service type " << v.first << ", ignoring";
+			}
+		}
+	}
+
+	catch (const boost::property_tree::ptree_bad_path& e) {
+		BOOST_LOG_TRIVIAL(info) << "[readconfig] no services defined";
 	}
 
 	return true;
