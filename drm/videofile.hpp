@@ -24,6 +24,9 @@ public:
 	int videoStream; 
 	AVCodec* decoder = nullptr;
 	AVFormatContext* inputContext = nullptr;
+	AVCodecContext* decoderContext = nullptr;
+	AVStream* video = nullptr;
+
 
 private:
 	// VideoFile can't be copied as is contains pointers to AV contexts
