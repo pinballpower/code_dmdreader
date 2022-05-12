@@ -83,6 +83,7 @@ if (LIBAV_INCLUDE_DIR)
 message(STATUS "libavutil/hwcontext_drm.h found in ${LIBAV_INCLUDE_DIR}")
 include_directories(${LIBAV_INCLUDE_DIR})
 set (VIDEO_SRC "drm/drmprimeout.cpp" "drm/drmprimeout.hpp" "drm/videoplayer.cpp" "drm/videoplayer.hpp" "drm/drmframebuffer.hpp" "drm/drmframebuffer.cpp"  )
+set (PUPPLAYER_SRC "pupplayer/pupplayer.hpp" "pupplayer/pupplayer.cpp" "drm/videofile.hpp" "drm/videofile.cpp")
 set (VIDEO_LIBRARIES avcodec avfilter avutil avformat drm)
 else()
 message(FATAL_ERROR "libavutil/hwcontext_drm.h not found, you might need to install libavutil-dev ")
@@ -198,7 +199,7 @@ set (DMDSOURCE_SRC  "dmdsource/pngsource.hpp" "dmdsource/pngsource.cpp" "dmdsour
 set (DMD_SRC "dmd/palette.hpp" "dmd/maskeddmdframe.hpp" "dmd/maskeddmdframe.cpp" "dmd/dmdframe.cpp" "dmd/dmdframe.hpp"  "dmd/palette.cpp"  )
 set (PROCESSOR_SRC "processor/pubcapture.cpp" "processor/frameprocessor.hpp" "processor/frameprocessor.cpp" "processor/frameinfologger.hpp" "processor/frameinfologger.cpp" "processor/palettecolorizer.hpp" "processor/palettecolorizer.cpp" "processor/framestore.hpp" "processor/framestore.cpp")
 
-add_executable (${PROJECT_NAME} "dmdreader.cpp" ${UTIL_SRC} ${RENDER_SRC} ${DMD_SRC} ${DMDSOURCE_SRC} ${PROCESSOR_SRC} ${COLOR_SRC} ${OPENGL_SRC} ${SPI_SRC} ${RPI_SRC} ${VIDEO_SRC})
+add_executable (${PROJECT_NAME} "dmdreader.cpp" ${UTIL_SRC} ${RENDER_SRC} ${DMD_SRC} ${DMDSOURCE_SRC} ${PROCESSOR_SRC} ${COLOR_SRC} ${OPENGL_SRC} ${SPI_SRC} ${RPI_SRC} ${VIDEO_SRC} ${PUPPLAYER_SRC})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBRARIES} ${ZLIB_LIBRARIES} ${VIDEO_LIBRARIES})
