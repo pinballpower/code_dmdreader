@@ -139,7 +139,6 @@ bool VideoPlayer::playLoop(string filename, bool loop)
 
 	terminate = false;
 
-
 	type = av_hwdevice_find_type_by_name(hwdev);
 	if (type == AV_HWDEVICE_TYPE_NONE) {
 		BOOST_LOG_TRIVIAL(error) << "[videoplayer] device type " << hwdev << " is not supported.";
@@ -150,107 +149,108 @@ bool VideoPlayer::playLoop(string filename, bool loop)
 	}
 
 
-loopy:
+	while (!terminate) {
 
-	/* open the input file */
-	if (avformat_open_input(&input_ctx, filename.c_str(), NULL, NULL) != 0) {
-		BOOST_LOG_TRIVIAL(error) << "[videoplayer] cannot open input file " << filename;
-		return false;
-	}
-
-	if (avformat_find_stream_info(input_ctx, NULL) < 0) {
-		BOOST_LOG_TRIVIAL(error) << "[videoplayer] cannot find input stream information.";
-		return false;
-	}
-
-	/* find the video stream information */
-	ret = av_find_best_stream(input_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, &decoder, 0);
-	if (ret < 0) {
-		BOOST_LOG_TRIVIAL(error) << "[videoplayer] cannot find a video stream in the input file";
-		return false;
-	}
-	video_stream = ret;
-
-	if (decoder->id == AV_CODEC_ID_H264) {
-		if ((decoder = avcodec_find_decoder_by_name("h264_v4l2m2m")) == NULL) {
-			BOOST_LOG_TRIVIAL(error) << "[videoplayer] cannot find the h264 v4l2m2m decoder";
+		/* open the input file */
+		if (avformat_open_input(&input_ctx, filename.c_str(), NULL, NULL) != 0) {
+			BOOST_LOG_TRIVIAL(error) << "[videoplayer] cannot open input file " << filename;
 			return false;
 		}
-		hw_pix_fmt = AV_PIX_FMT_DRM_PRIME;
-	}
-	else {
-		for (i = 0;; i++) {
-			const AVCodecHWConfig* config = avcodec_get_hw_config(decoder, i);
-			if (!config) {
-				BOOST_LOG_TRIVIAL(error) << "[videoplayer] decoder " << decoder->name << " does not support device type " << av_hwdevice_get_type_name(type);
+
+		if (avformat_find_stream_info(input_ctx, NULL) < 0) {
+			BOOST_LOG_TRIVIAL(error) << "[videoplayer] cannot find input stream information.";
+			return false;
+		}
+
+		/* find the video stream information */
+		ret = av_find_best_stream(input_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, &decoder, 0);
+		if (ret < 0) {
+			BOOST_LOG_TRIVIAL(error) << "[videoplayer] cannot find a video stream in the input file";
+			return false;
+		}
+		video_stream = ret;
+
+		if (decoder->id == AV_CODEC_ID_H264) {
+			if ((decoder = avcodec_find_decoder_by_name("h264_v4l2m2m")) == NULL) {
+				BOOST_LOG_TRIVIAL(error) << "[videoplayer] cannot find the h264 v4l2m2m decoder";
 				return false;
 			}
-			if (config->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX &&
-				config->device_type == type) {
-				hw_pix_fmt = config->pix_fmt;
-				break;
+			hw_pix_fmt = AV_PIX_FMT_DRM_PRIME;
+		}
+		else {
+			for (i = 0;; i++) {
+				const AVCodecHWConfig* config = avcodec_get_hw_config(decoder, i);
+				if (!config) {
+					BOOST_LOG_TRIVIAL(error) << "[videoplayer] decoder " << decoder->name << " does not support device type " << av_hwdevice_get_type_name(type);
+					return false;
+				}
+				if (config->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX &&
+					config->device_type == type) {
+					hw_pix_fmt = config->pix_fmt;
+					break;
+				}
 			}
 		}
-	}
 
-	if (!(decoder_ctx = avcodec_alloc_context3(decoder))) {
-		BOOST_LOG_TRIVIAL(error) << "[videoplayer] couldn't allocate AV codec";
-		return false;
-	}
-
-	video = input_ctx->streams[video_stream];
-	if (avcodec_parameters_to_context(decoder_ctx, video->codecpar) < 0) {
-		BOOST_LOG_TRIVIAL(error) << "[videoplayer] couldn't get context";
-		return false;
-	}
-
-	decoder_ctx->get_format = get_hw_format;
-
-	if (hw_decoder_init(decoder_ctx, type) < 0) {
-		BOOST_LOG_TRIVIAL(error) << "[videoplayer] couldn't initialize HW decoder";
-		return false;
-	}
-
-	decoder_ctx->thread_count = 3;
-
-	if ((ret = avcodec_open2(decoder_ctx, decoder, NULL)) < 0) {
-		BOOST_LOG_TRIVIAL(error) << "[videoplayer] failed to open codec for stream #" << video_stream;
-		return -1;
-	}
-
-	/* actual decoding */
-	playing = true;
-	while ((ret >= 0) and (playing)) {
-		if ((ret = av_read_frame(input_ctx, &packet)) < 0)
-			break;
-
-		// very simplistic pause implementation
-		while (paused) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(25));
+		if (!(decoder_ctx = avcodec_alloc_context3(decoder))) {
+			BOOST_LOG_TRIVIAL(error) << "[videoplayer] couldn't allocate AV codec";
+			return false;
 		}
 
-		if (video_stream == packet.stream_index)
-			ret = decode_write(decoder_ctx, dpo, &packet);
+		video = input_ctx->streams[video_stream];
+		if (avcodec_parameters_to_context(decoder_ctx, video->codecpar) < 0) {
+			BOOST_LOG_TRIVIAL(error) << "[videoplayer] couldn't get context";
+			return false;
+		}
 
+		decoder_ctx->get_format = get_hw_format;
+
+		if (hw_decoder_init(decoder_ctx, type) < 0) {
+			BOOST_LOG_TRIVIAL(error) << "[videoplayer] couldn't initialize HW decoder";
+			return false;
+		}
+
+		decoder_ctx->thread_count = 3;
+
+		if ((ret = avcodec_open2(decoder_ctx, decoder, NULL)) < 0) {
+			BOOST_LOG_TRIVIAL(error) << "[videoplayer] failed to open codec for stream #" << video_stream;
+			return -1;
+		}
+
+		/* actual decoding */
+		playing = true;
+		while ((ret >= 0) and (playing)) {
+			if ((ret = av_read_frame(input_ctx, &packet)) < 0)
+				break;
+
+			// very simplistic pause implementation
+			while (paused) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(25));
+			}
+
+			if (video_stream == packet.stream_index)
+				ret = decode_write(decoder_ctx, dpo, &packet);
+
+			av_packet_unref(&packet);
+		}
+
+		/* flush the decoder */
+		packet.data = NULL;
+		packet.size = 0;
+		ret = decode_write(decoder_ctx, dpo, &packet);
 		av_packet_unref(&packet);
-	}
 
-	/* flush the decoder */
-	packet.data = NULL;
-	packet.size = 0;
-	ret = decode_write(decoder_ctx, dpo, &packet);
-	av_packet_unref(&packet);
+		avcodec_free_context(&decoder_ctx);
+		avformat_close_input(&input_ctx);
 
-	avcodec_free_context(&decoder_ctx);
-	avformat_close_input(&input_ctx);
-
-	playing = false;
-
-	if (loop) {
-		goto loopy;
+		if (!loop) {
+			terminate = true;
+		}
 	}
 
 	closeScreen();
+	playing = false;
+
 
 	return true;
 }
