@@ -54,6 +54,7 @@ static int decode_write(AVCodecContext* const avctx,
 	int size;
 	int ret = 0;
 	unsigned int i;
+	int countFrames = 0;
 
 	ret = avcodec_send_packet(avctx, packet);
 	if (ret < 0) {
@@ -72,7 +73,7 @@ static int decode_write(AVCodecContext* const avctx,
 		if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
 			av_frame_free(&frame);
 			av_frame_free(&sw_frame);
-			return 0;
+			break;
 		}
 		else if (ret < 0) {
 			BOOST_LOG_TRIVIAL(error) << "[videoplayer] error while decoding";
@@ -80,6 +81,7 @@ static int decode_write(AVCodecContext* const avctx,
 		}
 
 		dpo->displayFrame(frame);
+		countFrames++;
 
 	fail:
 		av_frame_free(&frame);
@@ -88,23 +90,21 @@ static int decode_write(AVCodecContext* const avctx,
 		if (ret < 0)
 			return ret;
 	}
+
+	BOOST_LOG_TRIVIAL(trace) << "[videoplayer] frames decoded from packet: " << countFrames;
 	return 0;
 }
 
 
 void VideoPlayer::playLoop(bool loop)
 {
-	int ret;
-	
 	AVPacket packet;
-	const char* hwdev = "drm";
-	int i;
 
 	terminate = false;
 
 	/* actual decoding */
 	playing = true;
-	while ((ret >= 0) and (! terminate)) {
+	while (! terminate) {
 
 		// eof check and loop
 		if (!currentVideo->nextFrame(&packet)) {
@@ -126,8 +126,14 @@ void VideoPlayer::playLoop(bool loop)
 			std::this_thread::sleep_for(std::chrono::milliseconds(25));
 		}
 
-		if (currentVideo->videoStream == packet.stream_index)
-			ret = decode_write(currentVideo->decoderContext, dpo, &packet);
+		if (currentVideo->videoStream == packet.stream_index) {
+			// Theoretically a packet could contain more than one frame. However, with MP4 files it seems, a packet conatins
+			// only one frame
+			if (decode_write(currentVideo->decoderContext, dpo, &packet)) {
+				BOOST_LOG_TRIVIAL(error) << "[videoplayer] error while decoding video stream, aborting";
+				break;
+			}
+		}
 
 		av_packet_unref(&packet);
 	}
@@ -135,7 +141,7 @@ void VideoPlayer::playLoop(bool loop)
 	/* flush the decoder */
 	packet.data = NULL;
 	packet.size = 0;
-	ret = decode_write(currentVideo->decoderContext, dpo, &packet);
+	decode_write(currentVideo->decoderContext, dpo, &packet);
 	av_packet_unref(&packet);
 
 	currentVideo->close();
@@ -188,6 +194,10 @@ void VideoPlayer::closeScreen() {
 
 void VideoPlayer::startPlayback(unique_ptr<VideoFile> videoFile,  bool loop)
 {
+	if (! videoFile) {
+		return;
+	}
+
 	videoFile->connectToDecoder();
 	if (videoFile->getPlaybackState() != VideoPlaybackState::DECODER_CONNECTED) {
 		BOOST_LOG_TRIVIAL(trace) << "[videoplayer] couldn't connect to video decoder";
