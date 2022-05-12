@@ -22,7 +22,7 @@ public:
 	void closeScreen();
 
 	// Playback
-	void startPlayback(VideoFile &videoFile, bool loop = false);
+	void startPlayback(unique_ptr<VideoFile> videoFile, bool loop = false);
 	bool isPlaying();
 	void stop();
 	void pause(bool paused=true);
@@ -41,7 +41,9 @@ private:
 	bool screenOpened = false;
 	bool paused = false;
 
-	bool playLoop(VideoFile *videoFile, bool loop);
+	void playLoop(bool loop);
+
+	unique_ptr<VideoFile> currentVideo = unique_ptr<VideoFile>(nullptr);
 
 	thread playerThread;
 

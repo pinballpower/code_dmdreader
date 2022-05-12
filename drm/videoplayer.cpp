@@ -45,8 +45,6 @@ extern "C" {
 
 using namespace std;
 
-
-
 static int decode_write(AVCodecContext* const avctx,
 	DRMPrimeOut* const dpo,
 	AVPacket* packet)
@@ -94,7 +92,7 @@ static int decode_write(AVCodecContext* const avctx,
 }
 
 
-bool VideoPlayer::playLoop(VideoFile *videoFile, bool loop)
+void VideoPlayer::playLoop(bool loop)
 {
 	int ret;
 	
@@ -109,12 +107,12 @@ bool VideoPlayer::playLoop(VideoFile *videoFile, bool loop)
 	while ((ret >= 0) and (! terminate)) {
 
 		// eof check and loop
-		if (!videoFile->nextFrame(&packet)) {
+		if (!currentVideo->nextFrame(&packet)) {
 			// got no package, probably EOF
 			if (loop) {
 				// try to read from the beginning
-				videoFile->seek(0);
-				if (!videoFile->nextFrame(&packet)) {
+				currentVideo->seek(0);
+				if (!currentVideo->nextFrame(&packet)) {
 					break;
 				}
 			}
@@ -128,8 +126,8 @@ bool VideoPlayer::playLoop(VideoFile *videoFile, bool loop)
 			std::this_thread::sleep_for(std::chrono::milliseconds(25));
 		}
 
-		if (videoFile->videoStream == packet.stream_index)
-			ret = decode_write(videoFile->decoderContext, dpo, &packet);
+		if (currentVideo->videoStream == packet.stream_index)
+			ret = decode_write(currentVideo->decoderContext, dpo, &packet);
 
 		av_packet_unref(&packet);
 	}
@@ -137,10 +135,10 @@ bool VideoPlayer::playLoop(VideoFile *videoFile, bool loop)
 	/* flush the decoder */
 	packet.data = NULL;
 	packet.size = 0;
-	ret = decode_write(videoFile->decoderContext, dpo, &packet);
+	ret = decode_write(currentVideo->decoderContext, dpo, &packet);
 	av_packet_unref(&packet);
 
-	videoFile->close();
+	currentVideo->close();
 
 	playing = false;
 }
@@ -188,15 +186,16 @@ void VideoPlayer::closeScreen() {
 }
 
 
-void VideoPlayer::startPlayback(VideoFile &videoFile,  bool loop)
+void VideoPlayer::startPlayback(unique_ptr<VideoFile> videoFile,  bool loop)
 {
-	videoFile.connectToDecoder();
-	if (videoFile.getPlaybackState() != VideoPlaybackState::DECODER_CONNECTED) {
+	videoFile->connectToDecoder();
+	if (videoFile->getPlaybackState() != VideoPlaybackState::DECODER_CONNECTED) {
 		BOOST_LOG_TRIVIAL(trace) << "[videoplayer] couldn't connect to video decoder";
 		return;
 	}
 	stop();
-	playerThread = thread(&VideoPlayer::playLoop, this, &videoFile, loop);
+	currentVideo = std::move(videoFile);
+	playerThread = thread(&VideoPlayer::playLoop, this, loop);
 }
 
 bool VideoPlayer::isPlaying()
