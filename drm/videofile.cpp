@@ -141,6 +141,18 @@ void VideoFile::close()
 	avformat_close_input(&inputContext);
 }
 
+bool VideoFile::seek(int64_t timeStamp, int64_t range)
+{
+	int64_t min_ts = timeStamp - range;
+	int64_t max_ts = timeStamp + range;
+	return avformat_seek_file(inputContext, videoStream, min_ts, timeStamp, max_ts, 0);
+}
+
+bool VideoFile::nextFrame(AVPacket* packet)
+{
+	return av_read_frame(inputContext, packet) >= 0;
+}
+
 
 VideoFile::~VideoFile()
 {

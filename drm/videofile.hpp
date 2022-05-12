@@ -35,6 +35,10 @@ public:
 	void connectToDecoder();
 	void close();
 
+	bool seek(int64_t timeStamp, int64_t seekRange=100);
+
+	bool nextFrame(AVPacket* packet);
+
 	int videoStream; 
 	AVCodec* decoder = nullptr;
 	AVFormatContext* inputContext = nullptr;

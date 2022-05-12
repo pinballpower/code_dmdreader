@@ -98,56 +98,51 @@ bool VideoPlayer::playLoop(VideoFile *videoFile, bool loop)
 {
 	int ret;
 	
-	
 	AVPacket packet;
 	const char* hwdev = "drm";
 	int i;
 
-	openScreen();
-
 	terminate = false;
 
-	while (!terminate) {
+	/* actual decoding */
+	playing = true;
+	while ((ret >= 0) and (! terminate)) {
 
-
-
-
-
-		/* actual decoding */
-		playing = true;
-		while ((ret >= 0) and (playing)) {
-			if ((ret = av_read_frame(videoFile->inputContext, &packet)) < 0)
-				break;
-
-			// very simplistic pause implementation
-			while (paused) {
-				std::this_thread::sleep_for(std::chrono::milliseconds(25));
+		// eof check and loop
+		if (!videoFile->nextFrame(&packet)) {
+			// got no package, probably EOF
+			if (loop) {
+				// try to read from the beginning
+				videoFile->seek(0);
+				if (!videoFile->nextFrame(&packet)) {
+					break;
+				}
 			}
-
-			if (videoFile->videoStream == packet.stream_index)
-				ret = decode_write(videoFile->decoderContext, dpo, &packet);
-
-			av_packet_unref(&packet);
+			else {
+				break;
+			}
 		}
 
-		/* flush the decoder */
-		packet.data = NULL;
-		packet.size = 0;
-		ret = decode_write(videoFile->decoderContext, dpo, &packet);
+		// very simplistic pause implementation
+		while (paused) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(25));
+		}
+
+		if (videoFile->videoStream == packet.stream_index)
+			ret = decode_write(videoFile->decoderContext, dpo, &packet);
+
 		av_packet_unref(&packet);
-
-		videoFile->close();
-
-		if (!loop) {
-			terminate = true;
-		}
 	}
 
-	closeScreen();
+	/* flush the decoder */
+	packet.data = NULL;
+	packet.size = 0;
+	ret = decode_write(videoFile->decoderContext, dpo, &packet);
+	av_packet_unref(&packet);
+
+	videoFile->close();
+
 	playing = false;
-
-
-	return true;
 }
 
 VideoPlayer::VideoPlayer(int screenNumber, int planeNumber, CompositionGeometry compositionGeometry)
@@ -155,6 +150,9 @@ VideoPlayer::VideoPlayer(int screenNumber, int planeNumber, CompositionGeometry 
 	this->screenNumber = screenNumber;
 	this->planeNumber = planeNumber;
 	this->compositionGeometry = compositionGeometry;
+
+	openScreen();
+
 	playing = false;
 	paused = false;
 }
