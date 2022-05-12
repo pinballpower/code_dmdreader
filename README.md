@@ -32,4 +32,4 @@ Below is a list of links to different documentation, sample code and more that h
 
 ## Additional resources
 
-I have created a [simple list with links to additional resources in the web](https://github.com/pinballpower/code_dmdreader/blob/main/links.md). Feel free to send a pull request with additional resources.
+I have created a [simple list with links to additional resources in the web](links.md). Feel free to send a pull request with additional resources.
