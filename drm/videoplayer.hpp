@@ -29,7 +29,6 @@ public:
 
 private:
 
-	// scaling (-1 means full-screen)
 	CompositionGeometry compositionGeometry;
 
 	int screenNumber = 0;
