@@ -20,8 +20,7 @@ public:
 	void closeScreen();
 
 	// Playback
-	void play(string filename, int loopCount=0);
-	void playBackground(string filename, int loopCount=0);
+	void startPlayback(string filename, int loopCount=0);
 	bool isPlaying();
 	void stop();
 	void pause(bool paused=true);

@@ -285,12 +285,8 @@ void VideoPlayer::closeScreen() {
 	delete dpo;
 }
 
-void VideoPlayer::play(string filename, int loopCount)
-{
-	playLoop(filename, loopCount);
-}
 
-void VideoPlayer::playBackground(string filename, int loopCount)
+void VideoPlayer::startPlayback(string filename, int loopCount)
 {
 	playerThread = thread(&VideoPlayer::playLoop, this, filename, loopCount);
 }
