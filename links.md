@@ -4,6 +4,10 @@
 
 - https://forums.raspberrypi.com/viewtopic.php?t=317511
 
+## V4L2
+
+- https://github.com/Fredrum/rpi_v4l2_tests/tree/master/include (camera to OpenGL)
+
 ### DRM/MKS
 
 - https://events.static.linuxfound.org/sites/events/files/slides/brezillon-drm-kms.pdf
