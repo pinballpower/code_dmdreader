@@ -30,15 +30,6 @@ This complicates stuff as the video player that is needed for PubPacks need to b
 
 Below is a list of links to different documentation, sample code and more that helped during the development of the RPI graphical interface.
 
-### General
+## Additional resources
 
-- https://forums.raspberrypi.com/viewtopic.php?t=317511
-
-### DRM/MKS
-
-- https://events.static.linuxfound.org/sites/events/files/slides/brezillon-drm-kms.pdf
-- https://github.com/embear-engineering/drm-framebuffer
-
-## Related projects
-
-- https://github.com/tomba/kmsxx (found this too late and implemented lots of the DRM/KMS stuff by myself)
+I have created a [simple list with links to additional resources in the web](links.md). Feel free to send a pull request with additional resources.
