@@ -19,3 +19,5 @@ samples/*.txt
 /samples/gb1.txt.gz
 /debug-win.json
 /samples/jellyfish-3-mbps-hd-hevc.mkv
+/samples/spagb_100b2s
+/samples/spagb_100
