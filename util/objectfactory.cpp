@@ -11,6 +11,7 @@
 #include "../processor/palettecolorizer.hpp"
 #include "../processor/framestore.hpp"
 #include "../render/framerenderer.hpp"
+#include "../services/service.hpp"
 
 #ifdef USE_OPENGLGLAD
 #include "../render/gladopenglrenderer.hpp"
@@ -20,6 +21,9 @@
 #endif
 #ifdef USE_SPI
 #include "../dmdsource/spisource.hpp"
+#endif
+#ifdef USE_VIDEO
+#include "../pupplayer/pupplayer.hpp"
 #endif
 
 #if __has_include("../colorize/config.h")
@@ -108,5 +112,20 @@ FrameRenderer* createRenderer(string name) {
 		BOOST_LOG_TRIVIAL(error) << "renderer name " << name << " unknown";
 		return NULL;
 	}
+}
 
+
+std::shared_ptr<Service> createService(string name) {
+	if (name == "null") {
+		return std::make_shared<Service>();
+	}
+#ifdef USE_VIDEO
+	else if (name == "pupplayer") {
+		return std::make_shared<PUPPlayer>();
+	}
+#endif
+	else {
+		BOOST_LOG_TRIVIAL(error) << "renderer name " << name << " unknown";
+		return NULL;
+	}
 }

@@ -9,7 +9,9 @@
 #include "../dmdsource/dmdsource.hpp"
 #include "../processor/frameprocessor.hpp"
 #include "../render/framerenderer.hpp"
+#include "../services/service.hpp"
 
 DMDSource* createSource(string name);
 DMDFrameProcessor* createProcessor(string name);
 FrameRenderer* createRenderer(string name);
+std::shared_ptr<Service> createService(string name);
