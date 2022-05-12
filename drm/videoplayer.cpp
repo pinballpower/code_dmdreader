@@ -123,7 +123,7 @@ static int decode_write(AVCodecContext* const avctx,
 }
 
 
-bool VideoPlayer::playLoop(string filename, int loopCount)
+bool VideoPlayer::playLoop(string filename, bool loop)
 {
 	AVFormatContext* input_ctx = NULL;
 	int video_stream, ret;
@@ -137,6 +137,9 @@ bool VideoPlayer::playLoop(string filename, int loopCount)
 
 	openScreen();
 
+	terminate = false;
+
+
 	type = av_hwdevice_find_type_by_name(hwdev);
 	if (type == AV_HWDEVICE_TYPE_NONE) {
 		BOOST_LOG_TRIVIAL(error) << "[videoplayer] device type " << hwdev << " is not supported.";
@@ -145,6 +148,7 @@ bool VideoPlayer::playLoop(string filename, int loopCount)
 			BOOST_LOG_TRIVIAL(error) << "              " << av_hwdevice_get_type_name(type);
 		return false;
 	}
+
 
 loopy:
 
@@ -242,8 +246,7 @@ loopy:
 
 	playing = false;
 
-	if (loopCount != 0) {
-		loopCount--;
+	if (loop) {
 		goto loopy;
 	}
 
@@ -286,9 +289,9 @@ void VideoPlayer::closeScreen() {
 }
 
 
-void VideoPlayer::startPlayback(string filename, int loopCount)
+void VideoPlayer::startPlayback(string filename,  bool loop)
 {
-	playerThread = thread(&VideoPlayer::playLoop, this, filename, loopCount);
+	playerThread = thread(&VideoPlayer::playLoop, this, filename, loop);
 }
 
 bool VideoPlayer::isPlaying()

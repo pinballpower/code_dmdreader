@@ -20,7 +20,7 @@ public:
 	void closeScreen();
 
 	// Playback
-	void startPlayback(string filename, int loopCount=0);
+	void startPlayback(string filename, bool loop = false);
 	bool isPlaying();
 	void stop();
 	void pause(bool paused=true);
@@ -35,11 +35,12 @@ private:
 	int screenNumber = 0;
 	int planeNumber = 0;
 
+	bool terminate = false;
 	bool playing = false;
 	bool screenOpened = false;
 	bool paused = false;
 
-	bool playLoop(string filename, int loopCount=0);
+	bool playLoop(string filename, bool loop);
 
 	thread playerThread;
 
