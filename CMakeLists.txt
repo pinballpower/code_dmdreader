@@ -81,6 +81,7 @@ set (RPI_SRC "drm/drmhelper.hpp" "drm/drmhelper.cpp"   "rpi/spi.hpp" "rpi/spi.cp
 find_path(LIBAV_INCLUDE_DIR "libavutil/hwcontext_drm.h")
 if (LIBAV_INCLUDE_DIR)
 message(STATUS "libavutil/hwcontext_drm.h found in ${LIBAV_INCLUDE_DIR}")
+add_definitions(-DUSE_VIDEO)
 include_directories(${LIBAV_INCLUDE_DIR})
 set (VIDEO_SRC "drm/drmprimeout.cpp" "drm/drmprimeout.hpp" "drm/videoplayer.cpp" "drm/videoplayer.hpp" "drm/drmframebuffer.hpp" "drm/drmframebuffer.cpp" )
 set (PUPPLAYER_SRC "pupplayer/pupplayer.hpp" "pupplayer/pupplayer.cpp" "drm/videofile.hpp" "drm/videofile.cpp" "drm/videofileloader.cpp" "drm/videofileloader.hpp")
