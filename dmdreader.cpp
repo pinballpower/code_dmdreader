@@ -22,8 +22,7 @@
 #include "dmdsource/dmdsource.hpp"
 #include "util/objectfactory.hpp"
 
-#include "drm/videoplayer.hpp"
-#include "drm/drmframebuffer.hpp"
+#include "pupplayer/pupplayer.hpp"
 
 using namespace std;
 
@@ -242,19 +241,7 @@ int main(int argc, char** argv)
 	int activeSourceIndex = 0;
 	DMDSource* source = sources[activeSourceIndex];
 
-	DRMFrameBuffer dfb = DRMFrameBuffer(1, 0, CompositionGeometry(0,0,400,400));
-
-	VideoPlayer p1 = VideoPlayer(1, 1, CompositionGeometry(100, 100, 600, 500));
-	p1.openScreen();
-	p1.playBackground("/home/matuschd/code_dmdreader/samples/jellyfish-3-mbps-hd-hevc.mkv", 0);
-
-	VideoPlayer p2 = VideoPlayer(1,2, CompositionGeometry(200, 200, 400, 300));
-	p2.openScreen();
-	p2.playBackground("/home/matuschd/code_dmdreader/samples/jellyfish-3-mbps-hd-hevc.mkv", 0);
-
-	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-	p1.pause();
-
+	PUPPlayer pp = PUPPlayer(0);
 
 	while ((!(sourcesFinished) && (! isFinished))) {
 
