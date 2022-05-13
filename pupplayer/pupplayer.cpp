@@ -128,20 +128,65 @@ PUPPlayer::~PUPPlayer()
     stop();
 }
 
+bool PUPPlayer::initScreens(string screensToConfigure, int displayNumber) {
+
+    // initialize videoplayers for screens
+    int planeIndex = 0;
+
+    for (string screenIdStr : splitLine(screensToConfigure)) {
+        int screenId = parseInteger(screenIdStr);
+
+        for (auto &screen : screens) {
+            if (screen.screenNum == screenId) {
+                BOOST_LOG_TRIVIAL(trace) << "[pupcapture] trying to configure screen " << screenId;
+
+                CompositionGeometry composition;
+                if (screen.customPos != "") {
+                    // TODO: calculate plane size
+                }
+
+                players[screenId] = std::make_unique<VideoPlayer>(displayNumber, planeIndex, composition);
+                // screen.videoPlayer = std::make_unique<VideoPlayer>(); //
+                    // std::make_unique<VideoPlayer>(displayNumber, planeIndex, composition);
+                planeIndex++;
+
+                break;
+            }
+        }
+    }
+
+    BOOST_LOG_TRIVIAL(info) << "[pupcapture] initialized " << planeIndex << " video planes";
+
+    return true;
+}
+
 bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
 {
-    string directory = pt_source.get("directory", "");
+    string filename;
 
-    string filename = directory + "/triggers.pup";
-    auto triggers = readConfigFile<PUPTrigger>(filename);
-    if (!triggers) {
-        BOOST_LOG_TRIVIAL(error) << "[pupplayer] can't read file " << filename;
+    int displayNumber = pt_source.get("display_number", 0);
+
+    string screensToConfigure = pt_source.get("screens", "");
+    if (screensToConfigure == "") {
+        BOOST_LOG_TRIVIAL(error) << "[pupcapture] screens not configured, this is mandatory, disabling pupcapture";
         return false;
     }
+
+    string directory = pt_source.get("directory", "");
 
     filename = directory + "/screens.pup";
     auto screens = readConfigFile<PUPScreen>(filename);
     if (!screens) {
+        BOOST_LOG_TRIVIAL(error) << "[pupplayer] can't read file " << filename;
+        return false;
+    }
+    this->screens = screens.value();
+    initScreens(screensToConfigure, displayNumber);
+
+
+    filename = directory + "/triggers.pup";
+    auto triggers = readConfigFile<PUPTrigger>(filename);
+    if (!triggers) {
         BOOST_LOG_TRIVIAL(error) << "[pupplayer] can't read file " << filename;
         return false;
     }
@@ -154,7 +199,7 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
     }
 
     this->triggers = triggers.value();
-    this->screens = screens.value();
+    
     this->playlists = playlists.value();
 
     BOOST_LOG_TRIVIAL(info) << "[pupplayer] read " << this->triggers.size() << " triggers, "

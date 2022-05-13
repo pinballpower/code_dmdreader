@@ -36,14 +36,16 @@ private:
 	vector<PUPTrigger> triggers;
 	vector<PUPScreen> screens;
 	vector<PUPPlaylist> playlists;
-	vector<std::shared_ptr<VideoPlayer>> players;
 	queue<string> eventsToProcess;
+	map<int, std::unique_ptr<VideoPlayer>> players; // maps screen ID to a video player
 
 	string lastTrigger = "";
 
 	void eventLoop();
 	thread eventThread;
 	interprocess_semaphore eventReady = interprocess_semaphore(0);
+
+	bool initScreens(string screensToConfigure, int displayNumber);
 
 	void sendEvent(const string event);
 	void processTrigger(string trigger);
