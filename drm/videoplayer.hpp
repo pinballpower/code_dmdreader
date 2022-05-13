@@ -15,6 +15,8 @@ class VideoPlayer {
 public: 
 
 	VideoPlayer(int screenNumber=0, int planeNumber=0, CompositionGeometry composition = CompositionGeometry());
+	VideoPlayer(const VideoPlayer&) = delete;
+	VideoPlayer(VideoPlayer&&) = default;
 	~VideoPlayer();
 
 	// open/close connection to DRM
@@ -30,7 +32,6 @@ public:
 	void setComposition(CompositionGeometry compositionGeometry);
 
 private:
-
 	CompositionGeometry compositionGeometry;
 
 	int screenNumber = 0;
