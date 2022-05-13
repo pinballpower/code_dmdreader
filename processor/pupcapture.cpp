@@ -111,7 +111,17 @@ bool PUPCapture::configureFromPtree(boost::property_tree::ptree pt_general, boos
     }
 
     if (loadTriggers(bitsperpixel, dir, std::nullopt)) { // let the system find the correct palette
-        BOOST_LOG_TRIVIAL(info) << "[pupcapture] loaded " << trigger_frames.size() << " trigger frames";
+        int masked = 0;
+        int unmasked = 0;
+        for (const auto& f : trigger_frames) {
+            if (f.second.isMasked()) {
+                masked++;
+            }
+            else {
+                unmasked++;
+            }
+        }
+        BOOST_LOG_TRIVIAL(info) << "[pupcapture] loaded " << trigger_frames.size() << " trigger frames (" << masked << " masked, " << unmasked << " unmasked)";
         return true;
     }
     else {
@@ -123,7 +133,7 @@ DMDFrame PUPCapture::processFrame(DMDFrame &f)
 {
     // check all maksedframes if one matches
     map<int, MaskedDMDFrame>::iterator itr;
-    for (auto p: trigger_frames) {
+    for (const auto &p: trigger_frames) {
         int i = p.first;
         MaskedDMDFrame mf = p.second;
 
