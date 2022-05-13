@@ -8,6 +8,7 @@ class PUPTrigger {
 
 public:
 
+    PUPTrigger();
     PUPTrigger(string configLine);
 
     bool isValid();

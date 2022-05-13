@@ -7,6 +7,10 @@
 using namespace std;
 
 
+PUPTrigger::PUPTrigger()
+{
+}
+
 PUPTrigger::PUPTrigger(string configLine)
 {
     std::vector<std::string> fields = splitLine(configLine);

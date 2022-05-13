@@ -33,7 +33,7 @@ public:
 
 
 private:
-	vector<PUPTrigger> triggers;
+	map<string,PUPTrigger> triggers; // map trigger to trigger data
 	vector<PUPScreen> screens;
 	vector<PUPPlaylist> playlists;
 	queue<string> eventsToProcess;
