@@ -166,7 +166,7 @@ SourceProperties TXTDMDSource::getProperties() {
 
 bool TXTDMDSource::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {
 	bits = pt_source.get("bitsperpixel", 4);
-	useTimingData = pt_source.get("use__timing_data", true);
+	useTimingData = pt_source.get("use_timing_data", true);
 	bool res=openFile(pt_source.get("name", ""));
 	if (res) preloadNextFrame();
 	startMillisec = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
