@@ -20,7 +20,7 @@ bool PUPCapture::loadTriggers(int bitsperpixel, string directory, std::optional 
     std::filesystem::path folder(directory);
     if (!std::filesystem::is_directory(folder))
     {
-        BOOST_LOG_TRIVIAL(error) << folder.string() + " is not a directory";
+        BOOST_LOG_TRIVIAL(error) << "[pupcapture] " << folder.string() + " is not a directory";
         return false;
     }
 
@@ -41,17 +41,21 @@ bool PUPCapture::loadTriggers(int bitsperpixel, string directory, std::optional 
                 int i = stoi(match.str(1));
                 if (i > max_index) { max_index = i; };
 
-                RGBBuffer buff = readBMP(full_name);
-                rgbdata.insert(pair<int, RGBBuffer>(i, buff));
-
-                BOOST_LOG_TRIVIAL(debug) << "loaded " << filename;
-
+                try {
+                    RGBBuffer buff = readBMP(full_name);
+                    rgbdata.insert(pair<int, RGBBuffer>(i, buff));
+                    BOOST_LOG_TRIVIAL(debug) << "[pupcapture] loaded " << filename;
+                }
+                catch (...) {
+                    BOOST_LOG_TRIVIAL(error) << "[pupcapture] couldn't load " << filename << ", ignoring";
+                }
+                
             }
         }
     }
 
     if (max_index <= 0) {
-        BOOST_LOG_TRIVIAL(error) << "Couldn't find any usuable files in " << directory;
+        BOOST_LOG_TRIVIAL(error) << "[pupcapture] couldn't find any usuable files in " << directory << ", not using pupcapture";
         return false;
     }
 
@@ -60,7 +64,7 @@ bool PUPCapture::loadTriggers(int bitsperpixel, string directory, std::optional 
         vector<DMDPalette> palettes = default_palettes();
         for (const auto p : palettes) {
 
-            BOOST_LOG_TRIVIAL(debug) << "Checking palette " << p.name;
+            BOOST_LOG_TRIVIAL(debug) << "[pupcapture] checking palette " << p.name;
             bool matchesImage = true;
 
             map<int, RGBBuffer>::iterator itr;
@@ -80,7 +84,7 @@ bool PUPCapture::loadTriggers(int bitsperpixel, string directory, std::optional 
     }
 
     if (! palette) {
-        BOOST_LOG_TRIVIAL(error) << "Couldn't find matching color palette for images in " << directory;
+        BOOST_LOG_TRIVIAL(error) << "[pupcapture] couldn't find matching color palette for images in " << directory << ", not using pupcapture";
         return false;
     }
 
@@ -95,24 +99,22 @@ bool PUPCapture::loadTriggers(int bitsperpixel, string directory, std::optional 
         trigger_frames.insert(pair<int, MaskedDMDFrame>(i, mf));
     }
 
-    BOOST_LOG_TRIVIAL(info) << "loaded files from " << directory << " configured triggers up to " << max_index;
     return true;
 }
 
 bool PUPCapture::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {
-    string dir = pt_source.get("directory", "");
-    if (dir == "") {
-        BOOST_LOG_TRIVIAL(error) << "pupcapture directory has not been configured";
-        return false;
-    }
+    string dir = pt_source.get("directory", ".");
 
     int bitsperpixel = pt_general.get("bitsperpixel", 0);
     if (!bitsperpixel) {
-        BOOST_LOG_TRIVIAL(error) << "couldn't detect bits/pixel";
+        BOOST_LOG_TRIVIAL(error) << "[pupcapture] couldn't detect bits/pixel, you need to set it in the general section of the configuration file, disabling pupcapture";
         return false;
     }
 
-    return loadTriggers(bitsperpixel, dir, std::nullopt); // let the system find the correct palette
+    if (loadTriggers(bitsperpixel, dir, std::nullopt)) { // let the system find the correct palette
+        BOOST_LOG_TRIVIAL(info) << "[pupcapture] loaded " << trigger_frames.size() << " trigger frames";
+        return true;
+    }
 }
 
 DMDFrame PUPCapture::processFrame(DMDFrame &f)
@@ -124,7 +126,7 @@ DMDFrame PUPCapture::processFrame(DMDFrame &f)
         MaskedDMDFrame mf = p.second;
 
         if (mf.matchesImage(f)) {
-            cout << "found pupcapture match: " << i << "\n";
+            BOOST_LOG_TRIVIAL(error) << "found pupcapture match: " << i;
         }
     }
 
