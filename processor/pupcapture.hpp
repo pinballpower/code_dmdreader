@@ -9,7 +9,7 @@
 #include "../dmd/maskeddmdframe.hpp"
 #include "frameprocessor.hpp"
 
-class PubCapture : public DMDFrameProcessor {
+class PUPCapture : public DMDFrameProcessor {
 
 public:
 

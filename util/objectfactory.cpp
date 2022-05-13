@@ -5,7 +5,7 @@
 #include "../dmdsource/txtdmdsource.hpp"
 #include "../dmdsource/nullsource.hpp"
 #include "../dmdsource/pngsource.hpp"
-#include "../processor/pubcapture.hpp"
+#include "../processor/pupcapture.hpp"
 #include "../processor/frameprocessor.hpp"
 #include "../processor/frameinfologger.hpp"
 #include "../processor/palettecolorizer.hpp"
@@ -64,8 +64,8 @@ std::shared_ptr<DMDSource> createSource(string name) {
 
 std::shared_ptr<DMDFrameProcessor> createProcessor(string name) {
 
-	if (name == "pubcapture") {
-		return std::make_shared<PubCapture>();
+	if (name == "pupcapture") {
+		return std::make_shared<PUPCapture>();
 	}
 #ifdef VNICOLORING
 	else if (name == "pin2dmd") {

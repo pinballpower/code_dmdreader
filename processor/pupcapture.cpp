@@ -7,13 +7,13 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/log/trivial.hpp>
 
-#include "pubcapture.hpp"
+#include "pupcapture.hpp"
 #include "../util/image.hpp"
 #include "../util/bmp.hpp"
 
 using namespace std;
 
-bool PubCapture::loadTriggers(int bitsperpixel, string directory, std::optional <DMDPalette> palette)
+bool PUPCapture::loadTriggers(int bitsperpixel, string directory, std::optional <DMDPalette> palette)
 {
     regex file_expr("([0-9]+).bmp");
 
@@ -99,10 +99,10 @@ bool PubCapture::loadTriggers(int bitsperpixel, string directory, std::optional 
     return true;
 }
 
-bool PubCapture::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {
+bool PUPCapture::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {
     string dir = pt_source.get("directory", "");
     if (dir == "") {
-        BOOST_LOG_TRIVIAL(error) << "pubcapture directory has not been configured";
+        BOOST_LOG_TRIVIAL(error) << "pupcapture directory has not been configured";
         return false;
     }
 
@@ -115,7 +115,7 @@ bool PubCapture::configureFromPtree(boost::property_tree::ptree pt_general, boos
     return loadTriggers(bitsperpixel, dir, std::nullopt); // let the system find the correct palette
 }
 
-DMDFrame PubCapture::processFrame(DMDFrame &f)
+DMDFrame PUPCapture::processFrame(DMDFrame &f)
 {
     // check all maksedframes if one matches
     map<int, MaskedDMDFrame>::iterator itr;
@@ -124,7 +124,7 @@ DMDFrame PubCapture::processFrame(DMDFrame &f)
         MaskedDMDFrame mf = p.second;
 
         if (mf.matchesImage(f)) {
-            cout << "found pubcapture match: " << i << "\n";
+            cout << "found pupcapture match: " << i << "\n";
         }
     }
 
