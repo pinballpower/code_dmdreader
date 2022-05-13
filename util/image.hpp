@@ -28,9 +28,10 @@ public:
 
 	const vector<uint8_t> &getData() const;
 
-	static RGBBuffer fromPNG(const string filename, bool useAlpha = false);
+	static RGBBuffer fromImageFile(const string filename, bool useAlpha = false);
 
 	bool isNull() const;
+	bool isValid() const;
 
 protected:
 	vector <uint8_t> data;

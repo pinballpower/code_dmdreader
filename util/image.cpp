@@ -56,7 +56,7 @@ void RGBBuffer::setPixel(int x, int y, uint8_t r, uint8_t g, uint8_t b, uint8_t 
 	}
 }
 
-RGBBuffer RGBBuffer::fromPNG(const string filename, bool useAlpha)
+RGBBuffer RGBBuffer::fromImageFile(const string filename, bool useAlpha)
 {
 	int width = 0;
 	int height = 0;
@@ -91,4 +91,9 @@ RGBBuffer RGBBuffer::fromPNG(const string filename, bool useAlpha)
 bool RGBBuffer::isNull() const
 {
 	return ((width <= 0) || (height <= 0));
+}
+
+bool RGBBuffer::isValid() const
+{
+	return !isNull();
 }

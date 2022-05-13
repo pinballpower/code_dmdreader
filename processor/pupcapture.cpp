@@ -9,7 +9,6 @@
 
 #include "pupcapture.hpp"
 #include "../util/image.hpp"
-#include "../util/bmp.hpp"
 
 using namespace std;
 
@@ -41,12 +40,12 @@ bool PUPCapture::loadTriggers(int bitsperpixel, string directory, std::optional 
                 int i = stoi(match.str(1));
                 if (i > max_index) { max_index = i; };
 
-                try {
-                    RGBBuffer buff = readBMP(full_name);
+                RGBBuffer buff = RGBBuffer::fromImageFile(full_name);
+                if (buff.isValid()) {
                     rgbdata.insert(pair<int, RGBBuffer>(i, buff));
                     BOOST_LOG_TRIVIAL(debug) << "[pupcapture] loaded " << filename;
                 }
-                catch (...) {
+                else {
                     BOOST_LOG_TRIVIAL(error) << "[pupcapture] couldn't load " << filename << ", ignoring";
                 }
                 
@@ -114,6 +113,9 @@ bool PUPCapture::configureFromPtree(boost::property_tree::ptree pt_general, boos
     if (loadTriggers(bitsperpixel, dir, std::nullopt)) { // let the system find the correct palette
         BOOST_LOG_TRIVIAL(info) << "[pupcapture] loaded " << trigger_frames.size() << " trigger frames";
         return true;
+    }
+    else {
+        return false;
     }
 }
 

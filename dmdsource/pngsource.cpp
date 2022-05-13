@@ -27,7 +27,7 @@ bool PNGSource::configureFromPtree(boost::property_tree::ptree pt_general, boost
 	for (auto pair : pt_source.get_child("files"))
 	{
 		BOOST_LOG_TRIVIAL(info) << "[pngsource] reading " << pair.second.data();
-		RGBBuffer buff = RGBBuffer::fromPNG(pair.second.data());
+		RGBBuffer buff = RGBBuffer::fromImageFile(pair.second.data());
 		if (!buff.isNull()) {
 			frames.push(DMDFrame(buff));
 		}

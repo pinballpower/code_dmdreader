@@ -7,7 +7,6 @@
 #include <cassert>
 
 #include "../util/crc32.hpp"
-#include "../util/bmp.hpp"
 
 #include "dmdframe.hpp"
 

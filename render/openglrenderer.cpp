@@ -70,7 +70,7 @@ void OpenGLRenderer::initializeOpenGL()
 	// set texture filtering parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	RGBBuffer textureBuff = RGBBuffer::fromPNG(overlay_texture_file.c_str(), true);
+	RGBBuffer textureBuff = RGBBuffer::fromImageFile(overlay_texture_file.c_str(), true);
 	if (!(textureBuff.isNull()))
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureBuff.width, textureBuff.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureBuff.getData().data());
