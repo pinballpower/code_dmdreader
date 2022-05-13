@@ -25,9 +25,9 @@ DMDFrame PaletteColorizer::processFrame(DMDFrame& f)
 		else {
 			c = palette[px];
 		}
-		result.appendPixel(c.c.cols.r);
-		result.appendPixel(c.c.cols.g);
-		result.appendPixel(c.c.cols.b);
+		result.appendPixel(c.r);
+		result.appendPixel(c.g);
+		result.appendPixel(c.b);
 	}
 
 	return result;

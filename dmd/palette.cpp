@@ -94,6 +94,7 @@ const std::optional<DMDPalette> find_matching_palette(const vector<DMDPalette> p
 vector<DMDPalette> default_palettes() {
 	vector<DMDPalette> res = vector<DMDPalette>();
 
+	// the last color in this palette is the color of the mask rectangle
 	vector<uint32_t> pd_4_orange_masked_data{
 		0x00000000, 0x11050000, 0x22090000, 0x330e0000,
 		0x44120000, 0x55170000, 0x661C0000, 0x77200000,
