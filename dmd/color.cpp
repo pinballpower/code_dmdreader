@@ -26,15 +26,15 @@ DMDColor::DMDColor(uint32_t colors) {
 	alpha = colors     & 0xff;
 }
 
-bool DMDColor::matchesImage(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t alpha1) const {
+bool DMDColor::matches(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t alpha1) const {
 	return ((r1 == r) && (g1 == g) && (b1 == b) && (alpha1 == alpha));
 }
 
-bool DMDColor::matchesImage(uint8_t r1, uint8_t g1, uint8_t b1) const {
+bool DMDColor::matches(uint8_t r1, uint8_t g1, uint8_t b1) const {
 	return ((r1 == r) && (g1 == g) && (b1 == b));
 }
 
-bool DMDColor::matchesImage(DMDColor color, bool ignore_alpha) const {
+bool DMDColor::matches(DMDColor color, bool ignore_alpha) const {
 	if ((color.r == r) && (color.g == g) && (color.b == b)) {
 		if (ignore_alpha) {
 			return true;

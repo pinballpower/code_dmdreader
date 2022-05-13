@@ -33,7 +33,7 @@ DMDPalette::DMDPalette(vector<uint32_t> colors, int bitsperpixel, string name1)
 
 int DMDPalette::getIndexOf(uint32_t color, bool ignore_alpha) const {
 	for (int i = 0; i < colors.size(); i++) {
-		if (colors[i].matchesImage(color, ignore_alpha)) {
+		if (colors[i].matches(color, ignore_alpha)) {
 			return i;
 		}
 	}
@@ -42,7 +42,7 @@ int DMDPalette::getIndexOf(uint32_t color, bool ignore_alpha) const {
 
 int DMDPalette::getIndexOf(uint8_t r, uint8_t g, uint8_t b) const {
 	for (int i = 0; i < colors.size(); i++) {
-		if (colors[i].matchesImage(r, g, b)) {
+		if (colors[i].matches(r, g, b)) {
 			return i;
 		}
 	}
@@ -59,7 +59,7 @@ bool DMDPalette::matchesImage(const RGBBuffer& buf) const
 		bool color_found = false;
 
 		for (const auto c : colors) {
-			if (c.matchesImage(r, g, b)) {
+			if (c.matches(r, g, b)) {
 				color_found = true;
 				break;
 			}

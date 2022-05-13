@@ -19,9 +19,9 @@ public:
 	DMDColor(uint32_t colors);
 	DMDColor(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t alpha1 = 0);
 
-	bool matchesImage(uint8_t r1, uint8_t g1, uint8_t b1) const;
-	bool matchesImage(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t alpha1) const;
-	bool matchesImage(DMDColor c, bool ignore_alpha = true) const;
+	bool matches(uint8_t r1, uint8_t g1, uint8_t b1) const;
+	bool matches(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t alpha1) const;
+	bool matches(DMDColor c, bool ignore_alpha = true) const;
 
 	static DMDColor fade(const DMDColor color, int fading);
 
