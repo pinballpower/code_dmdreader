@@ -125,6 +125,7 @@ std::optional<vector<myType>> readConfigFile(string filename) {
 
 PUPPlayer::~PUPPlayer()
 {
+    stop();
 }
 
 bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
@@ -165,11 +166,73 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 
 bool PUPPlayer::start()
 {
+    eventThread = thread(&PUPPlayer::eventLoop, this);
     return true;
 }
 
-void PUPPlayer::playEvent(int event)
+void PUPPlayer::stop()
 {
+    // send quit signal and wait until all events have been processed
+    sendEvent(QUIT);
+    if (eventThread.joinable()) {
+        eventThread.join();
+    }
+}
+
+string PUPPlayer::name()
+{
+    return "pupplayer";
+}
+
+std::pair<ServiceResponse, string> PUPPlayer::command(const string& cmd)
+{
+    if (cmd.starts_with("trigger:")) {
+        eventsToProcess.push(cmd);
+        eventReady.post();
+        return std::pair<ServiceResponse, string>(ServiceResponse::OK, "queued");
+    }
+    else {
+        return std::pair<ServiceResponse, string>(ServiceResponse::ERROR, "");
+    }
+}
+
+void PUPPlayer::eventLoop()
+{
+    bool finished = false;
+    while (!finished) {
+        eventReady.wait();
+        string event = eventsToProcess.front();
+        eventsToProcess.pop();
+
+        if (event == QUIT) {
+            finished = true;
+        }
+        else if (event.starts_with("trigger:")) {
+            processTrigger(event.substr(8));
+        }
+        else {
+            BOOST_LOG_TRIVIAL(warning) << "[pupplayer] unknown event " << event;
+        }
+    }
+}
+
+void PUPPlayer::sendEvent(const string event)
+{
+    eventsToProcess.push(event);
+    eventReady.post();
+}
+
+void PUPPlayer::processTrigger(string trigger)
+{
+    if (trigger == lastTrigger) {
+        BOOST_LOG_TRIVIAL(trace) << "[pupplayer] ignoring duplicat trigger " << trigger;
+        return;
+    }
+    else {
+        lastTrigger = trigger;
+    }
+
+    BOOST_LOG_TRIVIAL(error) << "[pupplayer] trigger " << trigger;
 }
 
 PUPPlayer::PUPPlayer(int screenNumber)
