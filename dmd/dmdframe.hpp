@@ -54,7 +54,7 @@ public:
 	void appendPixel(uint8_t px);
 
 	bool isNull() const;
-	bool isValid() const;
+	virtual bool isValid() const;
 
 	string asString();
 

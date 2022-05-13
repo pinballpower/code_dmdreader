@@ -2,6 +2,7 @@
 
 #include "maskeddmdframe.hpp"
 
+#include <boost/log/trivial.hpp>
 
 MaskedDMDFrame::MaskedDMDFrame() {
 }
@@ -9,7 +10,7 @@ MaskedDMDFrame::MaskedDMDFrame() {
 MaskedDMDFrame::~MaskedDMDFrame() {
 }
 
-bool MaskedDMDFrame::matchesImage(const DMDFrame frame) const {
+bool MaskedDMDFrame::matchesImage(const DMDFrame &frame) const {
 
 	if (frame.getPixelData().size() != data.size()) {
 		return false;
@@ -92,7 +93,6 @@ void MaskedDMDFrame::readFromRGBImage(const RGBBuffer rgbdata, const DMDPalette 
 			}
 
 			data.push_back(color_index);
-
 		}
 	}
 
@@ -113,7 +113,29 @@ void MaskedDMDFrame::readFromRGBImage(const RGBBuffer rgbdata, const DMDPalette 
 				}
 			}
 		}
+		masked = true;
+	}
+	else {
+		BOOST_LOG_TRIVIAL(debug) << "[maskeddmdframe] no mask found, assuming unmasked frame";
+		for (int i = 0; i < width * height; i++) {
+			mask.push_back(0xff);
+		}
+		masked = false;
 	}
 
 	DMDFrame::getChecksum(true); // recalculate checksum
+}
+
+bool MaskedDMDFrame::isValid() const
+{
+	if (!DMDFrame::isValid()) {
+		return false;
+	}
+
+	return mask.size() == data.size();
+}
+
+bool MaskedDMDFrame::isMasked() const
+{
+	return masked;
 }
