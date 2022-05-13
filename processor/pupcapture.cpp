@@ -9,6 +9,7 @@
 
 #include "pupcapture.hpp"
 #include "../util/image.hpp"
+#include "../services/serviceregistry.hpp"
 
 using namespace std;
 
@@ -138,7 +139,24 @@ DMDFrame PUPCapture::processFrame(DMDFrame &f)
         MaskedDMDFrame mf = p.second;
 
         if (mf.matchesImage(f)) {
-            BOOST_LOG_TRIVIAL(error) << "found pupcapture match: " << i;
+
+            string trigger = "trigger:D"+ std::to_string(p.first);
+
+            std::pair<ServiceResponse, string> res = serviceRegistry.command("pupplayer", trigger);
+            if (res.first == ServiceResponse::SERVICE_NOT_FOUND) {
+                BOOST_LOG_TRIVIAL(error) << "[pupcapture] pupplayer not available, has probably not been configured";
+            }
+            else if (res.first == ServiceResponse::OK) {
+                BOOST_LOG_TRIVIAL(debug) << "[pupcapture] sent " << trigger << " to pupplayer";
+            }
+            else if (res.first == ServiceResponse::ERROR) {
+                BOOST_LOG_TRIVIAL(error) << "[pupcapture] pupplayer couldn't process " << trigger;
+            }
+            else {
+                BOOST_LOG_TRIVIAL(error) << "[pupcapture] unknown service response";
+            }
+
+            break;
         }
     }
 
