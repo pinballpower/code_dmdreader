@@ -21,6 +21,7 @@
 #include "dmd/dmdframe.hpp"
 #include "dmdsource/dmdsource.hpp"
 #include "util/objectfactory.hpp"
+#include "services/serviceregistry.hpp"
 
 #include "pupplayer/pupplayer.hpp"
 
@@ -29,7 +30,6 @@ using namespace std;
 vector<std::shared_ptr<DMDSource>> sources;
 vector<std::shared_ptr<DMDFrameProcessor>> processors;
 vector<std::shared_ptr<FrameRenderer>> renderers;
-map<string, std::shared_ptr<Service>> services;
 
 bool terminateWhenFinished = true;
 
@@ -192,7 +192,9 @@ bool read_config(string filename) {
 			if (service) {
 				if (service->configureFromPtree(pt_general, v.second)) {
 					if (service->start()) {
-						services[service->name()] = service;
+						if (! serviceRegistry.registerService(service)) {
+							BOOST_LOG_TRIVIAL(info) << "[error] could not add service " << v.first << " to service registry";
+						}
 					}
 					else {
 						BOOST_LOG_TRIVIAL(info) << "[error] could not start service " << v.first;
@@ -341,11 +343,7 @@ int main(int argc, char** argv)
 	}
 	renderers.clear();
 
-	BOOST_LOG_TRIVIAL(debug) << "[dmdreader] stopping services";
-	for (auto servicepair : services) {
-		servicepair.second->stop();
-	}
-	services.clear();
+	serviceRegistry.clear();
 
 	BOOST_LOG_TRIVIAL(info) << "[dmdreader] exiting";
 
