@@ -1,10 +1,16 @@
 #pragma once
 
+#include <map>
+
 #include <boost/property_tree/ptree.hpp>
 
 #include "../dmd/dmdframe.hpp"
 
-using namespace std;
+enum class ServiceResponse {
+	OK, 
+	ERROR,
+	SERVICE_NOT_FOUND
+};
 
 class Service {
 
@@ -21,5 +27,5 @@ public:
 	/// </summary>
 	/// <param name="cmd">the command</param>
 	/// <returns>the result of this command</returns>
-	virtual string command(const string& cmd); 
+	virtual std::pair<ServiceResponse, string> command(const string& cmd);
 };
