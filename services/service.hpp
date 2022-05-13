@@ -15,4 +15,11 @@ public:
 
 	virtual bool start();
 	virtual void stop();
+
+	/// <summary>
+	/// A generic interface to send a command to a service
+	/// </summary>
+	/// <param name="cmd">the command</param>
+	/// <returns>the result of this command</returns>
+	virtual string command(const string& cmd); 
 };

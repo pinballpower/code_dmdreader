@@ -18,3 +18,8 @@ bool Service::start()
 void Service::stop()
 {
 }
+
+string Service::command(const string& cmd)
+{
+	return "not implemented";
+}
