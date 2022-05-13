@@ -45,5 +45,9 @@
       "height": 640,
       "bitsperpixel": 2
     }
+  },
+  "service": {
+    "pupplayer": {
+    }
   }
 }

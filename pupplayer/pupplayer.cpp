@@ -9,11 +9,25 @@
 #include "../drm/videofile.hpp"
 #include "trigger.hpp"
 
-int flex_stoi(const string &s, int defaultValue) {
+int parseInteger(const string &s, int defaultValue) {
     if (s == "") {
         return defaultValue;
     }
     return std::stoi(s);
+}
+
+int parseBool(const string& s, bool defaultValue)
+{
+    if (s == "") {
+        return defaultValue;
+    }
+    if ((s == "0") || (s == "off")) {
+        return false;
+    }
+    if ((s == "1") || (s == "on")) {
+        return true;
+    }
+    return defaultValue;
 }
 
 enum class CSVState {
@@ -64,11 +78,12 @@ vector<string> splitLine(const string &line) {
             break;
         }
     }
+
     return fields;
 }
 
 template <class myType>
-vector<myType> readConfigFile(string filename) {
+std::optional<vector<myType>> readConfigFile(string filename) {
     vector<myType> result;
 
     ifstream is;
@@ -77,8 +92,7 @@ vector<myType> readConfigFile(string filename) {
         is.open(filename);
     }
     catch (std::ios_base::failure e) {
-        BOOST_LOG_TRIVIAL(error) << "[trigger] can't open file " << filename << ": " << e.what();
-        return result;
+        return  std::nullopt;
     }
 
     bool eof = false;
@@ -115,9 +129,38 @@ PUPPlayer::~PUPPlayer()
 
 bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
 {
-    triggers = readConfigFile<PUPTrigger>("/home/matuschd/code_dmdreader/samples/spagb_100b2s/triggers.pup");
-    screens = readConfigFile<PUPScreen>("/home/matuschd/code_dmdreader/samples/spagb_100b2s/screens.pup");
- 	return true;
+    string directory = pt_source.get("directory", "");
+
+    string filename = directory + "/triggers.pup";
+    auto triggers = readConfigFile<PUPTrigger>(filename);
+    if (!triggers) {
+        BOOST_LOG_TRIVIAL(error) << "[pupplayer] can't read file " << filename;
+        return false;
+    }
+
+    filename = directory + "/screens.pup";
+    auto screens = readConfigFile<PUPScreen>(filename);
+    if (!screens) {
+        BOOST_LOG_TRIVIAL(error) << "[pupplayer] can't read file " << filename;
+        return false;
+    }
+
+    filename = directory + "/playlists.pup";
+    auto playlists = readConfigFile<PUPPlaylist>(filename);
+    if (!playlists) {
+        BOOST_LOG_TRIVIAL(error) << "[pupplayer] can't read file " << filename;
+        return false;
+    }
+
+    this->triggers = triggers.value();
+    this->screens = screens.value();
+    this->playlists = playlists.value();
+
+    BOOST_LOG_TRIVIAL(info) << "[pupplayer] read " << this->triggers.size() << " triggers, "
+        << this->screens.size() << " screens and "
+        << this->playlists.size() << " playlists";
+
+    return true;
 }
 
 bool PUPPlayer::start()

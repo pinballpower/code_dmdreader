@@ -16,29 +16,20 @@ PUPTrigger::PUPTrigger(string configLine)
     }
 
     try {
-        id = std::stoi(fields[0]);
-        if (std::stoi(fields[1])) {
-            active = true;
-        }
-        else {
-            active = false;
-        }
-
+        id = parseInteger(fields[0]);
+        active = parseBool(fields[1]);
         description = fields[2];
         trigger = fields[3];
-        screennum = flex_stoi(fields[4]);
+        screennum = parseInteger(fields[4]);
         playlist = fields[5];
         playfile = fields[6];
-
-        volume = flex_stoi(fields[7]);
-        priority = flex_stoi(fields[8]);
-        length = flex_stoi(fields[9]);
-        counter = flex_stoi(fields[10]);
-        rest_seconds = flex_stoi(fields[11]);
-
+        volume = parseInteger(fields[7]);
+        priority = parseInteger(fields[8]);
+        length = parseInteger(fields[9]);
+        counter = parseInteger(fields[10]);
+        rest_seconds = parseInteger(fields[11]);
         loop = fields[12];
-
-        defaults = flex_stoi(fields[13],0);
+        defaults = parseInteger(fields[13],0);
     }
     catch (...) {
         BOOST_LOG_TRIVIAL(error) << "can't parse trigger line  \"" << configLine << "\"";

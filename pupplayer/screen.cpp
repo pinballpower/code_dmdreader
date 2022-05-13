@@ -12,7 +12,7 @@ PUPScreen::PUPScreen(string configLine)
     }
 
     try {
-        screenNum = flex_stoi(fields[0]);
+        screenNum = parseInteger(fields[0]);
         screenDescription = fields[1];
         playList = fields[2];
         playFile = fields[3];
@@ -20,7 +20,7 @@ PUPScreen::PUPScreen(string configLine)
 
         active = true;
 
-        priority = flex_stoi(fields[6]);
+        priority = parseInteger(fields[6]);
         customPos= fields[7];
     }
     catch (...) {
