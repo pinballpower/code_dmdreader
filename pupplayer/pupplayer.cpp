@@ -276,11 +276,16 @@ void PUPPlayer::sendEvent(const string event)
 
 
 void PUPPlayer::updatePlayerState() {
-	for (auto& player : playerStates) {
-		int playerId = player.first;
-		if (! players[playerId]->isPlaying()) {
-			player.second.playing = false;
-			player.second.priority = -1;
+	for (auto& playerState : playerStates) {
+		int playerId = playerState.first;
+		auto& player = players[playerId];
+		if (!player) {
+			BOOST_LOG_TRIVIAL(warning) << "[pupplayer] got a null player, something is terribly wrong :( ";
+			continue;
+		}
+		if (! player->isPlaying()) {
+			playerState.second.playing = false;
+			playerState.second.priority = -1;
 		}
 	}
 }
