@@ -1,9 +1,15 @@
 #include "playlist.hpp"
 #include "pupplayer.hpp"
 
+#include <filesystem>
+
 #include <boost/log/trivial.hpp>
 
-PUPPlaylist::PUPPlaylist(string configLine)
+PUPPlaylist::PUPPlaylist()
+{
+}
+
+PUPPlaylist::PUPPlaylist(const string configLine)
 {
 	std::vector<std::string> fields = splitLine(configLine);
 
@@ -27,7 +33,48 @@ PUPPlaylist::PUPPlaylist(string configLine)
 }
 
 
-bool PUPPlaylist::isValid()
+bool PUPPlaylist::isValid() const
 {
 	return screenNum >= 0;
+}
+
+void PUPPlaylist::scanFiles(const string baseDirectory)
+{
+	files.clear();
+	string path = baseDirectory+"/"+folder;
+	for (const auto file : std::filesystem::directory_iterator(path)) {
+		if (file.is_regular_file()) {
+			string pathStr = file.path();
+			for (const string suffix : {".mp4"}) {
+				if (pathStr.ends_with(suffix)) {
+					files.push_back(pathStr);
+					BOOST_LOG_TRIVIAL(error) << "[playlist] added " << pathStr << " to playlist " << folder;
+					break;
+				}
+			}
+		}
+	}
+
+	if (alphaSort) {
+		std::sort(files.begin(), files.end(), [](const std::string& a, const std::string& b) -> bool { return a < b; });
+	}
+}
+
+string PUPPlaylist::nextFile()
+{
+	if (files.size() == 0) {
+		return "";
+	}
+
+	if (currentFileIndex >= files.size()) {
+		currentFileIndex = 0;
+	}
+
+	if (alphaSort) {
+		return files[currentFileIndex];
+		currentFileIndex++;
+	}
+	else {
+		return files[rand() % files.size()];
+	}
 }

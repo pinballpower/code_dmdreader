@@ -163,7 +163,7 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 	string filename;
 
 	int displayNumber = pt_source.get("display_number", 0);
-	string directory = pt_source.get("directory", "");
+	basedir = pt_source.get("directory", "");
 	string screensToConfigure = pt_source.get("screens", "");
 	if (screensToConfigure == "") {
 		BOOST_LOG_TRIVIAL(error) << "[pupcapture] screens not configured, this is mandatory, disabling pupcapture";
@@ -171,7 +171,7 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 	}
 
 	{
-		filename = directory + "/screens.pup";
+		filename = basedir + "/screens.pup";
 		auto screens = readConfigFile<PUPScreen>(filename);
 		if (!screens) {
 			BOOST_LOG_TRIVIAL(error) << "[pupplayer] can't read file " << filename;
@@ -182,7 +182,7 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 	}
 
 	{
-		filename = directory + "/triggers.pup";
+		filename = basedir + "/triggers.pup";
 		auto triggerList = readConfigFile<PUPTrigger>(filename);
 		if (!triggerList) {
 			BOOST_LOG_TRIVIAL(error) << "[pupplayer] can't read file " << filename;
@@ -195,13 +195,17 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 	}
 
 	{
-		filename = directory + "/playlists.pup";
+		filename = basedir + "/playlists.pup";
 		auto playlists = readConfigFile<PUPPlaylist>(filename);
 		if (!playlists) {
 			BOOST_LOG_TRIVIAL(error) << "[pupplayer] can't read file " << filename;
 			return false;
 		}
-		this->playlists = playlists.value();
+		// move to a map and scan files
+		for (auto pl : playlists.value()) {
+			this->playlists[pl.folder] = pl;
+			this->playlists[pl.folder].scanFiles(basedir);
+		}
 	}
 
 	BOOST_LOG_TRIVIAL(info) << "[pupplayer] read " << this->triggers.size() << " triggers, "
@@ -269,6 +273,7 @@ void PUPPlayer::sendEvent(const string event)
 	eventReady.post();
 }
 
+
 void PUPPlayer::processTrigger(string trigger)
 {
 	if (trigger == lastTrigger) {
@@ -286,7 +291,16 @@ void PUPPlayer::processTrigger(string trigger)
 
 	const auto& triggerData = triggers[trigger];
 
-	BOOST_LOG_TRIVIAL(error) << "[pupplayer] trigger " << trigger;
+	string playfile = triggerData.playfile;
+	if (playfile == "") {
+		PUPPlaylist pl = playlists[triggerData.playlist];
+		playfile = pl.nextFile();
+	}
+	else {
+		playfile = triggerData.playlist + "/" + playfile;
+	}
+
+	BOOST_LOG_TRIVIAL(error) << "[pupplayer] trigger " << trigger << " play file " << playfile;
 }
 
 PUPPlayer::PUPPlayer(int screenNumber)

@@ -35,11 +35,12 @@ public:
 private:
 	map<string,PUPTrigger> triggers; // map trigger to trigger data
 	vector<PUPScreen> screens;
-	vector<PUPPlaylist> playlists;
+	map <string, PUPPlaylist> playlists;
 	queue<string> eventsToProcess;
 	map<int, std::unique_ptr<VideoPlayer>> players; // maps screen ID to a video player
 
 	string lastTrigger = "";
+	string basedir; 
 
 	void eventLoop();
 	thread eventThread;
