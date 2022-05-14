@@ -183,7 +183,7 @@ void VideoPlayer::startPlayback(unique_ptr<VideoFile> videoFile,  bool loop)
 
 bool VideoPlayer::isPlaying()
 {
-	return playerThread.joinable();
+	return playing;
 }
 
 void VideoPlayer::stop()
