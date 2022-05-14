@@ -142,14 +142,18 @@ bool PUPPlayer::initScreen(int screenId, int displayNumber) {
 	players[screenId] = std::make_unique<VideoPlayer>(displayNumber, planeIndex, CompositionGeometry());
 	playerStates[screenId] = PlayerState();
 	planeIndex++;
+	CompositionGeometry parentComposition = players[screenId]->getCompositionGeometry();
 
 	// Now all subscreens
 	for (auto& screen : screens) {
-		if ((screen.screenNum == screenId) || (screen.parentScreen == screenId)) {
+		if (screen.parentScreen == screenId) {
 			BOOST_LOG_TRIVIAL(trace) << "[pupcapture] trying to configure screen " << screen.screenNum;
 
 			CompositionGeometry composition;
-			// TODO: handle composition
+			composition.x = parentComposition.x + parentComposition.width * screen.x;
+			composition.y = parentComposition.y + parentComposition.height * screen.y;
+			composition.width = parentComposition.width * screen.width;
+			composition.height = parentComposition.height * screen.height;
 
 			players[screen.screenNum] = std::make_unique<VideoPlayer>(displayNumber, planeIndex, composition);
 			playerStates[screen.screenNum] = PlayerState();

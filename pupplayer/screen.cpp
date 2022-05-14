@@ -30,10 +30,11 @@ PUPScreen::PUPScreen(string configLine)
             }
             else {
                 parentScreen = parseInteger(posFields[0]);
-                x1 = parseFloat(posFields[1]);
-                y1 = parseFloat(posFields[2]);
-                x2 = parseFloat(posFields[3]);
-                y1 = parseFloat(posFields[4]);
+                // convert percentage to 0-1 range
+                x = parseFloat(posFields[1])/100;
+                y = parseFloat(posFields[2])/100;
+                width = parseFloat(posFields[3])/100;
+                height = parseFloat(posFields[4])/100;
             }
         }
 
