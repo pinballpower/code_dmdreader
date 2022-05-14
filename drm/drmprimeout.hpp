@@ -41,6 +41,8 @@ public:
 
 	int displayFrame(struct AVFrame* frame);
 
+	const CompositionGeometry getCompositionGeometry() const;
+
 
 private:
 	void renderLoop();
@@ -64,7 +66,7 @@ private:
 	interprocess_semaphore semaphoreNextFrameReady = interprocess_semaphore(0);
 	interprocess_semaphore semaphoreRendererReady = interprocess_semaphore(0);
 	bool terminate = false;
-	AVFrame* nextFrame;
+	AVFrame* nextFrame = nullptr;
 
 	DRMHelper drmHelper;
 

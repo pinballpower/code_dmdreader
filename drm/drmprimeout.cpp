@@ -174,6 +174,11 @@ int DRMPrimeOut::displayFrame(struct AVFrame* src_frame)
 	return 0;
 }
 
+const CompositionGeometry DRMPrimeOut::getCompositionGeometry() const
+{
+	return compositionGeometry;
+}
+
 DRMPrimeOut::DRMPrimeOut(const CompositionGeometry compositionGeometry, int screenNumber, int planeNumber)
 {
 	drmFd = DRMHelper::getDRMDeviceFd(); // Cache it

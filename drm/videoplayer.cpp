@@ -201,7 +201,12 @@ void VideoPlayer::pause(bool paused)
 	this->paused = paused;
 }
 
-void VideoPlayer::setComposition(CompositionGeometry compositionGeometry)
+CompositionGeometry VideoPlayer::getCompositionGeometry(const CompositionGeometry compositionGeometry)
 {
-	this->compositionGeometry = compositionGeometry;
+	if (dpo) {
+		return dpo->getCompositionGeometry();
+	}
+	else {
+		return CompositionGeometry();
+	}
 }

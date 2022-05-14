@@ -29,7 +29,7 @@ public:
 	void stop();
 	void pause(bool paused=true);
 
-	void setComposition(CompositionGeometry compositionGeometry);
+	CompositionGeometry getCompositionGeometry(const CompositionGeometry compositionGeometry);
 
 private:
 	CompositionGeometry compositionGeometry;
