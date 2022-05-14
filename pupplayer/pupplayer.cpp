@@ -146,6 +146,7 @@ bool PUPPlayer::initScreens(string screensToConfigure, int displayNumber) {
 				}
 
 				players[screenId] = std::make_unique<VideoPlayer>(displayNumber, planeIndex, composition);
+				playerStates[screenId] = PlayerState();
 				planeIndex++;
 
 				break;
@@ -274,6 +275,16 @@ void PUPPlayer::sendEvent(const string event)
 }
 
 
+void PUPPlayer::updatePlayerState() {
+	for (auto& player : playerStates) {
+		int playerId = player.first;
+		if (! players[playerId]->isPlaying()) {
+			player.second.playing = false;
+			player.second.priority = -1;
+		}
+	}
+}
+
 void PUPPlayer::processTrigger(string trigger)
 {
 	if (trigger == lastTrigger) {
@@ -297,8 +308,50 @@ void PUPPlayer::processTrigger(string trigger)
 		playfile = pl.nextFile();
 	}
 	else {
-		playfile = triggerData.playlist + "/" + playfile;
+		playfile = basedir+"/"+triggerData.playlist + "/" + playfile;
 	}
+
+	updatePlayerState();
+
+	PlayerState matchingPlayerState = playerStates[triggerData.screennum];
+
+	// Handle priorities
+	if ((triggerData.priority < matchingPlayerState.priority) ||
+		(triggerData.priority == matchingPlayerState.priority) && (triggerData.loop == TriggerLoop::SKIP_SAME_PRIORITY))
+	{
+		BOOST_LOG_TRIVIAL(debug) << "[pupplayer] ignoring trigger " << trigger << " with priority " << triggerData.priority 
+			<< " as a player with priority " << matchingPlayerState.priority << " is still running on screen " << triggerData.screennum;
+		return;
+	}
+
+	// When stopping make sure that the player is really stopped before going on with the next events
+	if (triggerData.loop == TriggerLoop::STOP_FILE) {
+		players[triggerData.screennum]->stop();
+		while (players[triggerData.screennum]->isPlaying()) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(25));
+		}
+		BOOST_LOG_TRIVIAL(debug) << "[pupplayer] trigger " << trigger << " stopped playback on screen  " << triggerData.screennum;
+		return;
+	}
+
+	// TODO: Handle more trigger loop types
+	//  SPLASH_RESUME,SET_BACKGROUND
+
+	bool loop = false;
+	if ((triggerData.loop == TriggerLoop::LOOP) || (triggerData.loop == TriggerLoop::LOOP_FILE)) {
+		loop = true;
+		// TODO: What's the difference between "loop" and "loopFile"?
+	}
+
+	if (playfile == "") {
+		BOOST_LOG_TRIVIAL(debug) << "[pupplayer] trigger " << trigger << " no playfile, doing nothing ";
+		return;
+	}
+
+	playerStates[triggerData.screennum].priority = triggerData.priority;
+	playerStates[triggerData.screennum].playing = true;
+	// TODO: Preload video files 
+	players[triggerData.screennum]->startPlayback(make_unique<VideoFile>(playfile, true), loop);
 
 	BOOST_LOG_TRIVIAL(error) << "[pupplayer] trigger " << trigger << " play file " << playfile;
 }

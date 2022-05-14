@@ -16,7 +16,7 @@ PUPTrigger::PUPTrigger(string configLine)
     std::vector<std::string> fields = splitLine(configLine);
 
     if (fields.size() < 14) {
-        BOOST_LOG_TRIVIAL(error) << "can't parse trigger line, need at least 14 fields: \"" << configLine << "\"";
+        BOOST_LOG_TRIVIAL(error) << "[puptrigger] can't parse trigger line, need at least 14 fields: \"" << configLine << "\"";
     }
 
     try {
@@ -32,12 +32,36 @@ PUPTrigger::PUPTrigger(string configLine)
         length = parseInteger(fields[9]);
         counter = parseInteger(fields[10]);
         rest_seconds = parseInteger(fields[11]);
-        loop = fields[12];
+
+        loop = TriggerLoop::DEFAULT;
+        if (fields[12] == "SkipSamePrty") {
+            loop = TriggerLoop::SKIP_SAME_PRIORITY;
+        }
+        else if (fields[12] == "SplashResume") {
+            loop = TriggerLoop::SPLASH_RESUME;
+        }
+        else if (fields[12] == "Loop") {
+            loop = TriggerLoop::LOOP;
+        }
+        else if (fields[12] == "LoopFile") {
+            loop = TriggerLoop::LOOP_FILE;
+        }
+        else if (fields[12] == "SkipSamePrty") {
+            loop = TriggerLoop::SKIP_SAME_PRIORITY;
+        }
+        else if (fields[12] == "StopFile") {
+            loop = TriggerLoop::STOP_FILE;
+        }
+        else if (fields[12] == "SetBG") {
+            loop = TriggerLoop::SET_BACKGROUND;
+        }
+        else {
+            BOOST_LOG_TRIVIAL(error) << "[puptrigger] don't know trigger loop type " << fields[12] << ", using default";
+        }
         defaults = parseInteger(fields[13],0);
     }
     catch (...) {
-        BOOST_LOG_TRIVIAL(error) << "can't parse trigger line  \"" << configLine << "\"";
-
+        BOOST_LOG_TRIVIAL(error) << "[puptrigger] can't parse trigger line  \"" << configLine << "\"";
     }
 
 }

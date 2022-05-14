@@ -18,6 +18,13 @@ using namespace boost::interprocess;
 
 const string QUIT = "quit";
 
+class PlayerState {
+
+public:
+	int priority=-1;
+	bool playing = false;
+};
+
 class PUPPlayer : public Service {
 
 public:
@@ -38,6 +45,7 @@ private:
 	map <string, PUPPlaylist> playlists;
 	queue<string> eventsToProcess;
 	map<int, std::unique_ptr<VideoPlayer>> players; // maps screen ID to a video player
+	map<int, PlayerState> playerStates;				// keeps track of the state of all players
 
 	string lastTrigger = "";
 	string basedir; 
@@ -50,7 +58,7 @@ private:
 
 	void sendEvent(const string event);
 	void processTrigger(string trigger);
-
+	void updatePlayerState();
 };
 
 

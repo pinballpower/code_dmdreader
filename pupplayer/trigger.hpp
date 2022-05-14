@@ -4,6 +4,16 @@
 
 using namespace std;
 
+enum class TriggerLoop {
+    DEFAULT,
+    LOOP,
+    LOOP_FILE,
+    SKIP_SAME_PRIORITY,
+    STOP_FILE,
+    SPLASH_RESUME,
+    SET_BACKGROUND
+};
+
 class PUPTrigger {
 
 public:
@@ -25,6 +35,6 @@ public:
     int length;         // unsupported
     int counter;        // 
     int rest_seconds;
-    string loop;
+    TriggerLoop loop;
     int defaults;
 };
