@@ -55,8 +55,11 @@ PUPTrigger::PUPTrigger(string configLine)
         else if (fields[12] == "SetBG") {
             loop = TriggerLoop::SET_BACKGROUND;
         }
+        else if (fields[12] == "") {
+            loop = TriggerLoop::DEFAULT;
+        }
         else {
-            BOOST_LOG_TRIVIAL(error) << "[puptrigger] don't know trigger loop type " << fields[12] << ", using default";
+            BOOST_LOG_TRIVIAL(error) << "[puptrigger] don't know trigger type " << fields[12] << ", using default";
         }
         defaults = parseInteger(fields[13],0);
     }
