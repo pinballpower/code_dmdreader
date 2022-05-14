@@ -68,5 +68,5 @@ PUPTrigger::PUPTrigger(string configLine)
 
 bool PUPTrigger::isValid()
 {
-    return id >= 0;
+    return ((id >= 0) && (screennum >= 0));
 }
