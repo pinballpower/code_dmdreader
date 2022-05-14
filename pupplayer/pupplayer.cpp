@@ -307,6 +307,11 @@ void PUPPlayer::processTrigger(string trigger)
 
 	const auto& triggerData = triggers[trigger];
 
+	if (! playerStates.contains(triggerData.screennum)) {
+		BOOST_LOG_TRIVIAL(trace) << "[pupplayer] trigger " << trigger << " for inactive screen, ignoring";
+		return;
+	}
+
 	string playfile = triggerData.playfile;
 	if (playfile == "") {
 		PUPPlaylist pl = playlists[triggerData.playlist];
@@ -356,7 +361,12 @@ void PUPPlayer::processTrigger(string trigger)
 	playerStates[triggerData.screennum].priority = triggerData.priority;
 	playerStates[triggerData.screennum].playing = true;
 	// TODO: Preload video files 
-	players[triggerData.screennum]->startPlayback(make_unique<VideoFile>(playfile, true), loop);
+	auto& player = players[triggerData.screennum];
+	if (!player) {
+		BOOST_LOG_TRIVIAL(warning) << "[pupplayer] got a null player, something is terribly wrong :( ";
+		return;
+	}
+	player->startPlayback(make_unique<VideoFile>(playfile, true), loop);
 
 	BOOST_LOG_TRIVIAL(error) << "[pupplayer] trigger " << trigger << " play file " << playfile;
 }
