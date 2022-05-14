@@ -54,7 +54,7 @@ private:
 	thread eventThread;
 	interprocess_semaphore eventReady = interprocess_semaphore(0);
 
-	bool initScreens(string screensToConfigure, int displayNumber);
+	bool initScreen(int screenId, int displayNumber);
 
 	void sendEvent(const string event);
 	void processTrigger(string trigger);
@@ -65,4 +65,5 @@ private:
 // Helper functions to read .pup files
 vector<string> splitLine(const string& line);
 int parseInteger(const string &s, int defaultValue = -1);
-int parseBool(const string& s, bool defaultValue = true);
+bool parseBool(const string& s, bool defaultValue = true);
+float parseFloat(const string& s, float defaultValue = 0);

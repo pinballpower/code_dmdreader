@@ -16,7 +16,14 @@ int parseInteger(const string& s, int defaultValue) {
 	return std::stoi(s);
 }
 
-int parseBool(const string& s, bool defaultValue)
+float parseFloat(const string& s, float defaultValue) {
+	if (s == "") {
+		return defaultValue;
+	}
+	return std::stof(s);
+}
+
+bool parseBool(const string& s, bool defaultValue)
 {
 	if (s == "") {
 		return defaultValue;
@@ -128,29 +135,25 @@ PUPPlayer::~PUPPlayer()
 	stop();
 }
 
-bool PUPPlayer::initScreens(string screensToConfigure, int displayNumber) {
+bool PUPPlayer::initScreen(int screenId, int displayNumber) {
 
-	// initialize videoplayers for screens
+	// first initialize main screen
 	int planeIndex = 0;
+	players[screenId] = std::make_unique<VideoPlayer>(displayNumber, planeIndex, CompositionGeometry());
+	playerStates[screenId] = PlayerState();
+	planeIndex++;
 
-	for (string screenIdStr : splitLine(screensToConfigure)) {
-		int screenId = parseInteger(screenIdStr);
+	// Now all subscreens
+	for (auto& screen : screens) {
+		if ((screen.screenNum == screenId) || (screen.parentScreen == screenId)) {
+			BOOST_LOG_TRIVIAL(trace) << "[pupcapture] trying to configure screen " << screen.screenNum;
 
-		for (auto& screen : screens) {
-			if (screen.screenNum == screenId) {
-				BOOST_LOG_TRIVIAL(trace) << "[pupcapture] trying to configure screen " << screenId;
+			CompositionGeometry composition;
+			// TODO: handle composition
 
-				CompositionGeometry composition;
-				if (screen.customPos != "") {
-					// TODO: calculate plane size
-				}
-
-				players[screenId] = std::make_unique<VideoPlayer>(displayNumber, planeIndex, composition);
-				playerStates[screenId] = PlayerState();
-				planeIndex++;
-
-				break;
-			}
+			players[screen.screenNum] = std::make_unique<VideoPlayer>(displayNumber, planeIndex, composition);
+			playerStates[screen.screenNum] = PlayerState();
+			planeIndex++;
 		}
 	}
 
@@ -165,11 +168,6 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 
 	int displayNumber = pt_source.get("display_number", 0);
 	basedir = pt_source.get("directory", "");
-	string screensToConfigure = pt_source.get("screens", "");
-	if (screensToConfigure == "") {
-		BOOST_LOG_TRIVIAL(error) << "[pupcapture] screens not configured, this is mandatory, disabling pupcapture";
-		return false;
-	}
 
 	{
 		filename = basedir + "/screens.pup";
@@ -179,7 +177,19 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 			return false;
 		}
 		this->screens = screens.value();
-		initScreens(screensToConfigure, displayNumber);
+		int backglassId = -1;
+		for (const auto& s : this->screens) {
+			if (s.screenDescription == "Backglass") {
+				backglassId = s.screenNum;
+				break;
+			}
+		}
+
+		if (backglassId < 0) {
+			BOOST_LOG_TRIVIAL(error) << "[pupplayer] can't find backglass, not initializing PUPPlayer";
+			return false;
+		}
+		initScreen(backglassId, displayNumber);
 	}
 
 	{

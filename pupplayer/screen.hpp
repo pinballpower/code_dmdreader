@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "../drm/drmhelper.hpp"
+
 using namespace std;
 
 class PUPScreen {
@@ -19,5 +21,10 @@ public:
     string loopit;
     bool active;
     int priority;
-    string customPos;
+
+    int parentScreen = -1;
+    float x1;
+    float y1;
+    float x2;
+    float y2;
 };
