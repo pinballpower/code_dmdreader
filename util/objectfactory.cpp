@@ -12,6 +12,7 @@
 #include "../processor/framestore.hpp"
 #include "../render/framerenderer.hpp"
 #include "../services/service.hpp"
+#include "../services/pupeventplayback.hpp"
 
 #ifdef USE_OPENGLGLAD
 #include "../render/gladopenglrenderer.hpp"
@@ -118,6 +119,9 @@ std::shared_ptr<Service> createService(string name) {
 		return std::make_shared<PUPPlayer>();
 	}
 #endif
+	else if (name == "pupeventplayback") {
+		return std::make_shared<PUPEventPlayback>();
+	}
 	else {
 		BOOST_LOG_TRIVIAL(error) << "renderer name " << name << " unknown";
 		return NULL;
