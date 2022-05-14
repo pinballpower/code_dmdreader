@@ -362,9 +362,10 @@ void PUPPlayer::processTrigger(string trigger)
 	//  SPLASH_RESUME,SET_BACKGROUND
 
 	bool loop = false;
+	// TODO: What's the difference between "loop" and "loopFile"?
 	if ((triggerData.loop == TriggerLoop::LOOP) || (triggerData.loop == TriggerLoop::LOOP_FILE)) {
 		loop = true;
-		// TODO: What's the difference between "loop" and "loopFile"?
+		
 	}
 
 	if (playfile == "") {
