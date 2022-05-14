@@ -18,6 +18,8 @@ extern "C" {
 
 using namespace std;
 
+static int activePlayers = 0;
+
 static int decode_write(AVCodecContext* const avctx,
 	DRMPrimeOut* const dpo,
 	AVPacket* packet)
@@ -74,6 +76,8 @@ void VideoPlayer::playLoop(bool loop)
 	AVPacket packet;
 
 	terminate = false;
+	activePlayers++;
+	BOOST_LOG_TRIVIAL(error) << "[videoplayer] " << activePlayers << " active players";
 
 	/* actual decoding */
 	playing = true;
@@ -118,7 +122,9 @@ void VideoPlayer::playLoop(bool loop)
 	av_packet_unref(&packet);
 
 	currentVideo->close();
+	currentVideo = unique_ptr<VideoFile>(nullptr);
 
+	activePlayers--;
 	playing = false;
 }
 
@@ -201,7 +207,7 @@ void VideoPlayer::pause(bool paused)
 	this->paused = paused;
 }
 
-CompositionGeometry VideoPlayer::getCompositionGeometry(const CompositionGeometry compositionGeometry)
+CompositionGeometry VideoPlayer::getCompositionGeometry() const
 {
 	if (dpo) {
 		return dpo->getCompositionGeometry();
