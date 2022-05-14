@@ -48,7 +48,7 @@ void PUPPlaylist::scanFiles(const string baseDirectory)
 			for (const string suffix : {".mp4"}) {
 				if (pathStr.ends_with(suffix)) {
 					files.push_back(pathStr);
-					BOOST_LOG_TRIVIAL(error) << "[playlist] added " << pathStr << " to playlist " << folder;
+					BOOST_LOG_TRIVIAL(debug) << "[playlist] added " << pathStr << " to playlist " << folder;
 					break;
 				}
 			}
