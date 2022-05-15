@@ -42,6 +42,7 @@ public:
 	~DRMPrimeOut();
 
 	int displayFrame(struct AVFrame* frame);
+	bool setPlaneAlpha(uint32_t alpha);
 
 	const CompositionGeometry getCompositionGeometry() const;
 
@@ -50,8 +51,6 @@ private:
 	void renderLoop();
 	void da_uninit(drm_aux_t* da);
 	int renderFrame(AVFrame* frame);
-
-	bool setPlaneAlpha(uint32_t alpha);
 
 	int screenNumber;
 	int drmFd;
