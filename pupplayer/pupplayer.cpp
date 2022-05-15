@@ -383,7 +383,7 @@ void PUPPlayer::processTrigger(string trigger)
 	}
 	player->startPlayback(make_unique<VideoFile>(playfile, true), loop);
 
-	BOOST_LOG_TRIVIAL(error) << "[pupplayer] trigger " << trigger << " play file " << playfile;
+	BOOST_LOG_TRIVIAL(error) << "[pupplayer] trigger " << trigger << " play file " << playfile << " on screen " << triggerData.screennum;
 }
 
 PUPPlayer::PUPPlayer(int screenNumber)
