@@ -2,21 +2,22 @@
 
 ## Graphics
 
-- https://forums.raspberrypi.com/viewtopic.php?t=317511
+- Graphics APIs on the Raspberry Pi: https://forums.raspberrypi.com/viewtopic.php?t=317511
 
 ## Video playback/V4L2
 
-- https://github.com/egnor/pivid (Pi video player that is scriptable)
-- https://github.com/Fredrum/rpi_v4l2_tests/tree/master/include (camera to OpenGL)
+- Scriptable Pi video player: https://github.com/egnor/pivid
+- Camera to OpenGL: https://github.com/Fredrum/rpi_v4l2_tests/tree/master/include
 
 ### DRM/MKS
 
+- DRM properties database: https://drmdb.emersion.fr/ 
 - https://events.static.linuxfound.org/sites/events/files/slides/brezillon-drm-kms.pdf
-- https://github.com/embear-engineering/drm-framebuffer
+- DRM based framebuffer device: https://github.com/embear-engineering/drm-framebuffer
 
 ### Related projects
 
-- https://github.com/tomba/kmsxx (found this too late and implemented lots of the DRM/KMS stuff by myself)
+- C++ DRM/KMS interface: https://github.com/tomba/kmsxx (found this too late and implemented lots of the DRM/KMS stuff by myself)
 
 ## C++ Multithreading
 
