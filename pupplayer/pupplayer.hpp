@@ -25,6 +25,8 @@ public:
 	bool playing = false;
 };
 
+const vector<string> PUPPLAYER_SUPPORTED_EXTENSIONS = { ".mp4" };
+
 class PUPPlayer : public Service {
 
 public:
@@ -38,6 +40,7 @@ public:
 
 	virtual std::pair<ServiceResponse, string> command(const string& cmd);
 
+	static bool hasSupportedExtension(string filename);
 
 private:
 	map<string,PUPTrigger> triggers; // map trigger to trigger data
@@ -54,7 +57,7 @@ private:
 	thread eventThread;
 	interprocess_semaphore eventReady = interprocess_semaphore(0);
 
-	bool initScreen(int screenId, int displayNumber);
+	bool initScreen(int screenId, int displayNumber, const vector<string>& ignoreScreens);
 
 	void sendEvent(const string event);
 	void processTrigger(string trigger);

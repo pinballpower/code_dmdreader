@@ -135,7 +135,7 @@ PUPPlayer::~PUPPlayer()
 	stop();
 }
 
-bool PUPPlayer::initScreen(int screenId, int displayNumber) {
+bool PUPPlayer::initScreen(int screenId, int displayNumber, const vector<string> &ignoreScreens) {
 
 	// first initialize main screen
 	int planeIndex = 0;
@@ -146,6 +146,10 @@ bool PUPPlayer::initScreen(int screenId, int displayNumber) {
 
 	// Now all subscreens
 	for (auto& screen : screens) {
+		if (std::find(ignoreScreens.begin(), ignoreScreens.end(), std::to_string(screen.screenNum)) != ignoreScreens.end()) {
+			BOOST_LOG_TRIVIAL(trace) << "[pupcapture] not initializing screen " << screen.screenNum << ", is on ignore list";
+			break;
+		}
 		if (screen.parentScreen == screenId) {
 			BOOST_LOG_TRIVIAL(trace) << "[pupcapture] trying to configure screen " << screen.screenNum;
 
@@ -173,6 +177,8 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 	int displayNumber = pt_source.get("display_number", 0);
 	basedir = pt_source.get("directory", "");
 
+	vector<string>ignoreScreens = splitLine(pt_source.get("ignore_screens", ""));
+
 	{
 		filename = basedir + "/screens.pup";
 		auto screens = readConfigFile<PUPScreen>(filename);
@@ -193,7 +199,7 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 			BOOST_LOG_TRIVIAL(error) << "[pupplayer] can't find backglass, not initializing PUPPlayer";
 			return false;
 		}
-		initScreen(backglassId, displayNumber);
+		initScreen(backglassId, displayNumber, ignoreScreens);
 	}
 
 	{
@@ -260,6 +266,16 @@ std::pair<ServiceResponse, string> PUPPlayer::command(const string& cmd)
 	else {
 		return std::pair<ServiceResponse, string>(ServiceResponse::ERROR, "");
 	}
+}
+
+bool PUPPlayer::hasSupportedExtension(string filename)
+{
+	for (const string suffix : PUPPLAYER_SUPPORTED_EXTENSIONS) {
+		if (filename.ends_with(suffix)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 void PUPPlayer::eventLoop()
@@ -381,9 +397,14 @@ void PUPPlayer::processTrigger(string trigger)
 		BOOST_LOG_TRIVIAL(warning) << "[pupplayer] got a null player, something is terribly wrong :( ";
 		return;
 	}
-	player->startPlayback(make_unique<VideoFile>(playfile, true), loop);
 
-	BOOST_LOG_TRIVIAL(error) << "[pupplayer] trigger " << trigger << " play file " << playfile << " on screen " << triggerData.screennum;
+	if (PUPPlayer::hasSupportedExtension(playfile)) {
+		player->startPlayback(make_unique<VideoFile>(playfile, true), loop);
+		BOOST_LOG_TRIVIAL(info) << "[pupplayer] trigger " << trigger << " play file " << playfile << " on screen " << triggerData.screennum;
+	}
+	else {
+		BOOST_LOG_TRIVIAL(debug) << "[pupplayer] trigger " << trigger << " ignoring play file " << playfile << ", unsupported extension";
+	}
 }
 
 PUPPlayer::PUPPlayer(int screenNumber)
