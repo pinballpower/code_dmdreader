@@ -43,15 +43,10 @@ void PUPPlaylist::scanFiles(const string baseDirectory)
 	files.clear();
 	string path = baseDirectory+"/"+folder;
 	for (const auto file : std::filesystem::directory_iterator(path)) {
-		if (file.is_regular_file()) {
-			string pathStr = file.path();
-			for (const string suffix : {".mp4"}) {
-				if (pathStr.ends_with(suffix)) {
-					files.push_back(pathStr);
-					BOOST_LOG_TRIVIAL(debug) << "[playlist] added " << pathStr << " to playlist " << folder;
-					break;
-				}
-			}
+		string pathStr = file.path();
+		if (file.is_regular_file() && PUPPlayer::hasSupportedExtension(pathStr)) {
+			files.push_back(pathStr);
+			BOOST_LOG_TRIVIAL(debug) << "[playlist] added " << pathStr << " to playlist " << folder;
 		}
 	}
 
