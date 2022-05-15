@@ -52,6 +52,7 @@ int DRMPrimeOut::renderFrame(AVFrame* frame)
 	const uint32_t format = desc->layers[0].format;
 	int ret = 0;
 
+	// this will be called only once per video. After the first one, the planeId is known
 	if (connectionData.outputFourCC != format) {
 		bool foundPlane = DRMHelper::findPlane(connectionData.crtcIndex, format, &connectionData.planeId, planeNumber);
 		if (! foundPlane) {
@@ -122,6 +123,18 @@ int DRMPrimeOut::renderFrame(AVFrame* frame)
 	ano = ano + 1 >= AUX_SIZE ? 0 : ano + 1;
 
 	return ret;
+}
+
+bool DRMPrimeOut::setPlaneAlpha(uint32_t alpha)
+{
+	if (connectionData.planeId) {
+		DRMHelper::setAlphaForPlane(connectionData.planeId, alpha);
+		return true;
+	}
+	else {
+		BOOST_LOG_TRIVIAL(debug) << "[drmprime_out] planeId not yet set, cant set alpha";
+		return false;
+	}
 }
 
 

@@ -39,6 +39,10 @@ std::map<unsigned int, string > encoderTypeNames = {
 	{ DRM_MODE_ENCODER_DPMST, "fake" }
 };
 
+#define NAME_ALPHA "alpha"
+#define NAME_PIXEL_BLEND "pixel blend mode"
+#define VALUE_PIXEL_BLEND_COVERAGE "Coverage"
+
 
 const vector<string> devicesToTry = { "/dev/dri/card0","/dev/dri/card1" };
 
@@ -544,4 +548,79 @@ void CompositionGeometry::fitInto(CompositionGeometry screenSize)
 	if (width > screenSize.width) {
 		width = screenSize.width;
 	}
+}
+
+bool DRMHelper::setAlphaForPlane(uint32_t planeId, uint32_t alpha) {
+	drmModeObjectPropertiesPtr props;
+	props = drmModeObjectGetProperties(drmDeviceFd, planeId,
+		DRM_MODE_OBJECT_PLANE);
+	if (!props) {
+		BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] no plane properties found";
+	}
+
+	bool done = false;
+	for (int i = 0; i < props->count_props; i++) {
+		drmModePropertyPtr prop;
+
+		prop = drmModeGetProperty(drmDeviceFd, props->props[i]);
+		if (prop) {
+			if (strcmp(prop->name, NAME_ALPHA) == 0) {
+				BOOST_LOG_TRIVIAL(info) << "[drmframebuffer] setting " << NAME_ALPHA;
+				if (drmModeObjectSetProperty(drmDeviceFd, planeId, DRM_MODE_OBJECT_PLANE, prop->prop_id, alpha)) {
+					BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] could not set alpha property";
+				}
+				else {
+					done = true;
+					break;
+				}
+			}
+			drmModeFreeProperty(prop);
+		}
+		if (done) {
+			break;
+		}
+	}
+	drmModeFreeObjectProperties(props);
+	return done;
+}
+
+bool DRMHelper::setPixelBlendCoverageForPlane(uint32_t planeId) {
+	drmModeObjectPropertiesPtr props;
+	props = drmModeObjectGetProperties(drmDeviceFd, planeId,
+		DRM_MODE_OBJECT_PLANE);
+	if (!props) {
+		BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] no plane properties found";
+	}
+
+	bool done = false;
+	for (int i = 0; i < props->count_props; i++) {
+		drmModePropertyPtr prop;
+
+		prop = drmModeGetProperty(drmDeviceFd, props->props[i]);
+		if (prop) {
+			if (strcmp(prop->name, NAME_PIXEL_BLEND) == 0) {
+
+				drm_mode_property_enum* pEnum = prop->enums;
+				for (int j = 0; j < prop->count_enums; j++) {
+					if (strcmp(pEnum->name, VALUE_PIXEL_BLEND_COVERAGE) == 0) {
+						BOOST_LOG_TRIVIAL(info) << "[drmframebuffer] setting " << NAME_PIXEL_BLEND << " to " << VALUE_PIXEL_BLEND_COVERAGE;
+						if (drmModeObjectSetProperty(drmDeviceFd, planeId, DRM_MODE_OBJECT_PLANE, prop->prop_id, pEnum->value)) {
+							BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] could not set pixel blending property";
+						}
+						else {
+							done = true;
+							break;
+						}
+					}
+					pEnum++;
+				}
+			}
+			drmModeFreeProperty(prop);
+		}
+		if (done) {
+			break;
+		}
+	}
+	drmModeFreeObjectProperties(props);
+	return done;
 }

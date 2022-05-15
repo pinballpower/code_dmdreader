@@ -95,6 +95,8 @@ public:
 
 	static string planeformatString(uint32_t format);
 	static uint32_t planeformat(string formatString);
+	static bool setAlphaForPlane(uint32_t planeId, uint32_t alpha);
+	static bool setPixelBlendCoverageForPlane(uint32_t planeId);
 
 protected:
 

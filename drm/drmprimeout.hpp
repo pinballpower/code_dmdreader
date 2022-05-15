@@ -1,5 +1,7 @@
 #pragma once 
 
+#include <cstdint>
+
 #include <thread>
 #include <boost/interprocess/sync/interprocess_semaphore.hpp>
 
@@ -48,6 +50,8 @@ private:
 	void renderLoop();
 	void da_uninit(drm_aux_t* da);
 	int renderFrame(AVFrame* frame);
+
+	bool setPlaneAlpha(uint32_t alpha);
 
 	int screenNumber;
 	int drmFd;
