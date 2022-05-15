@@ -28,6 +28,7 @@ public:
 	bool isPlaying();
 	void stop();
 	void pause(bool paused=true);
+	void setFinishNotify(std::function<void()> notifyFinished = []()->void {});
 
 	CompositionGeometry getCompositionGeometry() const;
 
@@ -41,10 +42,12 @@ private:
 	bool playing = false;
 	bool screenOpened = false;
 	bool paused = false;
+	bool transparentWhenStopped = true;
 
 	void playLoop(bool loop);
 
 	unique_ptr<VideoFile> currentVideo = unique_ptr<VideoFile>(nullptr);
+	std::function<void()> notifyFinishedFunction = []()->void {};
 
 	thread playerThread;
 

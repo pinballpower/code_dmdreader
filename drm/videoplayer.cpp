@@ -79,6 +79,10 @@ void VideoPlayer::playLoop(bool loop)
 	activePlayers++;
 	BOOST_LOG_TRIVIAL(error) << "[videoplayer] " << activePlayers << " active players";
 
+	if (transparentWhenStopped) {
+		dpo->setPlaneAlpha(0xffff);
+	}
+
 	/* actual decoding */
 	playing = true;
 	while (! terminate) {
@@ -116,13 +120,19 @@ void VideoPlayer::playLoop(bool loop)
 	}
 
 	/* flush the decoder */
-	packet.data = NULL;
+	packet.data = nullptr;
 	packet.size = 0;
 	decode_write(currentVideo->decoderContext, dpo, &packet);
 	av_packet_unref(&packet);
 
+	if (transparentWhenStopped) {
+		dpo->setPlaneAlpha(0);
+	}
+
 	currentVideo->close();
 	currentVideo = unique_ptr<VideoFile>(nullptr);
+
+	notifyFinishedFunction();
 
 	activePlayers--;
 	playing = false;
@@ -205,6 +215,11 @@ void VideoPlayer::stop()
 void VideoPlayer::pause(bool paused)
 {
 	this->paused = paused;
+}
+
+void VideoPlayer::setFinishNotify(std::function<void()> notifyFinished)
+{
+	this->notifyFinishedFunction = notifyFinished;
 }
 
 CompositionGeometry VideoPlayer::getCompositionGeometry() const
