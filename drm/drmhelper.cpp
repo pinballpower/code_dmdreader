@@ -142,7 +142,7 @@ bool DRMHelper::initFullscreen(int displayNumber, int width, int height) {
 		} else {
 
 		}
-		BOOST_LOG_TRIVIAL(info) << "[drmhelper] found supported resolution: " << drmMode.hdisplay << "x" << drmMode.vdisplay << " " << selected;
+		BOOST_LOG_TRIVIAL(debug) << "[drmhelper] found supported resolution: " << drmMode.hdisplay << "x" << drmMode.vdisplay << " " << selected;
 	}
 	drmMode = connector->modes[0];
 	currentScreenSize.width = drmMode.hdisplay;
@@ -555,7 +555,7 @@ bool DRMHelper::setAlphaForPlane(uint32_t planeId, uint32_t alpha) {
 	props = drmModeObjectGetProperties(drmDeviceFd, planeId,
 		DRM_MODE_OBJECT_PLANE);
 	if (!props) {
-		BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] no plane properties found";
+		BOOST_LOG_TRIVIAL(error) << "[drmhelper] no plane properties found";
 	}
 
 	bool done = false;
@@ -565,9 +565,9 @@ bool DRMHelper::setAlphaForPlane(uint32_t planeId, uint32_t alpha) {
 		prop = drmModeGetProperty(drmDeviceFd, props->props[i]);
 		if (prop) {
 			if (strcmp(prop->name, NAME_ALPHA) == 0) {
-				BOOST_LOG_TRIVIAL(info) << "[drmframebuffer] setting " << NAME_ALPHA;
+				BOOST_LOG_TRIVIAL(debug) << "[drmhelper] setting " << NAME_ALPHA;
 				if (drmModeObjectSetProperty(drmDeviceFd, planeId, DRM_MODE_OBJECT_PLANE, prop->prop_id, alpha)) {
-					BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] could not set alpha property";
+					BOOST_LOG_TRIVIAL(error) << "[drmhelper] could not set alpha property";
 				}
 				else {
 					done = true;
@@ -589,7 +589,7 @@ bool DRMHelper::setPixelBlendCoverageForPlane(uint32_t planeId) {
 	props = drmModeObjectGetProperties(drmDeviceFd, planeId,
 		DRM_MODE_OBJECT_PLANE);
 	if (!props) {
-		BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] no plane properties found";
+		BOOST_LOG_TRIVIAL(error) << "[drmhelper] no plane properties found";
 	}
 
 	bool done = false;
@@ -603,9 +603,9 @@ bool DRMHelper::setPixelBlendCoverageForPlane(uint32_t planeId) {
 				drm_mode_property_enum* pEnum = prop->enums;
 				for (int j = 0; j < prop->count_enums; j++) {
 					if (strcmp(pEnum->name, VALUE_PIXEL_BLEND_COVERAGE) == 0) {
-						BOOST_LOG_TRIVIAL(info) << "[drmframebuffer] setting " << NAME_PIXEL_BLEND << " to " << VALUE_PIXEL_BLEND_COVERAGE;
+						BOOST_LOG_TRIVIAL(debug) << "[drmhelper] setting " << NAME_PIXEL_BLEND << " to " << VALUE_PIXEL_BLEND_COVERAGE;
 						if (drmModeObjectSetProperty(drmDeviceFd, planeId, DRM_MODE_OBJECT_PLANE, prop->prop_id, pEnum->value)) {
-							BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] could not set pixel blending property";
+							BOOST_LOG_TRIVIAL(error) << "[drmhelper] could not set pixel blending property";
 						}
 						else {
 							done = true;
