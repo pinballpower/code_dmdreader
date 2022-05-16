@@ -5,7 +5,7 @@
 #include <boost/log/trivial.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/foreach.hpp>
-
+#include <boost/algorithm/string.hpp>
 
 #include "../drm/drmhelper.hpp"
 #include "../drm/videofile.hpp"
@@ -311,7 +311,7 @@ void PUPPlayer::playbackFinished(int playerId, VideoPlayerFinishCode finishCode)
 	BOOST_LOG_TRIVIAL(warning) << "[pupplayer] video player " << playerId << " finished playback";
 	playerStates[playerId].playing = false;
 	if (finishCode != VideoPlayerFinishCode::STOPPED_FOR_NEXT_VIDEO) {
-//		playDefaultVideo(playerId);
+		sendEvent("defaultvideo:" + std::to_string(playerId));
 	}
 }
 
@@ -330,7 +330,8 @@ void PUPPlayer::eventLoop()
 			processTrigger(event.substr(8));
 		}
 		else if (event.starts_with("video:")) {
-			vector<string>parts = splitLine(event);
+			vector<string>parts;
+			boost::split(parts, event, boost::is_any_of(":"));
 			if (parts.size() == 4) {
 				string filename = parts[1];
 				int screenNumber = parseInteger(parts[2], -1);
@@ -340,6 +341,16 @@ void PUPPlayer::eventLoop()
 				}
 			}
 			
+		}
+		else if (event.starts_with("defaultvideo:")) {
+			vector<string>parts;
+			boost::split(parts, event, boost::is_any_of(":"));
+			if (parts.size() == 2) {
+				int screenNumber = parseInteger(parts[1], -1);
+				if (screenNumber >= 0) {
+					playDefaultVideo(screenNumber);
+				}
+			}
 		}
 		else {
 			BOOST_LOG_TRIVIAL(warning) << "[pupplayer] unknown event " << event;
@@ -440,6 +451,7 @@ void PUPPlayer::processTrigger(string trigger)
 
 	playerStates[triggerData.screennum].priority = triggerData.priority;
 
+	BOOST_LOG_TRIVIAL(error) << "[pupplayer] trigger " << trigger << " starting " << playfile;
 	startVideoPlayback(playfile, triggerData.screennum, loop);
 
 }
