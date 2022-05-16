@@ -152,11 +152,11 @@ bool PUPPlayer::initScreen(int screenId, int displayNumber, const vector<string>
 	// Now all subscreens
 	for (auto& screen : screens) {
 		if (std::find(ignoreScreens.begin(), ignoreScreens.end(), std::to_string(screen.screenNum)) != ignoreScreens.end()) {
-			BOOST_LOG_TRIVIAL(trace) << "[pupcapture] not initializing screen " << screen.screenNum << ", is on ignore list";
+			BOOST_LOG_TRIVIAL(trace) << "[pupplayer] not initializing screen " << screen.screenNum << ", is on ignore list";
 			break;
 		}
 		if (screen.parentScreen == screenId) {
-			BOOST_LOG_TRIVIAL(trace) << "[pupcapture] trying to configure screen " << screen.screenNum;
+			BOOST_LOG_TRIVIAL(trace) << "[pupplayer] trying to configure screen " << screen.screenNum;
 
 			CompositionGeometry composition;
 			composition.x = parentComposition.x + parentComposition.width * screen.x;
@@ -171,7 +171,7 @@ bool PUPPlayer::initScreen(int screenId, int displayNumber, const vector<string>
 		}
 	}
 
-	BOOST_LOG_TRIVIAL(info) << "[pupcapture] initialized " << planeIndex << " video planes";
+	BOOST_LOG_TRIVIAL(info) << "[pupplayer] initialized " << planeIndex << " video planes";
 
 	return true;
 }
