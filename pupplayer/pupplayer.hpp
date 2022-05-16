@@ -43,7 +43,7 @@ public:
 
 	static bool hasSupportedExtension(string filename);
 
-	virtual void playbackFinished(int playerId) override;
+	virtual void playbackFinished(int playerId,VideoPlayerFinishCode finishCode) override;
 
 
 private:
@@ -67,6 +67,8 @@ private:
 	void processTrigger(string trigger);
 	void updatePlayerState();
 	void addFinishNotify(int screenId);
+	void playDefaultVideo(int screenId);
+	void startVideoPlayback(string filename, int screenNumber, bool loop);
 };
 
 

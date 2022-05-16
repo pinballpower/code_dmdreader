@@ -141,6 +141,23 @@ void PUPPlayer::addFinishNotify(int screenId) {
 	players[screenId]->setNotify(this);
 }
 
+void PUPPlayer::playDefaultVideo(int screenId) {
+	if (players.contains(screenId)) {
+		PUPScreen screen = screens[screenId];
+		if (screen.playFile != "") {
+			string playfile = basedir + "/" + screen.playList + "/" + screen.playFile;
+
+			if (PUPPlayer::hasSupportedExtension(playfile)) {
+				players[screen.screenNum]->startPlayback(make_unique<VideoFile>(playfile, true), true);
+				BOOST_LOG_TRIVIAL(info) << "[pupplayer] looping default video " << playfile << " on screen " << screenId;
+			}
+		}
+	}
+	else {
+		BOOST_LOG_TRIVIAL(error) << "[pupplayer] ooops, playDefaultVideo, screen " << screenId << " doesn't exist";
+	}
+}
+
 bool PUPPlayer::initVideoScreen(int screenId, int displayNumber, int& planeIndex) {
 
 	CompositionGeometry fullscreen = DRMHelper::getFullscreenResolution(displayNumber);
@@ -235,6 +252,11 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 		<< this->screens.size() << " screens and "
 		<< this->playlists.size() << " playlists";
 
+	// start default videos
+	for (auto &player: this->players) {
+		playDefaultVideo(player.first);
+	}
+
 	return true;
 }
 
@@ -284,10 +306,13 @@ bool PUPPlayer::hasSupportedExtension(string filename)
 	return false;
 }
 
-void PUPPlayer::playbackFinished(int playerId)
+void PUPPlayer::playbackFinished(int playerId, VideoPlayerFinishCode finishCode)
 {
 	BOOST_LOG_TRIVIAL(warning) << "[pupplayer] video player " << playerId << " finished playback";
 	playerStates[playerId].playing = false;
+	if (finishCode != VideoPlayerFinishCode::STOPPED_FOR_NEXT_VIDEO) {
+//		playDefaultVideo(playerId);
+	}
 }
 
 void PUPPlayer::eventLoop()
@@ -303,6 +328,18 @@ void PUPPlayer::eventLoop()
 		}
 		else if (event.starts_with("trigger:")) {
 			processTrigger(event.substr(8));
+		}
+		else if (event.starts_with("video:")) {
+			vector<string>parts = splitLine(event);
+			if (parts.size() == 4) {
+				string filename = parts[1];
+				int screenNumber = parseInteger(parts[2], -1);
+				bool loop = parseBool(parts[3], false);
+				if (screenNumber >= 0) {
+					startVideoPlayback(filename, screenNumber, true);
+				}
+			}
+			
 		}
 		else {
 			BOOST_LOG_TRIVIAL(warning) << "[pupplayer] unknown event " << event;
@@ -402,20 +439,27 @@ void PUPPlayer::processTrigger(string trigger)
 	}
 
 	playerStates[triggerData.screennum].priority = triggerData.priority;
-	playerStates[triggerData.screennum].playing = true;
+
+	startVideoPlayback(playfile, triggerData.screennum, loop);
+
+}
+
+void PUPPlayer::startVideoPlayback(string filename, int screenNumber, bool loop) {
 	// TODO: Preload video files 
-	auto& player = players[triggerData.screennum];
+
+	auto& player = players[screenNumber];
 	if (!player) {
 		BOOST_LOG_TRIVIAL(warning) << "[pupplayer] got a null player, something is terribly wrong :( ";
 		return;
 	}
 
-	if (PUPPlayer::hasSupportedExtension(playfile)) {
-		player->startPlayback(make_unique<VideoFile>(playfile, true), loop);
-		BOOST_LOG_TRIVIAL(info) << "[pupplayer] trigger " << trigger << " play file " << playfile << " on screen " << triggerData.screennum;
+	if (PUPPlayer::hasSupportedExtension(filename)) {
+		player->startPlayback(make_unique<VideoFile>(filename, true), loop);
+		playerStates[screenNumber].playing = true;
+		BOOST_LOG_TRIVIAL(info) << "[pupplayer] play file " << filename << " on screen " << screenNumber;
 	}
 	else {
-		BOOST_LOG_TRIVIAL(debug) << "[pupplayer] trigger " << trigger << " ignoring play file " << playfile << ", unsupported extension";
+		BOOST_LOG_TRIVIAL(debug) << "[pupplayer] ignoring play file " << filename << ", unsupported extension";
 	}
 }
 
