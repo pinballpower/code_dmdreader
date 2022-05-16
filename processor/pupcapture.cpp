@@ -142,18 +142,12 @@ DMDFrame PUPCapture::processFrame(DMDFrame &f)
 
             string trigger = "trigger:D"+ std::to_string(p.first);
 
-            std::pair<ServiceResponse, string> res = serviceRegistry.command("pupplayer", trigger);
-            if (res.first == ServiceResponse::SERVICE_NOT_FOUND) {
+            vector <std::pair<ServiceResponse, string>> res = serviceRegistry.command("pupplayer", trigger);
+            if (res.size() == 0) {
                 BOOST_LOG_TRIVIAL(error) << "[pupcapture] pupplayer not available, has probably not been configured";
             }
-            else if (res.first == ServiceResponse::OK) {
-                BOOST_LOG_TRIVIAL(debug) << "[pupcapture] sent " << trigger << " to pupplayer";
-            }
-            else if (res.first == ServiceResponse::ERROR) {
-                BOOST_LOG_TRIVIAL(error) << "[pupcapture] pupplayer couldn't process " << trigger;
-            }
             else {
-                BOOST_LOG_TRIVIAL(error) << "[pupcapture] unknown service response";
+                BOOST_LOG_TRIVIAL(info) << "[pupcapture] sent event to " << res.size() << " pupplayer(s)";
             }
 
             break;

@@ -28,4 +28,9 @@ public:
 	/// <param name="cmd">the command</param>
 	/// <returns>the result of this command</returns>
 	virtual std::pair<ServiceResponse, string> command(const string& cmd);
+
+	void setId(int serviceId);
+
+private:
+	int serviceId = 0;
 };

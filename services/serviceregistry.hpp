@@ -5,13 +5,13 @@ class ServiceRegistry {
 public:
 
 	ServiceRegistry();
-	bool registerService(std::shared_ptr<Service> service);
+	void registerService(std::shared_ptr<Service> service);
 	void clear();
 
-	std::pair<ServiceResponse, string> command(const string serviceName, const string& cmd);
+	vector<std::pair<ServiceResponse, string>> command(const string serviceName, const string& cmd, int instanceId = -1);
 
 private:
-	map<string, std::shared_ptr<Service>> services;
+	vector<std::shared_ptr<Service>> services;
 
 	ServiceRegistry(const ServiceRegistry&) = delete;
 	ServiceRegistry& operator=(const ServiceRegistry&) = delete;

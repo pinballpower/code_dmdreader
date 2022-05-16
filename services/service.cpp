@@ -23,3 +23,8 @@ std::pair<ServiceResponse, string> Service::command(const string& cmd)
 {
 	return make_pair(ServiceResponse::ERROR, "not implemented");
 }
+
+void Service::setId(int serviceId)
+{
+	this->serviceId = serviceId;
+}

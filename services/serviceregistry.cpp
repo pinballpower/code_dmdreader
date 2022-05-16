@@ -8,30 +8,28 @@ ServiceRegistry::ServiceRegistry()
 {
 }
 
-bool ServiceRegistry::registerService(std::shared_ptr<Service> service)
+void ServiceRegistry::registerService(std::shared_ptr<Service> service)
 {
-	if (services.contains(service->name()))
-	{
-		BOOST_LOG_TRIVIAL(debug) << "[serviceregistry] couldn't add service with name " << service->name() << " to registry, already exists";
-		return false;
-	}
-
-	services[service->name()] = service;
-	return true;
+	services.push_back(service);
 }
 
 void ServiceRegistry::clear()
 {
 	for (auto service : services) {
-		service.second->stop();
+		service->stop();
 	}
 	services.clear();
 }
 
-std::pair<ServiceResponse, string> ServiceRegistry::command(const string serviceName, const string& cmd)
+vector<std::pair<ServiceResponse, string>> ServiceRegistry::command(const string serviceName, const string& cmd, int instanceId)
 {
-	if (! services.contains(serviceName)) {
-		return make_pair(ServiceResponse::SERVICE_NOT_FOUND, "");
+	vector<std::pair<ServiceResponse, string>> res;
+
+	for (auto& service : services) {
+		if (service->name() == serviceName) {
+			res.push_back(service->command(cmd));
+		}
 	}
-	return services[serviceName]->command(cmd);
+
+	return res;
 }
