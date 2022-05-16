@@ -76,6 +76,7 @@ void VideoPlayer::playLoop(bool loop)
 	AVPacket packet;
 
 	terminate = false;
+	finishCode = VideoPlayerFinishCode::UNKNOWN;
 	activePlayers++;
 	BOOST_LOG_TRIVIAL(error) << "[videoplayer] " << activePlayers << " active players";
 
@@ -85,7 +86,7 @@ void VideoPlayer::playLoop(bool loop)
 
 	/* actual decoding */
 	playing = true;
-	while (! terminate) {
+	while (!terminate) {
 
 		// eof check and loop
 		if (!currentVideo->nextFrame(&packet)) {
@@ -98,6 +99,7 @@ void VideoPlayer::playLoop(bool loop)
 				}
 			}
 			else {
+				finishCode = VideoPlayerFinishCode::END_OF_FILE;
 				break;
 			}
 		}
@@ -133,7 +135,7 @@ void VideoPlayer::playLoop(bool loop)
 	currentVideo = unique_ptr<VideoFile>(nullptr);
 
 	if (videoPlayerNotify) {
-		videoPlayerNotify->playbackFinished(playerId);
+		videoPlayerNotify->playbackFinished(playerId, finishCode);
 	}
 
 	activePlayers--;
@@ -184,9 +186,9 @@ void VideoPlayer::closeScreen() {
 }
 
 
-void VideoPlayer::startPlayback(unique_ptr<VideoFile> videoFile,  bool loop)
+void VideoPlayer::startPlayback(unique_ptr<VideoFile> videoFile, bool loop)
 {
-	if (! videoFile) {
+	if (!videoFile) {
 		return;
 	}
 
@@ -195,7 +197,7 @@ void VideoPlayer::startPlayback(unique_ptr<VideoFile> videoFile,  bool loop)
 		BOOST_LOG_TRIVIAL(trace) << "[videoplayer] couldn't connect to video decoder";
 		return;
 	}
-	stop();
+	stop(VideoPlayerFinishCode::STOPPED_FOR_NEXT_VIDEO);
 	currentVideo = std::move(videoFile);
 	playerThread = thread(&VideoPlayer::playLoop, this, loop);
 }
@@ -205,14 +207,22 @@ bool VideoPlayer::isPlaying()
 	return playing;
 }
 
-void VideoPlayer::stop()
+void VideoPlayer::stop(VideoPlayerFinishCode finishCode)
 {
+	// thread can't stop itself
+	if (std::this_thread::get_id() == playerThread.get_id()) {
+		return;
+	}
+
+	this->finishCode = finishCode;
 	terminate = true;
 
 	// finish player thread
 	if (playerThread.joinable()) {
 		playerThread.join();
 	}
+
+	stopping = false;
 }
 
 void VideoPlayer::pause(bool paused)

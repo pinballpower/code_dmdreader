@@ -11,10 +11,17 @@
 
 using namespace std;
 
+enum class VideoPlayerFinishCode {
+	UNKNOWN,
+	END_OF_FILE,
+	STOPPED,
+	STOPPED_FOR_NEXT_VIDEO
+};
+
 class VideoPlayerNotify {
 
 public: 
-	virtual void playbackFinished(int playerId) {};
+	virtual void playbackFinished(int playerId, VideoPlayerFinishCode finishCode) {};
 };
 
 class VideoPlayer {
@@ -33,7 +40,7 @@ public:
 	// Playback
 	void startPlayback(unique_ptr<VideoFile> videoFile, bool loop = false);
 	bool isPlaying();
-	void stop();
+	void stop(VideoPlayerFinishCode finishCode = VideoPlayerFinishCode::STOPPED);
 	void pause(bool paused=true);
 	void setNotify(VideoPlayerNotify* videoPlayerNotify);
 
@@ -48,6 +55,7 @@ private:
 
 	bool terminate = false;
 	bool playing = false;
+	bool stopping = false;
 	bool screenOpened = false;
 	bool paused = false;
 	bool transparentWhenStopped = true;
@@ -57,6 +65,7 @@ private:
 	unique_ptr<VideoFile> currentVideo = unique_ptr<VideoFile>(nullptr);
 
 	VideoPlayerNotify* videoPlayerNotify = nullptr;
+	VideoPlayerFinishCode finishCode = VideoPlayerFinishCode::UNKNOWN;
 
 	thread playerThread;
 
