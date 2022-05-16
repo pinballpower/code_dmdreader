@@ -4,6 +4,8 @@
 
 #include <boost/log/trivial.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/foreach.hpp>
+
 
 #include "../drm/drmhelper.hpp"
 #include "../drm/videofile.hpp"
@@ -139,39 +141,22 @@ void PUPPlayer::addFinishNotify(int screenId) {
 	players[screenId]->setNotify(this);
 }
 
-bool PUPPlayer::initScreen(int screenId, int displayNumber, const vector<string> &ignoreScreens) {
+bool PUPPlayer::initVideoScreen(int screenId, int displayNumber, int& planeIndex) {
 
-	// first initialize main screen
-	int planeIndex = 0;
-	players[screenId] = std::make_unique<VideoPlayer>(displayNumber, planeIndex, CompositionGeometry(), screenId);
+	CompositionGeometry fullscreen = DRMHelper::getFullscreenResolution(displayNumber);
+
+	auto screen = screens[screenId];
+
+	CompositionGeometry composition;
+	composition.x = screen.x * fullscreen.width;
+	composition.y = screen.y * fullscreen.height;
+	composition.width = screen.width * fullscreen.width ;
+	composition.height = screen.height * fullscreen.height;
+
+	players[screenId] = std::make_unique<VideoPlayer>(displayNumber, planeIndex, composition, screenId);
 	addFinishNotify(screenId);
 	playerStates[screenId] = PlayerState();
 	planeIndex++;
-	CompositionGeometry parentComposition = players[screenId]->getCompositionGeometry();
-
-	// Now all subscreens
-	for (auto& screen : screens) {
-		if (std::find(ignoreScreens.begin(), ignoreScreens.end(), std::to_string(screen.screenNum)) != ignoreScreens.end()) {
-			BOOST_LOG_TRIVIAL(trace) << "[pupplayer] not initializing screen " << screen.screenNum << ", is on ignore list";
-			break;
-		}
-		if (screen.parentScreen == screenId) {
-			BOOST_LOG_TRIVIAL(trace) << "[pupplayer] trying to configure screen " << screen.screenNum;
-
-			CompositionGeometry composition;
-			composition.x = parentComposition.x + parentComposition.width * screen.x;
-			composition.y = parentComposition.y + parentComposition.height * screen.y;
-			composition.width = parentComposition.width * screen.width;
-			composition.height = parentComposition.height * screen.height;
-
-			players[screen.screenNum] = std::make_unique<VideoPlayer>(displayNumber, planeIndex, composition, screen.screenNum);
-			addFinishNotify(screen.screenNum);
-			playerStates[screen.screenNum] = PlayerState();
-			planeIndex++;
-		}
-	}
-
-	BOOST_LOG_TRIVIAL(info) << "[pupplayer] initialized " << planeIndex << " video planes";
 
 	return true;
 }
@@ -183,7 +168,6 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 	int displayNumber = pt_source.get("display_number", 0);
 	basedir = pt_source.get("directory", "");
 
-	vector<string>ignoreScreens = splitLine(pt_source.get("ignore_screens", ""));
 
 	{
 		filename = basedir + "/screens.pup";
@@ -192,27 +176,39 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 			BOOST_LOG_TRIVIAL(error) << "[pupplayer] can't read file " << filename;
 			return false;
 		}
-		this->screens = screens.value();
-		int backglassId = -1;
-		for (const auto& s : this->screens) {
-			if (s.screenDescription == "Backglass") {
-				backglassId = s.screenNum;
-				break;
+		// move to a map
+		for (PUPScreen screen : screens.value()) {
+			this->screens[screen.screenNum] = screen;
+		}
+
+		int planeIndex = 0;
+		BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt_source.get_child("screens")) {
+			int screenNum = v.second.get("screenNum", -1);
+			string screenType = v.second.get("type", "unknown");
+			// TODO: set layers
+
+			bool found = false;
+			for (auto screen : this->screens) {
+				if (screen.second.screenNum == screenNum) {
+					found = true;
+					if (screenType == "video") {
+						initVideoScreen(screenNum, displayNumber, planeIndex);
+					}
+					break;
+				}
+			}
+			if (!found) {
+				BOOST_LOG_TRIVIAL(error) << "[pupplayer] couldn't find screen " << screenNum;
 			}
 		}
 
-		if (backglassId < 0) {
-			BOOST_LOG_TRIVIAL(error) << "[pupplayer] can't find backglass, not initializing PUPPlayer";
-			return false;
-		}
-		initScreen(backglassId, displayNumber, ignoreScreens);
 	}
 
 	{
 		filename = basedir + "/triggers.pup";
 		auto triggerList = readConfigFile<PUPTrigger>(filename);
 		if (!triggerList) {
-			BOOST_LOG_TRIVIAL(error) << "[pupplayer] can't read file " << filename;
+			BOOST_LOG_TRIVIAL(error) << "[pupplayer] couldn't read file " << filename;
 			return false;
 		}
 		// move to a map
@@ -329,7 +325,7 @@ void PUPPlayer::updatePlayerState() {
 			BOOST_LOG_TRIVIAL(warning) << "[pupplayer] got a null player, something is terribly wrong :( ";
 			continue;
 		}
-		if (! player->isPlaying()) {
+		if (!player->isPlaying()) {
 			playerState.second.playing = false;
 			playerState.second.priority = -1;
 		}
@@ -346,14 +342,14 @@ void PUPPlayer::processTrigger(string trigger)
 		lastTrigger = trigger;
 	}
 
-	if (! triggers.contains(trigger)) {
+	if (!triggers.contains(trigger)) {
 		BOOST_LOG_TRIVIAL(error) << "[pupplayer] trigger " << trigger << " unknown, ignoring";
 		return;
 	}
 
 	const auto& triggerData = triggers[trigger];
 
-	if (! playerStates.contains(triggerData.screennum)) {
+	if (!playerStates.contains(triggerData.screennum)) {
 		BOOST_LOG_TRIVIAL(trace) << "[pupplayer] trigger " << trigger << " for inactive screen, ignoring";
 		return;
 	}
@@ -364,7 +360,7 @@ void PUPPlayer::processTrigger(string trigger)
 		playfile = pl.nextFile();
 	}
 	else {
-		playfile = basedir+"/"+triggerData.playlist + "/" + playfile;
+		playfile = basedir + "/" + triggerData.playlist + "/" + playfile;
 	}
 
 	updatePlayerState();
@@ -375,7 +371,7 @@ void PUPPlayer::processTrigger(string trigger)
 	if ((triggerData.priority < matchingPlayerState.priority) ||
 		(triggerData.priority == matchingPlayerState.priority) && (triggerData.loop == TriggerLoop::SKIP_SAME_PRIORITY))
 	{
-		BOOST_LOG_TRIVIAL(debug) << "[pupplayer] ignoring trigger " << trigger << " with priority " << triggerData.priority 
+		BOOST_LOG_TRIVIAL(debug) << "[pupplayer] ignoring trigger " << trigger << " with priority " << triggerData.priority
 			<< " as a player with priority " << matchingPlayerState.priority << " is still running on screen " << triggerData.screennum;
 		return;
 	}
@@ -397,7 +393,7 @@ void PUPPlayer::processTrigger(string trigger)
 	// TODO: What's the difference between "loop" and "loopFile"?
 	if ((triggerData.loop == TriggerLoop::LOOP) || (triggerData.loop == TriggerLoop::LOOP_FILE)) {
 		loop = true;
-		
+
 	}
 
 	if (playfile == "") {

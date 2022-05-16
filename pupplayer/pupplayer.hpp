@@ -48,7 +48,7 @@ public:
 
 private:
 	map<string,PUPTrigger> triggers; // map trigger to trigger data
-	vector<PUPScreen> screens;
+	map<int, PUPScreen> screens;
 	map <string, PUPPlaylist> playlists;
 	queue<string> eventsToProcess;
 	map<int, std::unique_ptr<VideoPlayer>> players; // maps screen ID to a video player
@@ -61,7 +61,7 @@ private:
 	thread eventThread;
 	interprocess_semaphore eventReady = interprocess_semaphore(0);
 
-	bool initScreen(int screenId, int displayNumber, const vector<string>& ignoreScreens);
+	bool initVideoScreen(int screenId, int displayNumber, int& planeIndex);
 
 	void sendEvent(const string event);
 	void processTrigger(string trigger);
