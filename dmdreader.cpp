@@ -192,9 +192,8 @@ bool read_config(string filename) {
 			if (service) {
 				if (service->configureFromPtree(pt_general, v.second)) {
 					if (service->start()) {
-						if (! serviceRegistry.registerService(service)) {
-							BOOST_LOG_TRIVIAL(info) << "[error] could not add service " << v.first << " to service registry";
-						}
+						serviceRegistry.registerService(service);
+						BOOST_LOG_TRIVIAL(info) << "[info] registered service " << service->name();
 					}
 					else {
 						BOOST_LOG_TRIVIAL(info) << "[error] could not start service " << v.first;
