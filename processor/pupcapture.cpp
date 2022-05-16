@@ -147,7 +147,7 @@ DMDFrame PUPCapture::processFrame(DMDFrame &f)
                 BOOST_LOG_TRIVIAL(error) << "[pupcapture] pupplayer not available, has probably not been configured";
             }
             else {
-                BOOST_LOG_TRIVIAL(info) << "[pupcapture] sent event to " << res.size() << " pupplayer(s)";
+                BOOST_LOG_TRIVIAL(debug) << "[pupcapture] sent event " << trigger << " to " << res.size() << " pupplayer(s)";
             }
 
             break;
