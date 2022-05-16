@@ -3,6 +3,11 @@
 #include "pupplayer.hpp"
 #include "screen.hpp"
 
+PUPScreen::PUPScreen()
+{
+    screenNum = -1;
+}
+
 PUPScreen::PUPScreen(string configLine)
 {
     std::vector<std::string> fields = splitLine(configLine);

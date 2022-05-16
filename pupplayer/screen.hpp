@@ -10,6 +10,7 @@ class PUPScreen {
 
 public:
 
+    PUPScreen();
     PUPScreen(string configLine);
 
     bool isValid();
