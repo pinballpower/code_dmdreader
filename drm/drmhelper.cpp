@@ -169,6 +169,48 @@ bool DRMHelper::initFullscreen(int displayNumber, int width, int height) {
 	return true;
 }
 
+CompositionGeometry DRMHelper::getFullscreenResolution(int displayNumber)
+{
+	CompositionGeometry res;
+
+	drmModeRes* resources = drmModeGetResources(drmDeviceFd);
+	if (resources == NULL)
+	{
+		BOOST_LOG_TRIVIAL(info) << "[drmhelper] unable to get DRM resources";
+		return res;
+	}
+
+	int currentDisplay = 0;
+	drmModeConnector* connector = nullptr;
+	for (int i = 0; i < resources->count_connectors; i++)
+	{
+		connector = drmModeGetConnector(drmDeviceFd, resources->connectors[i]);
+		if (connector->connection == DRM_MODE_CONNECTED)
+		{
+			if (currentDisplay == displayNumber) {
+				break;
+			}
+			else {
+				currentDisplay++;
+			}
+		}
+		drmModeFreeConnector(connector);
+	}
+	if (! connector)
+	{
+		BOOST_LOG_TRIVIAL(info) << "[drmhelper] unable to find connect display " << displayNumber;
+		drmModeFreeResources(resources);
+		return res;
+	}
+
+	res.height = connector->modes[0].vdisplay;
+	res.width = connector->modes[0].hdisplay;
+
+	drmModeFreeResources(resources);
+
+	return res;
+}
+
 bool DRMHelper::openDRMDevice() {
 	if (DRMHelper::isOpen()) {
 		return true;

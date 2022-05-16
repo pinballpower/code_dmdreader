@@ -75,6 +75,8 @@ public:
 	static const string getDRMDeviceFilename();
 
 	bool initFullscreen(int displayNumber, int width=0, int height=0);
+	static CompositionGeometry getFullscreenResolution(int displayNumber);
+
 	const ScreenSize getScreenSize() const;
 
 	uint32_t addAndActivateFramebuffer(uint32_t pitch, uint32_t handle);
