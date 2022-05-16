@@ -27,7 +27,7 @@ public:
 
 const vector<string> PUPPLAYER_SUPPORTED_EXTENSIONS = { ".mp4" };
 
-class PUPPlayer : public Service {
+class PUPPlayer : public Service, public VideoPlayerNotify {
 
 public:
 	PUPPlayer(int screenNumber = 0);
@@ -37,10 +37,14 @@ public:
 	virtual bool start() override;
 	virtual void stop() override;
 	virtual string name() override;
+	void playerHasFinished(int screenId);
 
 	virtual std::pair<ServiceResponse, string> command(const string& cmd);
 
 	static bool hasSupportedExtension(string filename);
+
+	virtual void playbackFinished(int playerId) override;
+
 
 private:
 	map<string,PUPTrigger> triggers; // map trigger to trigger data
@@ -62,6 +66,7 @@ private:
 	void sendEvent(const string event);
 	void processTrigger(string trigger);
 	void updatePlayerState();
+	void addFinishNotify(int screenId);
 };
 
 

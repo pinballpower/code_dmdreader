@@ -132,17 +132,20 @@ void VideoPlayer::playLoop(bool loop)
 	currentVideo->close();
 	currentVideo = unique_ptr<VideoFile>(nullptr);
 
-	notifyFinishedFunction();
+	if (videoPlayerNotify) {
+		videoPlayerNotify->playbackFinished(playerId);
+	}
 
 	activePlayers--;
 	playing = false;
 }
 
-VideoPlayer::VideoPlayer(int screenNumber, int planeNumber, CompositionGeometry compositionGeometry)
+VideoPlayer::VideoPlayer(int screenNumber, int planeNumber, CompositionGeometry compositionGeometry, int playerId)
 {
 	this->screenNumber = screenNumber;
 	this->planeNumber = planeNumber;
 	this->compositionGeometry = compositionGeometry;
+	this->playerId = playerId;
 
 	openScreen();
 
@@ -217,9 +220,9 @@ void VideoPlayer::pause(bool paused)
 	this->paused = paused;
 }
 
-void VideoPlayer::setFinishNotify(std::function<void()> notifyFinished)
+void VideoPlayer::setNotify(VideoPlayerNotify* videoPlayerNotify)
 {
-	this->notifyFinishedFunction = notifyFinished;
+	this->videoPlayerNotify = videoPlayerNotify;
 }
 
 CompositionGeometry VideoPlayer::getCompositionGeometry() const

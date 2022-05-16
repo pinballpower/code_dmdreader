@@ -135,11 +135,16 @@ PUPPlayer::~PUPPlayer()
 	stop();
 }
 
+void PUPPlayer::addFinishNotify(int screenId) {
+	players[screenId]->setNotify(this);
+}
+
 bool PUPPlayer::initScreen(int screenId, int displayNumber, const vector<string> &ignoreScreens) {
 
 	// first initialize main screen
 	int planeIndex = 0;
-	players[screenId] = std::make_unique<VideoPlayer>(displayNumber, planeIndex, CompositionGeometry());
+	players[screenId] = std::make_unique<VideoPlayer>(displayNumber, planeIndex, CompositionGeometry(), screenId);
+	addFinishNotify(screenId);
 	playerStates[screenId] = PlayerState();
 	planeIndex++;
 	CompositionGeometry parentComposition = players[screenId]->getCompositionGeometry();
@@ -159,7 +164,8 @@ bool PUPPlayer::initScreen(int screenId, int displayNumber, const vector<string>
 			composition.width = parentComposition.width * screen.width;
 			composition.height = parentComposition.height * screen.height;
 
-			players[screen.screenNum] = std::make_unique<VideoPlayer>(displayNumber, planeIndex, composition);
+			players[screen.screenNum] = std::make_unique<VideoPlayer>(displayNumber, planeIndex, composition, screen.screenNum);
+			addFinishNotify(screen.screenNum);
 			playerStates[screen.screenNum] = PlayerState();
 			planeIndex++;
 		}
@@ -236,6 +242,10 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 	return true;
 }
 
+void PUPPlayer::playerHasFinished(int screenId) {
+	BOOST_LOG_TRIVIAL(info) << "[pupplayer] playback on screen " << screenId << " has been finished";
+}
+
 bool PUPPlayer::start()
 {
 	eventThread = thread(&PUPPlayer::eventLoop, this);
@@ -276,6 +286,12 @@ bool PUPPlayer::hasSupportedExtension(string filename)
 		}
 	}
 	return false;
+}
+
+void PUPPlayer::playbackFinished(int playerId)
+{
+	BOOST_LOG_TRIVIAL(warning) << "[pupplayer] video player " << playerId << " finished playback";
+	playerStates[playerId].playing = false;
 }
 
 void PUPPlayer::eventLoop()

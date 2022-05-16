@@ -7,14 +7,21 @@
 #include "drmhelper.hpp"
 #include "videofile.hpp"
 
+#include <boost/log/trivial.hpp>
 
 using namespace std;
+
+class VideoPlayerNotify {
+
+public: 
+	virtual void playbackFinished(int playerId) {};
+};
 
 class VideoPlayer {
 
 public: 
 
-	VideoPlayer(int screenNumber=0, int planeNumber=0, CompositionGeometry composition = CompositionGeometry());
+	VideoPlayer(int screenNumber=0, int planeNumber=0, CompositionGeometry composition = CompositionGeometry(), int playerId=0);
 	VideoPlayer(const VideoPlayer&) = delete;
 	VideoPlayer(VideoPlayer&&) = default;
 	~VideoPlayer();
@@ -28,13 +35,14 @@ public:
 	bool isPlaying();
 	void stop();
 	void pause(bool paused=true);
-	void setFinishNotify(std::function<void()> notifyFinished = []()->void {});
+	void setNotify(VideoPlayerNotify* videoPlayerNotify);
 
 	CompositionGeometry getCompositionGeometry() const;
 
 private:
 	CompositionGeometry compositionGeometry;
 
+	int playerId = 0;
 	int screenNumber = 0;
 	int planeNumber = 0;
 
@@ -47,7 +55,8 @@ private:
 	void playLoop(bool loop);
 
 	unique_ptr<VideoFile> currentVideo = unique_ptr<VideoFile>(nullptr);
-	std::function<void()> notifyFinishedFunction = []()->void {};
+
+	VideoPlayerNotify* videoPlayerNotify = nullptr;
 
 	thread playerThread;
 
