@@ -2,7 +2,8 @@
   "general": {
     "cwd_to_configdir": true,
     "skip_unmodified_frames": true,
-    "terminate_when_finished":  true
+    "terminate_when_finished": true,
+    "bitsperpixel":  4
   },
   "source": {
     "spi": {
@@ -53,6 +54,61 @@
       "scale_linear": false,
       "display": true,
       "display_number": 0
+    }
+  },
+  "service": {
+    "pupplayer": {
+      "directory": "samples/gb_x265_b2s",
+      "screens": [
+        {
+          "screenNum": 2,
+          "type": "fb"
+        },
+        {
+          "screenNum": 11,
+          "type": "video"
+        },
+        {
+          "screenNum": 12,
+          "type": "video"
+        }
+      ]
+    },
+    "pupeventplayback": {
+      "events": [
+        {
+          "timestamp": 2000,
+          "event": "trigger:D1"
+        },
+        {
+          "timestamp": 3000,
+          "event": "trigger:D2"
+        },
+        {
+          "timestamp": 4000,
+          "event": "trigger:D3"
+        },
+        {
+          "timestamp": 5000,
+          "event": "trigger:D5"
+        },
+        {
+          "timestamp": 6000,
+          "event": "trigger:D16"
+        },
+        {
+          "timestamp": 16000,
+          "event": "trigger:D17"
+        },
+        {
+          "timestamp": 17000,
+          "event": "trigger:D18"
+        },
+        {
+          "timestamp": 18000,
+          "event": "trigger:D19"
+        }
+      ]
     }
   }
 }
