@@ -6,7 +6,6 @@
 #include "drmprimeout.hpp"
 #include "drmhelper.hpp"
 #include "videofile.hpp"
-
 #include <boost/log/trivial.hpp>
 
 using namespace std;

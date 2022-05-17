@@ -75,7 +75,6 @@ void VideoPlayer::playLoop(bool loop)
 {
 	AVPacket packet;
 
-	terminate = false;
 	finishCode = VideoPlayerFinishCode::UNKNOWN;
 	activePlayers++;
 	BOOST_LOG_TRIVIAL(error) << "[videoplayer] " << activePlayers << " active players";
@@ -86,6 +85,7 @@ void VideoPlayer::playLoop(bool loop)
 
 	/* actual decoding */
 	playing = true;
+	terminate = false;
 	while (!terminate) {
 
 		// eof check and loop
