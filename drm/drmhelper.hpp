@@ -28,6 +28,7 @@ public:
 	int height = -1;
 
 	void fitInto(const CompositionGeometry screenSize);
+	bool isUndefined();
 };
 
 struct DRMConnectionData

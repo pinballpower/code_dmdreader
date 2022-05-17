@@ -195,6 +195,7 @@ CompositionGeometry DRMHelper::getFullscreenResolution(int displayNumber)
 			}
 		}
 		drmModeFreeConnector(connector);
+		connector = nullptr;
 	}
 	if (! connector)
 	{
@@ -590,6 +591,11 @@ void CompositionGeometry::fitInto(CompositionGeometry screenSize)
 	if (width > screenSize.width) {
 		width = screenSize.width;
 	}
+}
+
+bool CompositionGeometry::isUndefined()
+{
+	return ((width <= 0) || (height <= 0));
 }
 
 bool DRMHelper::setAlphaForPlane(uint32_t planeId, uint32_t alpha) {
