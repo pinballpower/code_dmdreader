@@ -161,6 +161,9 @@ void PUPPlayer::playDefaultVideo(int screenId) {
 bool PUPPlayer::initVideoScreen(int screenId, int displayNumber, int& planeIndex) {
 
 	CompositionGeometry fullscreen = DRMHelper::getFullscreenResolution(displayNumber);
+	if (fullscreen.isUndefined()) {
+		return false;
+	}
 
 	auto screen = screens[screenId];
 
@@ -209,7 +212,9 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 				if (screen.second.screenNum == screenNum) {
 					found = true;
 					if (screenType == "video") {
-						initVideoScreen(screenNum, displayNumber, planeIndex);
+						if (!initVideoScreen(screenNum, displayNumber, planeIndex)) {
+							BOOST_LOG_TRIVIAL(error) << "[pupplayer] couldn't configure screen " << screenNum << " on display " << displayNumber;
+						}
 					}
 					break;
 				}
