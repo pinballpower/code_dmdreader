@@ -8,6 +8,7 @@
 
 - Scriptable Pi video player: https://github.com/egnor/pivid
 - Camera to OpenGL: https://github.com/Fredrum/rpi_v4l2_tests/tree/master/include
+- FFMPEG to OpenGL texture: https://gist.github.com/rcolinray/7552384
 
 ### DRM/MKS
 
