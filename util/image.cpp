@@ -37,6 +37,11 @@ const vector<uint8_t> &RGBBuffer::getData() const
 	return data;
 }
 
+uint8_t* RGBBuffer::getDataPointer()
+{
+	return &data[0];
+}
+
 void RGBBuffer::setPixel(int x, int y, rgb rgbdata)
 {
 	int offset = (x + y * width) * bytesPerPixel;

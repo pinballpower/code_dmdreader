@@ -27,6 +27,8 @@ public:
 	void setPixel(int x, int y, uint8_t r, uint8_t g, uint8_t b, uint8_t a = 0xff);
 
 	const vector<uint8_t> &getData() const;
+	uint8_t* getDataPointer();
+
 
 	static RGBBuffer fromImageFile(const string filename, bool useAlpha = false);
 
