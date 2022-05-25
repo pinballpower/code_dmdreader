@@ -7,6 +7,8 @@
 #include <boost/interprocess/sync/interprocess_semaphore.hpp>
 
 #include "../drm/videoplayer.hpp"
+#include "../drm/videofileloader.hpp"
+#include "../drm/drmframebuffer.hpp"
 #include "../services/service.hpp"
 
 #include "trigger.hpp"
@@ -51,8 +53,12 @@ private:
 	map<int, PUPScreen> screens;
 	map <string, PUPPlaylist> playlists;
 	queue<string> eventsToProcess;
-	map<int, std::unique_ptr<VideoPlayer>> players; // maps screen ID to a video player
-	map<int, PlayerState> playerStates;				// keeps track of the state of all players
+	map<int, std::unique_ptr<VideoPlayer>> videoPlayers;    // maps screen ID to a video player
+	map<int, std::unique_ptr<DRMFrameBuffer>> frameBuffers; // maps screen ID to a video player
+	map<int, PlayerState> playerStates;				     // keeps track of the state of all players
+	VideoFileLoader videoFileLoader;
+
+	bool usePreloader = false;
 
 	string lastTrigger = "";
 	string basedir; 
@@ -62,6 +68,7 @@ private:
 	interprocess_semaphore eventReady = interprocess_semaphore(0);
 
 	bool initVideoScreen(int screenId, int displayNumber, int& planeIndex);
+	bool initFrameBufferScreen(int screenId, int displayNumber, int& planeIndex);
 
 	void sendEvent(const string event);
 	void processTrigger(string trigger);
@@ -69,6 +76,7 @@ private:
 	void addFinishNotify(int screenId);
 	void playDefaultVideo(int screenId);
 	void startVideoPlayback(string filename, int screenNumber, bool loop);
+	void calculateScreenCoordinates(int screenId, int screenWidth, int screenHeight);
 };
 
 
