@@ -19,16 +19,6 @@ struct framebuffer {
 };
 
 
-void createDummyImage(uint8_t* framebufferData, int framebufferLen, int offset) {
-	int j = offset;
-	for (int i = 0; i < framebufferLen; i += 4, j++) {
-		framebufferData[i] = j & 0xff;
-		framebufferData[i + 1] = (j / 8) & 0xff;
-		framebufferData[i + 2] = (j / 256) & 0xff;
-		framebufferData[i + 3] = j & 0xff;
-	}
-}
-
 
 DRMFrameBuffer::DRMFrameBuffer(int screenNumber, int planeNumber, const CompositionGeometry geometry)
 {
@@ -46,6 +36,7 @@ DRMFrameBuffer::DRMFrameBuffer(int screenNumber, int planeNumber, const Composit
 
 	width = connectionData.connectorWidth;
 	height = connectionData.connectorHeight;
+	bytesPerLine = width * 4;
 
 	drm_mode_create_dumb dumbBufferConfig;
 	dumbBufferConfig.width = width;
@@ -91,7 +82,7 @@ DRMFrameBuffer::DRMFrameBuffer(int screenNumber, int planeNumber, const Composit
 
 	{
 		uint32_t planeFormat = DRMHelper::planeformat("AR24");
-		bool planeFound = DRMHelper::findPlane(connectionData.crtcIndex, planeFormat, &planeId, 5);
+		bool planeFound = DRMHelper::findPlane(connectionData.crtcIndex, planeFormat, &planeId, planeNumber);
 		if (!planeFound) {
 			BOOST_LOG_TRIVIAL(error) << "[drmframebuffer] no plane found for format " << DRMHelper::planeformatString(planeFormat);
 			goto cleanup;
@@ -142,4 +133,32 @@ uint8_t* DRMFrameBuffer::getBuffer() const
 const int DRMFrameBuffer::getBufferLen() const
 {
 	return framebufferLen;
+}
+
+void DRMFrameBuffer::addImage(RGBBuffer& image, int x, int y)
+{
+	int max_x = x + image.width;
+	int max_y = y + image.height;
+	int start_x = (x >= 0) ? 0 : -x;
+	int start_y = (y >= 0) ? 0 : -y;
+
+	int px_len = 4;
+
+	if (max_x > width) { max_x = width; };
+	if (max_y > height) { max_y = height; };
+
+	for (int src_y = start_y, dst_y = y; src_y < max_y; src_y++, dst_y++) {
+		uint8_t* dst = framebufferData + (dst_y * width + x)*4; // destination pixel address
+		auto start = image.getData()[0];
+		uint8_t* src = image.getDataPointer() + (src_y * image.width*px_len); // source pixel
+		for (int src_x = start_x; src_x < max_x; src_x++) {
+			uint8_t test[4] = { 0xff,0,0,0x7f };
+			memcpy(dst, test, px_len);
+			dst += 4;
+			src += px_len;
+		}
+		y++;
+	}
+
+	return;
 }

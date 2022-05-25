@@ -1,6 +1,7 @@
 #pragma once
 
 #include "drmhelper.hpp"
+#include "../util/image.hpp"
 
 class DRMFrameBuffer {
 
@@ -13,6 +14,7 @@ public:
 	uint8_t* getBuffer() const;
 	const int getBufferLen() const;
 
+	void addImage(RGBBuffer& image, int x, int y);
 
 private:
 	int screenNumber = 0;
@@ -29,7 +31,6 @@ private:
 
 	int width = 0;
 	int height = 0;
+	int bytesPerLine = 0;
 
 };
-
-void createDummyImage(uint8_t* framebufferData, int framebufferLen, int offset=0);
