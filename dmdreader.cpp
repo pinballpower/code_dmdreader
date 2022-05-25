@@ -25,6 +25,8 @@
 
 #include "pupplayer/pupplayer.hpp"
 
+#include "test/drmtest.hpp"
+
 using namespace std;
 
 vector<std::shared_ptr<DMDSource>> sources;
@@ -227,6 +229,8 @@ void signal_handler(int sig)
 
 int main(int argc, char** argv)
 {
+	demo_framebuffer();
+
 	signal(SIGINT, signal_handler);
 	signal(SIGTERM, signal_handler);
 #ifdef SIGBREAK
