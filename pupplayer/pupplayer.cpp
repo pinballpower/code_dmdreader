@@ -7,10 +7,6 @@
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "../drm/drmframebuffer.hpp"
-#include "../drm/drmhelper.hpp"
-#include "../drm/videofile.hpp"
-#include "../util/image.hpp"
 #include "trigger.hpp"
 
 int parseInteger(const string& s, int defaultValue) {
@@ -139,70 +135,36 @@ PUPPlayer::~PUPPlayer()
 	stop();
 }
 
-void PUPPlayer::addFinishNotify(int screenId) {
-	videoPlayers[screenId]->setNotify(this);
-}
-
 void PUPPlayer::playDefaultVideo(int screenId) {
-	if (videoPlayers.contains(screenId)) {
-		PUPScreen screen = screens[screenId];
-		if (screen.playFile != "") {
-			string playfile = basedir + "/" + screen.playList + "/" + screen.playFile;
+	PUPScreen screen = screens[screenId];
+	if (screen.playFile != "") {
+		string playfile = basedir + "/" + screen.playList + "/" + screen.playFile;
 
-			if (PUPPlayer::hasSupportedExtension(playfile)) {
-				videoPlayers[screen.screenNum]->startPlayback(make_unique<VideoFile>(playfile, true), true);
-				BOOST_LOG_TRIVIAL(info) << "[pupplayer] looping default video " << playfile << " on screen " << screenId;
-			}
+		if (PUPPlayer::hasSupportedExtension(playfile)) {
+			startVideoPlayback(playfile, screen, true);
+			BOOST_LOG_TRIVIAL(info) << "[pupplayer] looping default video " << playfile << " on screen " << screenId;
 		}
 	}
-	else {
-		BOOST_LOG_TRIVIAL(error) << "[pupplayer] ooops, playDefaultVideo, screen " << screenId << " doesn't exist";
-	}
 }
 
-bool PUPPlayer::initVideoScreen(int screenId, int displayNumber, int& planeIndex) {
-
-	CompositionGeometry fullscreen = DRMHelper::getFullscreenResolution(displayNumber);
-	if (fullscreen.isUndefined()) {
-		return false;
-	}
-
-	auto screen = screens[screenId];
-
-	CompositionGeometry composition;
-	composition.x = screen.x * fullscreen.width;
-	composition.y = screen.y * fullscreen.height;
-	composition.width = screen.width * fullscreen.width;
-	composition.height = screen.height * fullscreen.height;
-
-	videoPlayers[screenId] = std::make_unique<VideoPlayer>(displayNumber, planeIndex, composition, screenId);
-	addFinishNotify(screenId);
-	playerStates[screenId] = PlayerState();
-	planeIndex++;
-
-	return true;
+bool PUPPlayer::startVideoPlayback(string filename, const PUPScreen& screen, bool loop)
+{
+	BOOST_LOG_TRIVIAL(error) << "[pupplayer] startVideoPlayback not implemented";
+	return false;
 }
 
-bool PUPPlayer::initFrameBufferScreen(int screenId, int displayNumber, int& planeIndex) {
-
-	CompositionGeometry fullscreen = DRMHelper::getFullscreenResolution(displayNumber);
-	if (fullscreen.isUndefined()) {
-		return false;
-	}
-
-	auto screen = screens[screenId];
-
-	CompositionGeometry composition;
-	composition.x = screen.x * fullscreen.width;
-	composition.y = screen.y * fullscreen.height;
-	composition.width = screen.width * fullscreen.width;
-	composition.height = screen.height * fullscreen.height;
-
-	//frameBuffers[screenId] = std::make_unique<DRMFrameBuffer>(displayNumber, planeIndex, composition);
-	//planeIndex++;
-
-	return true;
+bool PUPPlayer::stopVideoPlayback(const PUPScreen& screen, bool waitUntilStopped)
+{
+	BOOST_LOG_TRIVIAL(error) << "[pupplayer] stopVideoPlayback not implemented";
+	return false;
 }
+
+bool PUPPlayer::initializeScreens()
+{
+	return false;
+}
+
+
 
 void PUPPlayer::calculateScreenCoordinates(int screenId, int screenWidth, int screenHeight) {
 	int screenX = 0, screenY = 0;
@@ -268,49 +230,8 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 		}
 
 		for (auto test : this->screens) {
-			calculateScreenCoordinates(test.second.screenNum, 1920, 1080);
+			calculateScreenCoordinates(test.second.screenNum, 1920, 1080); // TODO: Do not use fix coordinates
 		}
-
-		int planeIndex = 0;
-		BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt_source.get_child("screens")) {
-			int screenNum = v.second.get("screenNum", -1);
-			string screenType = v.second.get("type", "unknown");
-			// TODO: set layers
-
-			bool found = false;
-			for (auto screen : this->screens) {
-				if (screen.second.screenNum == screenNum) {
-					found = true;
-					if (screenType == "video") {
-						if (initVideoScreen(screenNum, displayNumber, planeIndex)) {
-							BOOST_LOG_TRIVIAL(info) << "[pupplayer] initialized video plane " << screenNum << " on display " << displayNumber;
-						}
-						else
-						{
-							BOOST_LOG_TRIVIAL(error) << "[pupplayer] couldn't configure video screen " << screenNum << " on display " << displayNumber;
-						}
-					}
-					else if (screenType == "fb") {
-						if (initFrameBufferScreen(screenNum, displayNumber, planeIndex)) {
-							BOOST_LOG_TRIVIAL(info) << "[pupplayer] initialized framebuffer plane " << screenNum << " on display " << displayNumber;
-
-							//RGBBuffer buff = RGBBuffer::fromImageFile("samples/spagb_100b2s/PuPOverlays/overlayer1.png");
-							//createDummyImage(frameBuffers[screenNum]->getBuffer(), frameBuffers[screenNum]->getBufferLen());
-							//frameBuffers[screenNum]->addImage(buff,0,0);
-
-						}
-						else {
-							BOOST_LOG_TRIVIAL(error) << "[pupplayer] couldn't configure framebuffer screen " << screenNum << " on display " << displayNumber;
-						}
-					}
-					break;
-				}
-			}
-			if (!found) {
-				BOOST_LOG_TRIVIAL(error) << "[pupplayer] couldn't find screen " << screenNum;
-			}
-		}
-
 	}
 
 	{
@@ -344,16 +265,7 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 		<< this->screens.size() << " screens and "
 		<< this->playlists.size() << " playlists";
 
-	// start default videos
-	for (auto& player : this->videoPlayers) {
-		playDefaultVideo(player.first);
-	}
-
 	return true;
-}
-
-void PUPPlayer::playerHasFinished(int screenId) {
-	BOOST_LOG_TRIVIAL(info) << "[pupplayer] playback on screen " << screenId << " has been finished";
 }
 
 bool PUPPlayer::start()
@@ -398,14 +310,6 @@ bool PUPPlayer::hasSupportedExtension(string filename)
 	return false;
 }
 
-void PUPPlayer::playbackFinished(int playerId, VideoPlayerFinishCode finishCode)
-{
-	BOOST_LOG_TRIVIAL(warning) << "[pupplayer] video player " << playerId << " finished playback";
-	playerStates[playerId].playing = false;
-	if (finishCode != VideoPlayerFinishCode::STOPPED_FOR_NEXT_VIDEO) {
-		sendEvent("defaultvideo:" + std::to_string(playerId));
-	}
-}
 
 void PUPPlayer::eventLoop()
 {
@@ -428,8 +332,8 @@ void PUPPlayer::eventLoop()
 				string filename = parts[1];
 				int screenNumber = parseInteger(parts[2], -1);
 				bool loop = parseBool(parts[3], false);
-				if (screenNumber >= 0) {
-					startVideoPlayback(filename, screenNumber, true);
+				if (screens.contains(screenNumber)) {
+					startVideoPlayback(filename, screens[screenNumber], true);
 				}
 			}
 
@@ -457,21 +361,6 @@ void PUPPlayer::sendEvent(const string event)
 }
 
 
-void PUPPlayer::updatePlayerState() {
-	for (auto& playerState : playerStates) {
-		int playerId = playerState.first;
-		auto& player = videoPlayers[playerId];
-		if (!player) {
-			BOOST_LOG_TRIVIAL(warning) << "[pupplayer] got a null player, something is terribly wrong :( ";
-			continue;
-		}
-		if (!player->isPlaying()) {
-			playerState.second.playing = false;
-			playerState.second.priority = -1;
-		}
-	}
-}
-
 void PUPPlayer::processTrigger(string trigger)
 {
 	if (trigger == lastTrigger) {
@@ -489,10 +378,12 @@ void PUPPlayer::processTrigger(string trigger)
 
 	const auto& triggerData = triggers[trigger];
 
-	if (!playerStates.contains(triggerData.screennum)) {
-		BOOST_LOG_TRIVIAL(trace) << "[pupplayer] trigger " << trigger << " for inactive screen, ignoring";
+	if (! screens.contains(triggerData.screennum)) {
+		BOOST_LOG_TRIVIAL(error) << "[pupplayer] trigger " << trigger << " screen " << triggerData.screennum << "unknown, ignoring";
 		return;
 	}
+	const auto triggerScreen = screens[triggerData.screennum];
+
 
 	string playfile = triggerData.playfile;
 	if (playfile == "") {
@@ -518,10 +409,7 @@ void PUPPlayer::processTrigger(string trigger)
 
 	// When stopping make sure that the player is really stopped before going on with the next events
 	if (triggerData.loop == TriggerLoop::STOP_FILE) {
-		videoPlayers[triggerData.screennum]->stop();
-		while (videoPlayers[triggerData.screennum]->isPlaying()) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(25));
-		}
+		stopVideoPlayback(triggerScreen, true);
 		BOOST_LOG_TRIVIAL(debug) << "[pupplayer] trigger " << trigger << " stopped playback on screen  " << triggerData.screennum;
 		return;
 	}
@@ -544,35 +432,16 @@ void PUPPlayer::processTrigger(string trigger)
 	playerStates[triggerData.screennum].priority = triggerData.priority;
 
 	BOOST_LOG_TRIVIAL(error) << "[pupplayer] trigger " << trigger << " starting " << playfile;
-	startVideoPlayback(playfile, triggerData.screennum, loop);
+	startVideoPlayback(playfile, triggerScreen, loop);
 
 }
 
-void PUPPlayer::startVideoPlayback(string filename, int screenNumber, bool loop) {
-	// TODO: Preload video files 
-
-	auto& player = videoPlayers[screenNumber];
-	if (!player) {
-		BOOST_LOG_TRIVIAL(warning) << "[pupplayer] got a null player, something is terribly wrong :( ";
-		return;
-	}
-
-	if (PUPPlayer::hasSupportedExtension(filename)) {
-		if (usePreloader) {
-			player->startPlayback(videoFileLoader.getFile(filename), loop);
-		}
-		else {
-			player->startPlayback(std::make_unique<VideoFile>(filename));
-		}
-		playerStates[screenNumber].playing = true;
-		BOOST_LOG_TRIVIAL(info) << "[pupplayer] play file " << filename << " on screen " << screenNumber;
-	}
-	else {
-		BOOST_LOG_TRIVIAL(debug) << "[pupplayer] ignoring play file " << filename << ", unsupported extension";
-	}
+bool PUPPlayer::updatePlayerState()
+{
+	BOOST_LOG_TRIVIAL(error) << "[pupplayer] updatePlayerState not implemented";
+	return false;
 }
 
 PUPPlayer::PUPPlayer(int screenNumber)
 {
 }
-

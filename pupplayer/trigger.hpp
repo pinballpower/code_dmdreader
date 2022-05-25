@@ -27,7 +27,7 @@ public:
     bool active;
     string description;
     string trigger;
-    int screennum;
+    int screennum=-1;
     string playlist;
     string playfile;
     int volume;         // unsupported
