@@ -24,8 +24,11 @@ public:
     int priority;
 
     int parentScreen = -1;
-    float x;
-    float y;
-    float width;
-    float height;
+    float x = 0;
+    float y = 0; 
+    float width = 0;
+    float height = 0;
+
+    // Coordinates on the real display that this will be displayed on
+    CompositionGeometry composition;
 };
