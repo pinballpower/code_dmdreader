@@ -1,6 +1,8 @@
 
 #include "videofileloader.hpp"
 
+#include <boost/log/trivial.hpp>
+
 VideoFileLoader::VideoFileLoader()
 {
 	loaderThread = thread(&VideoFileLoader::loaderLoop, this);
@@ -48,8 +50,15 @@ void VideoFileLoader::loaderLoop()
 			break;
 		}
 
-		auto filename = filesToLoad.front();
-		filesToLoad.pop();
-		preloadFile(filename);
+		if (filesToLoad.size() < 1) {
+			BOOST_LOG_TRIVIAL(error) << "[videofileloader] ooops, queue is empty, this should not happen";
+		}
+		else {
+			auto filename = filesToLoad.front();
+			filesToLoad.pop();
+			if (! preloadedFiles.contains(filename)) {
+				preloadedFiles[filename] = std::make_unique<VideoFile>(filename, true);
+			}
+		}
 	}
 }
