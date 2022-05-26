@@ -24,7 +24,7 @@
 #include "../dmdsource/spisource.hpp"
 #endif
 #ifdef USE_VIDEO
-#include "../pupplayer/pupplayer.hpp"
+#include "../pupplayer/pivid.hpp"
 #endif
 
 #if __has_include("../colorize/config.h")
@@ -116,7 +116,7 @@ std::shared_ptr<Service> createService(string name) {
 	}
 #ifdef USE_VIDEO
 	else if (name == "pupplayer") {
-		return std::make_shared<PUPPlayer>();
+		return std::make_shared<PividPUPPlayer>();
 	}
 #endif
 	else if (name == "pupeventplayback") {
