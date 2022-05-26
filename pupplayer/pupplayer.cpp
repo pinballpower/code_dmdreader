@@ -164,8 +164,6 @@ bool PUPPlayer::initializeScreens()
 	return false;
 }
 
-
-
 void PUPPlayer::calculateScreenCoordinates(int screenId, int screenWidth, int screenHeight) {
 	int screenX = 0, screenY = 0;
 
@@ -188,7 +186,7 @@ void PUPPlayer::calculateScreenCoordinates(int screenId, int screenWidth, int sc
 	screen.composition.height = screen.height * screenHeight;
 
 	// now update all subscreens
-	for (auto subScreen : screens) {
+	for (auto &subScreen : screens) {
 		if (subScreen.second.parentScreen == screenId) {
 
 			if (subScreen.second.width <= 0) {
@@ -201,6 +199,7 @@ void PUPPlayer::calculateScreenCoordinates(int screenId, int screenWidth, int sc
 			subScreen.second.composition.y = subScreen.second.y * screen.composition.height + screen.composition.y;
 			subScreen.second.composition.width = subScreen.second.width * screen.composition.width;
 			subScreen.second.composition.height = subScreen.second.height * screen.composition.height;
+			subScreen.second.displayNumber = screen.displayNumber;
 
 			BOOST_LOG_TRIVIAL(error) << "[pupplayer] " << subScreen.second.composition.width << "x" <<
 				subScreen.second.composition.height << "@" <<
@@ -217,6 +216,7 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 	int displayNumber = pt_source.get("display_number", 0);
 	basedir = pt_source.get("directory", "");
 
+	// screens
 	{
 		filename = basedir + "/screens.pup";
 		auto screens = readConfigFile<PUPScreen>(filename);
@@ -228,12 +228,9 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 		for (PUPScreen screen : screens.value()) {
 			this->screens[screen.screenNum] = screen;
 		}
-
-		for (auto test : this->screens) {
-			calculateScreenCoordinates(test.second.screenNum, 1920, 1080); // TODO: Do not use fix coordinates
-		}
 	}
 
+	// triggers
 	{
 		filename = basedir + "/triggers.pup";
 		auto triggerList = readConfigFile<PUPTrigger>(filename);
@@ -247,6 +244,7 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 		}
 	}
 
+	// playlists
 	{
 		filename = basedir + "/playlists.pup";
 		auto playlists = readConfigFile<PUPPlaylist>(filename);
@@ -258,6 +256,37 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 		for (auto pl : playlists.value()) {
 			this->playlists[pl.folder] = pl;
 			this->playlists[pl.folder].scanFiles(basedir);
+		}
+	}
+
+	// Screen to display mapping
+	{
+		try {
+			BOOST_FOREACH(const boost::property_tree::ptree::value_type &v, pt_source.get_child("screens")) {
+				auto screen = v.second;
+				int screenId = screen.get("screen", 0);
+				int displayId = screen.get("display_number", 0);
+				auto res = screen.get_child("resolution");
+				int width = res.get("width", 1920);
+				int height = res.get("height", 1080);
+
+				if (screens.contains(screenId)) {
+					screens[screenId].displayNumber = displayId;
+					calculateScreenCoordinates(screenId, width, height);
+				}
+			}
+		}
+		catch (const boost::property_tree::ptree_bad_path& e) {
+			BOOST_LOG_TRIVIAL(error) << "[pupplayer] couldn't read screen definitions";
+		}
+	}
+
+	// remove inactive screens
+	for (auto itr = screens.cbegin(); itr != screens.cend(); ) {
+		if (itr->second.hasDisplay()) {
+			++itr;
+		} else {
+			itr = screens.erase(itr);
 		}
 	}
 
@@ -309,7 +338,6 @@ bool PUPPlayer::hasSupportedExtension(string filename)
 	}
 	return false;
 }
-
 
 void PUPPlayer::eventLoop()
 {
