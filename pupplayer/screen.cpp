@@ -50,7 +50,13 @@ PUPScreen::PUPScreen(string configLine)
     }
 }
 
-bool PUPScreen::isValid()
+bool PUPScreen::isValid() const
 {
     return screenNum >= 0;
+}
+
+
+bool PUPScreen::hasDisplay() const
+{
+    return displayNumber >= 0;
 }

@@ -13,7 +13,8 @@ public:
     PUPScreen();
     PUPScreen(string configLine);
 
-    bool isValid();
+    bool isValid() const;
+    bool hasDisplay() const;
 
     int screenNum = -1;
     string screenDescription;
@@ -24,6 +25,9 @@ public:
     int priority;
 
     int parentScreen = -1;
+
+    // real screen ccordinates
+    int displayNumber = -1;
     float x = 0;
     float y = 0; 
     float width = 0;
