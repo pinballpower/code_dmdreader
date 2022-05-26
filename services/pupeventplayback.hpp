@@ -27,7 +27,7 @@ public:
 	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) override;
 	virtual bool start() override;
 	virtual void stop() override;
-	virtual string name() override;
+	virtual string name() const override;
 
 private:
 	void playEvents();

@@ -17,7 +17,7 @@ class Service {
 public:
 	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source);
 
-	virtual string name();
+	virtual string name() const;
 
 	virtual bool start();
 	virtual void stop();

@@ -312,7 +312,7 @@ void PUPPlayer::stop()
 	}
 }
 
-string PUPPlayer::name()
+string PUPPlayer::name() const
 {
 	return "pupplayer";
 }

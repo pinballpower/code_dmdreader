@@ -47,7 +47,7 @@ void PUPEventPlayback::stop()
 	}
 }
 
-string PUPEventPlayback::name()
+string PUPEventPlayback::name() const
 {
 	return "pupeventplayer";
 }

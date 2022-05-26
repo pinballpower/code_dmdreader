@@ -5,7 +5,7 @@ bool Service::configureFromPtree(boost::property_tree::ptree pt_general, boost::
 	return false;
 }
 
-string Service::name()
+string Service::name() const
 {
 	return "";
 }

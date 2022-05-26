@@ -38,7 +38,7 @@ public:
 	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) override;
 	virtual bool start() override;
 	virtual void stop() override;
-	virtual string name() override;
+	virtual string name() const override;
 	virtual std::pair<ServiceResponse, string> command(const string& cmd);
 
 	static bool hasSupportedExtension(string filename);
@@ -66,7 +66,6 @@ protected:
 	virtual bool initializeScreens();
 
 	void calculateScreenCoordinates(int screenId, int screenWidth, int screenHeight);
-
 };
 
 
