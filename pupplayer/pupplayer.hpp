@@ -66,6 +66,11 @@ protected:
 	virtual bool initializeScreens();
 
 	void calculateScreenCoordinates(int screenId, int screenWidth, int screenHeight);
+
+	const vector<string> getFilesForPlaylist(string playlist) const;
+	const vector<string> getFilesForScreen(int screenId) const;
+
+
 };
 
 

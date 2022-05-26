@@ -1,6 +1,7 @@
 #include "pupplayer.hpp"
 
 #include <queue>
+#include <filesystem>
 
 #include <boost/log/trivial.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -294,6 +295,8 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 		<< this->screens.size() << " screens and "
 		<< this->playlists.size() << " playlists";
 
+	initializeScreens();
+
 	return true;
 }
 
@@ -473,3 +476,36 @@ bool PUPPlayer::updatePlayerState()
 PUPPlayer::PUPPlayer(int screenNumber)
 {
 }
+
+const vector<string> PUPPlayer::getFilesForPlaylist(string playlist) const
+{
+	vector<string> res;
+
+	for (const auto f : filesystem::directory_iterator(basedir + "/" + playlist)) {
+		string file = f.path();
+		if (hasSupportedExtension(file)) {
+			res.push_back(file);
+		}
+	}
+	return res;
+}
+
+const vector<string> PUPPlayer::getFilesForScreen(int screenId) const {
+	vector<string> res;
+
+	// get playfiles from triggers
+	for (const auto t : triggers) {
+		if (t.second.screennum == screenId) {
+			if (t.second.playfile != "") {
+				res.push_back(basedir + "/" + t.second.playlist + "/" + t.second.playfile);
+			}
+			const vector playlistFiles = getFilesForPlaylist(t.second.playlist);
+			res.insert(std::end(res), std::begin(playlistFiles), std::end(playlistFiles));
+		}
+	}
+
+	// TODO: get playfiles from scree
+
+	return res;
+}
+
