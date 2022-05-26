@@ -168,23 +168,23 @@ bool PUPPlayer::initializeScreens()
 void PUPPlayer::calculateScreenCoordinates(int screenId, int screenWidth, int screenHeight) {
 	int screenX = 0, screenY = 0;
 
-	auto screen = this->screens[screenId];
-	if (screen.parentScreen >= 0) {
+	auto screen = &this->screens[screenId];
+	if (screen->parentScreen >= 0) {
 		BOOST_LOG_TRIVIAL(error) << "[pupplayer] can't calculate screen coordinates on " << screenId << " as it has a parent screen";
 		return;
 	}
 
-	if (screen.width <= 0) {
-		screen.width = 1;
+	if (screen->width <= 0) {
+		screen->width = 1;
 	}
-	if (screen.height <= 0) {
-		screen.height = 1;
+	if (screen->height <= 0) {
+		screen->height = 1;
 	}
 
-	screen.composition.x = screen.x * screenWidth;
-	screen.composition.y = screen.y * screenHeight;
-	screen.composition.width = screen.width * screenWidth;
-	screen.composition.height = screen.height * screenHeight;
+	screen->composition.x = screen->x * screenWidth;
+	screen->composition.y = screen->y * screenHeight;
+	screen->composition.width = screen->width * screenWidth;
+	screen->composition.height = screen->height * screenHeight;
 
 	// now update all subscreens
 	for (auto &subScreen : screens) {
@@ -196,11 +196,11 @@ void PUPPlayer::calculateScreenCoordinates(int screenId, int screenWidth, int sc
 			if (subScreen.second.height <= 0) {
 				subScreen.second.height = 1;
 			}
-			subScreen.second.composition.x = subScreen.second.x * screen.composition.width + screen.composition.x;
-			subScreen.second.composition.y = subScreen.second.y * screen.composition.height + screen.composition.y;
-			subScreen.second.composition.width = subScreen.second.width * screen.composition.width;
-			subScreen.second.composition.height = subScreen.second.height * screen.composition.height;
-			subScreen.second.displayNumber = screen.displayNumber;
+			subScreen.second.composition.x = subScreen.second.x * screen->composition.width + screen->composition.x;
+			subScreen.second.composition.y = subScreen.second.y * screen->composition.height + screen->composition.y;
+			subScreen.second.composition.width = subScreen.second.width * screen->composition.width;
+			subScreen.second.composition.height = subScreen.second.height * screen->composition.height;
+			subScreen.second.displayNumber = screen->displayNumber;
 
 			BOOST_LOG_TRIVIAL(error) << "[pupplayer] " << subScreen.second.composition.width << "x" <<
 				subScreen.second.composition.height << "@" <<
