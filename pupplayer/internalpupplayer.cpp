@@ -72,11 +72,6 @@ void InternalPUPPlayer::playerHasFinished(int screenId) {
 	BOOST_LOG_TRIVIAL(info) << "[pupplayer] playback on screen " << screenId << " has been finished";
 }
 
-string InternalPUPPlayer::name()
-{
-	return "pupplayer";
-}
-
 void InternalPUPPlayer::playbackFinished(int playerId, VideoPlayerFinishCode finishCode)
 {
 	BOOST_LOG_TRIVIAL(warning) << "[pupplayer] video player " << playerId << " finished playback";

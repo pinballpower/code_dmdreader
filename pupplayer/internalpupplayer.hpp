@@ -25,7 +25,6 @@ public:
 	InternalPUPPlayer(int screenNumber = 0);
 	~InternalPUPPlayer();
 
-	virtual string name() override;
 	void playerHasFinished(int screenId);
 
 	virtual void playbackFinished(int playerId,VideoPlayerFinishCode finishCode) override;
