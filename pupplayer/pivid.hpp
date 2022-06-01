@@ -19,6 +19,6 @@ private:
 	virtual bool stopVideoPlayback(const PUPScreen& screen, bool waitUntilStopped = true) override;
 	virtual bool initializeScreens() override;
 
-	const string resizedName(string filename, const PUPScreen& screen);
+	const string resizedName(string filename, const CompositionGeometry& geometry);
 };
 
