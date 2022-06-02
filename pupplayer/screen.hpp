@@ -35,4 +35,6 @@ public:
 
     // Coordinates on the real display that this will be displayed on
     CompositionGeometry composition;
+
+    string currentFile = "";
 };
