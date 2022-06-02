@@ -148,13 +148,13 @@ void PUPPlayer::playDefaultVideo(int screenId) {
 	}
 }
 
-bool PUPPlayer::startVideoPlayback(string filename, const PUPScreen& screen, bool loop)
+bool PUPPlayer::startVideoPlayback(string filename, PUPScreen& screen, bool loop)
 {
 	BOOST_LOG_TRIVIAL(error) << "[pupplayer] startVideoPlayback not implemented";
 	return false;
 }
 
-bool PUPPlayer::stopVideoPlayback(const PUPScreen& screen, bool waitUntilStopped)
+bool PUPPlayer::stopVideoPlayback(PUPScreen& screen, bool waitUntilStopped)
 {
 	BOOST_LOG_TRIVIAL(error) << "[pupplayer] stopVideoPlayback not implemented";
 	return false;
@@ -413,7 +413,7 @@ void PUPPlayer::processTrigger(string trigger)
 		BOOST_LOG_TRIVIAL(error) << "[pupplayer] trigger " << trigger << " screen " << triggerData.screennum << "unknown, ignoring";
 		return;
 	}
-	const auto triggerScreen = screens[triggerData.screennum];
+	auto& triggerScreen = screens[triggerData.screennum];
 
 
 	string playfile = triggerData.playfile;

@@ -50,7 +50,6 @@ protected:
 	queue<string> eventsToProcess;
 	map<int, PlayerState> playerStates;				     // keeps track of the state of all players
 
-
 	string lastTrigger = "";
 	string basedir;
 
@@ -61,8 +60,8 @@ protected:
 	void processTrigger(string trigger);
 	virtual bool updatePlayerState();
 	void playDefaultVideo(int screenId);
-	virtual bool startVideoPlayback(string filename, const PUPScreen& screen, bool loop);
-	virtual bool stopVideoPlayback(const PUPScreen& screen, bool waitUntilStopped=true);
+	virtual bool startVideoPlayback(string filename, PUPScreen& screen, bool loop);
+	virtual bool stopVideoPlayback(PUPScreen& screen, bool waitUntilStopped=true);
 	virtual bool initializeScreens();
 
 	void calculateScreenCoordinates(int screenId, int screenWidth, int screenHeight);

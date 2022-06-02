@@ -99,7 +99,7 @@ bool InternalPUPPlayer::updatePlayerState() {
 	return true;
 }
 
-bool InternalPUPPlayer::startVideoPlayback(string filename, const PUPScreen& screen, bool loop) {
+bool InternalPUPPlayer::startVideoPlayback(string filename, PUPScreen& screen, bool loop) {
 	// TODO: Preload video files 
 
 	auto& player = videoPlayers[screen.screenNum];
@@ -126,7 +126,7 @@ bool InternalPUPPlayer::startVideoPlayback(string filename, const PUPScreen& scr
 	return true;
 }
 
-bool InternalPUPPlayer::stopVideoPlayback(const PUPScreen& screen, bool waitUntilStopped)
+bool InternalPUPPlayer::stopVideoPlayback(PUPScreen& screen, bool waitUntilStopped)
 {
 	return false;
 }
