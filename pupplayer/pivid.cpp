@@ -6,14 +6,20 @@
 
 #include <boost/log/trivial.hpp>
 
+int roundup16(int i) {
+	return ((i + 15) / 16) * 16;
+}
 
-bool resizeFile(string filename, string newName, CompositionGeometry size)
+bool resizeFile(string filename, string newName, const PUPScreen& screen) 
 {
+	int width = roundup16(screen.composition.width);
+	int height = roundup16(screen.composition.height);
+
 	if (std::filesystem::exists(newName)) {
 		BOOST_LOG_TRIVIAL(info) << "[pivid] " << newName << " already exists";
 		return false;
 	}
-	string command = "ffmpeg -i " + filename + " -s " + to_string(size.width) + "x" + to_string(size.height) + " -an " + newName;
+	string command = "ffmpeg -i " + filename + " -s " + to_string(width) + "x" + to_string(height) + " -an " + newName;
 
 	std::filesystem::path p = std::filesystem::path(newName);
 	p.remove_filename();
@@ -47,16 +53,15 @@ bool PividPUPPlayer::initializeScreens()
 	for (auto screen : screens) {
 		vector<string> files = getFilesForScreen(screen.second.screenNum);
 		for (auto f : files) {
-			CompositionGeometry geometry = screen.second.composition;
-			resizeFile(f, resizedName(f, geometry), geometry);
+			resizeFile(f, resizedName(f, screen.second), screen.second);
 		}
 	}
 	return true;
 }
 
-const string PividPUPPlayer::resizedName(string filename, const CompositionGeometry& geometry) {
-	int width = geometry.width;
-	int height = geometry.height;
+const string PividPUPPlayer::resizedName(string filename, const PUPScreen& screen) {
+	int width = roundup16(screen.composition.width);
+	int height = roundup16(screen.composition.height);
 	std::filesystem::path p = filename;
 	string ext = p.extension();
 	string basename = p.replace_extension();
