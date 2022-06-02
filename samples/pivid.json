@@ -1,0 +1,24 @@
+{
+  "screens": {
+    "HDMI-1": {
+      "mode": [ 1920, 1080, 60 ],
+      "update_hz": 30,
+      "layers": [
+        {
+          "media": "../resized/ballroom/ballroomfinal-1720x871.mp4",
+          "play": {
+            "repeat": true
+          },
+          "to_xy": [ 100, 200 ]
+        },
+        {
+          "media": "../resized/ballroom/ballroommain1-1720x871.mp4",
+          "play": {
+            "repeat": true
+          },
+          "to_xy": [ 400, 500 ]
+        }
+      ]
+    }
+  }
+}
