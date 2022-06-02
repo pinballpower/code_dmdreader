@@ -17,7 +17,8 @@ bool resizeFile(string filename, string newName, CompositionGeometry size)
 
 	std::filesystem::path p = std::filesystem::path(newName);
 	p.remove_filename();
-	if (!std::filesystem::create_directories(p)) {
+	std::filesystem::create_directories(p);
+	if (! std::filesystem::exists(p)) {
 		BOOST_LOG_TRIVIAL(info) << "[pivid] couldn't create " << p;
 	}
 

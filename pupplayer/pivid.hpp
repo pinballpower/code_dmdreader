@@ -13,7 +13,7 @@ class PividPUPPlayer : public PUPPlayer {
 public:
 
 private:
-	string basedirResized = "/tmp";
+	string basedirResized="resized";
 
 	virtual bool startVideoPlayback(string filename, const PUPScreen& screen, bool loop) override;
 	virtual bool stopVideoPlayback(const PUPScreen& screen, bool waitUntilStopped = true) override;
