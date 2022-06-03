@@ -24,7 +24,7 @@
 #include "../dmdsource/spisource.hpp"
 #endif
 #ifdef USE_VIDEO
-#include "../pupplayer/pivid.hpp"
+#include "../pupplayer/pividpupplayer.hpp"
 #endif
 
 #if __has_include("../colorize/config.h")
