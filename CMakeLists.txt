@@ -202,10 +202,16 @@ set (PROCESSOR_SRC "processor/pupcapture.cpp" "processor/frameprocessor.hpp" "pr
 set (SERVICES_SRC "services/service.cpp" "services/service.hpp" "services/serviceregistry.hpp" "services/serviceregistry.cpp" "services/pupeventplayback.hpp" "services/pupeventplayback.cpp")
 set (TEST_SRC "test/drmtest.hpp"  "test/drmtest.cpp" )
 
-add_executable (${PROJECT_NAME} "dmdreader.cpp" ${UTIL_SRC} ${RENDER_SRC} ${DMD_SRC} ${DMDSOURCE_SRC} ${PROCESSOR_SRC} ${COLOR_SRC} ${OPENGL_SRC} ${SPI_SRC} ${RPI_SRC} ${VIDEO_SRC} ${PUPPLAYER_SRC} ${SERVICES_SRC} ${TEST_SRC})
+set (ALL_SOURCES ${UTIL_SRC} ${RENDER_SRC} ${DMD_SRC} ${DMDSOURCE_SRC} ${PROCESSOR_SRC} ${COLOR_SRC} ${OPENGL_SRC} ${SPI_SRC} ${RPI_SRC} ${VIDEO_SRC} ${PUPPLAYER_SRC} ${SERVICES_SRC} ${TEST_SRC})
 
+add_executable (${PROJECT_NAME} "dmdreader.cpp" ${ALL_SOURCES} )
 target_include_directories(${PROJECT_NAME} PRIVATE ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBRARIES} ${ZLIB_LIBRARIES} ${VIDEO_LIBRARIES})
+
+add_executable (test "test.cpp" ${ALL_SOURCES} )
+target_include_directories(test PRIVATE ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
+target_link_libraries(test PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBRARIES} ${ZLIB_LIBRARIES} ${VIDEO_LIBRARIES})
+
 
 #
 # Install
