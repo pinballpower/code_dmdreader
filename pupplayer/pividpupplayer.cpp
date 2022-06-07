@@ -1,3 +1,4 @@
+#include "pividpupplayer.hpp"
 #include "pivid.hpp"
 
 #include <filesystem>
@@ -57,8 +58,10 @@ bool PividPUPPlayer::initializeScreens()
 		}
 	}
 
-	string x = exportJSON();
-	printf(x.c_str());
+	// start PIVID
+	pivid.startServer(std::filesystem::current_path().generic_string());
+
+	exportJSON();
 
 	return true;
 }
@@ -75,42 +78,44 @@ const string PividPUPPlayer::resizedName(string filename, const PUPScreen& scree
 		basename = basename.substr(basedir.length());
 	}
 
-	string newName = basedirResized + basename + "-" + to_string(width) + "x" + to_string(height) + ".mp4";
+	string newName = basedirResized + "/" + basename + "-" + to_string(width) + "x" + to_string(height) + ".mp4";
 	return newName;
 }
 
-const string PividPUPPlayer::exportJSON() {
+const json PividPUPPlayer::exportAsJSON() {
 
-	string result = "{"
-		"\"screens\": {"
-		"  \"HDMI-1\": "
-		"    \"mode\": [1920, 1080, 60] ,"
-		"		\"update_hz\" : 30,"
-		"		\"layers\" : [";
-
+	json result;
+	result["screens"]["HDMI-1"]["mode"] = { 1920,1080,60 };
+	result["screens"]["HDMI-1"]["update_hz"] = 30;
+	result["screens"]["HDMI-1"]["layers"] = json::array();
+	auto& layers = result["screens"]["HDMI-1"]["layers"];
 	for (auto& s : screens) {
 		auto& screen = s.second;
-
-		result += exportScreenAsJSON(screen) + ",";
+		if (screen.currentFile != "") {
+			layers.push_back(exportScreenAsJSON(screen));
+		}
 	}
-	result = result.substr(0, result.size() - 1);
-
-	result +=
-		"       ]"
-		"     }"
-		"   }"
-		"}";
-
 	return result;
-
 }
 
-const string PividPUPPlayer::exportScreenAsJSON(PUPScreen& screen) {
+const json PividPUPPlayer::exportScreenAsJSON(PUPScreen& screen) {
+	//string result = "{"
+	//	"\"media\": \"" + screen.currentFile + "\"," +
+	//	"\"play\" : { \"t\": [ 0,3 ], \"v\": [ 0,3 ], \"repeat\": true }," +
+	//	"\"to_xy\" : [" + std::to_string(screen.composition.x) + "," + std::to_string(screen.composition.y) + "] }";
 
-	string result = "{"
-		"\"media\": \"" + screen.currentFile + "\"," +
-		"\"play\" : { \"t\": [ 0,3 ], \"v\": [ 0,3 ], \"repeat\": true }," +
-		"\"to_xy\" : [" + std::to_string(screen.composition.x) + "," + std::to_string(screen.composition.y) + "] }";
+	string realName = "";
+	float duration = 0;
+	if (screen.currentFile != "") {
+		realName = resizedName(screen.currentFile, screen);
+		duration = pivid.getDuration(realName);
+	}
+	json result;
+	result["media"] = realName;
+	result["play"]["t"] = { 0, duration };
+	result["play"]["v"] = { 0, duration };
+	result["play"]["repeat"] = true;
+	result["to_xy"] = { screen.composition.x , screen.composition.y };
 
 	return result;
 

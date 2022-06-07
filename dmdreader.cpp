@@ -25,8 +25,6 @@
 
 #include "pupplayer/pupplayer.hpp"
 
-#include "test/drmtest.hpp"
-
 using namespace std;
 
 vector<std::shared_ptr<DMDSource>> sources;
@@ -242,8 +240,6 @@ int main(int argc, char** argv)
 	);
 
 	BOOST_LOG_TRIVIAL(trace) << "[dmdreader] cwd: " << filesystem::current_path();
-
-	DRMHelper::logResources();
 
 	string config_file;
 	if (argc >= 2) {

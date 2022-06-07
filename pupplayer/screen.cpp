@@ -13,7 +13,7 @@ PUPScreen::PUPScreen(string configLine)
     std::vector<std::string> fields = splitLine(configLine);
 
     if (fields.size() < 8) {
-        BOOST_LOG_TRIVIAL(error) << "[pupscreen] can't parse screen line, need at least 8 fields: \"" << configLine << "\"";
+        BOOST_LOG_TRIVIAL(error) << "[pupscreen] couldn't parse screen line, need at least 8 fields: \"" << configLine << "\"";
     }
 
     try {
@@ -31,7 +31,7 @@ PUPScreen::PUPScreen(string configLine)
         if (customPos != "") {
             vector<string> posFields = splitLine(customPos);
             if (posFields.size() < 5) {
-                BOOST_LOG_TRIVIAL(error) << "[pupscreen] can't parse screen position, need at least 5 fields: \"" << customPos << "\"";
+                BOOST_LOG_TRIVIAL(error) << "[pupscreen] coulnd't parse screen position, need at least 5 fields: \"" << customPos << "\"";
             }
             else {
                 parentScreen = parseInteger(posFields[0]);
@@ -45,7 +45,7 @@ PUPScreen::PUPScreen(string configLine)
 
     }
     catch (...) {
-        BOOST_LOG_TRIVIAL(error) << "[pupscreen] can't parse screen line  \"" << configLine << "\"";
+        BOOST_LOG_TRIVIAL(error) << "[pupscreen] ccouldn't parse screen line  \"" << configLine << "\"";
 
     }
 }

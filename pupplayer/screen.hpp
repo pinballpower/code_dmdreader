@@ -37,4 +37,5 @@ public:
     CompositionGeometry composition;
 
     string currentFile = "";
+    bool loopCurrentFile = false;
 };

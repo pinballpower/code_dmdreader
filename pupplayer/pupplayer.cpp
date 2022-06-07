@@ -291,6 +291,15 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 		}
 	}
 
+	// set default videos
+	for (auto& pair : screens) {
+		auto& screen = pair.second;
+		if (screen.playFile != "") {
+			screen.currentFile = screen.playList+"/"+screen.playFile;
+			screen.loopCurrentFile = true;
+		}
+	}
+
 	BOOST_LOG_TRIVIAL(info) << "[pupplayer] read " << this->triggers.size() << " triggers, "
 		<< this->screens.size() << " screens and "
 		<< this->playlists.size() << " playlists";
@@ -504,7 +513,11 @@ const vector<string> PUPPlayer::getFilesForScreen(int screenId) const {
 		}
 	}
 
-	// TODO: get playfiles from scree
+	// get playfile from screen
+	auto screen = screens.at(screenId);
+	if (screen.playFile != "") {
+		res.push_back(basedir + "/" + screen.playList + "/" + screen.playFile);
+	}
 
 	return res;
 }
