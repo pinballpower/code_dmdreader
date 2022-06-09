@@ -52,12 +52,23 @@ PividPUPPlayer::PividPUPPlayer()
 
 bool PividPUPPlayer::startVideoPlayback(string filename, PUPScreen& screen, bool loop)
 {
-	return false;
+	// after the video has been finished, return to default video
+	float duration = pivid.getDuration(filename);
+	int delayMilliseconds = (duration * 1000) - 200;
+	std::thread threadSwitchToDefault(&PividPUPPlayer::playDefaultVideo, this, std::ref(screen), filename, delayMilliseconds);
+	threadSwitchToDefault.detach();
+
+	screen.currentFile = filename;
+	screen.loopCurrentFile = loop;
+	updatePIVID();
+	return true;
 }
 
 bool PividPUPPlayer::stopVideoPlayback(PUPScreen& screen, bool waitUntilStopped)
 {
-	return false;
+	screen.currentFile = "";
+	updatePIVID();
+	return true;
 }
 
 bool PividPUPPlayer::initializeScreens()
@@ -145,11 +156,30 @@ const json PividPUPPlayer::exportScreenAsJSON(PUPScreen& screen) {
 	result["media"] = realName;
 	result["play"]["t"] = { 0, duration };
 	result["play"]["v"] = { 0, duration };
-	result["play"]["repeat"] = true;
+	result["play"]["repeat"] = screen.loopCurrentFile;
 	result["to_xy"] = { screen.composition.x , screen.composition.y };
 
 	return result;
 
 }
 
+void PividPUPPlayer::playDefaultVideo(PUPScreen& screen, string checkPlayingFile, int delayMilliseconds) {
+
+	if (screen.playFile == "") {
+		return;
+	}
+
+	if (delayMilliseconds > 0) {
+		this_thread::sleep_for(chrono::milliseconds(delayMilliseconds));
+	}
+
+	// only do this if the currently playing file is still "checkPlayingFile", otherwise ignore
+	if ((checkPlayingFile != "") && (screen.currentFile != checkPlayingFile)) {
+		return;
+	}
+
+	screen.currentFile = screen.playList + "/" + screen.playFile;
+	screen.loopCurrentFile = true;
+	updatePIVID();
+}
 

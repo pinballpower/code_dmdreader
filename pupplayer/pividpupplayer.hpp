@@ -22,6 +22,7 @@ private:
 
 	virtual bool startVideoPlayback(string filename, PUPScreen& screen, bool loop) override;
 	virtual bool stopVideoPlayback(PUPScreen& screen, bool waitUntilStopped = true) override;
+	void playDefaultVideo(PUPScreen& screen, string checkPlayingFile, int delayMilliseconds = 0);
 	virtual bool initializeScreens() override;
 
 	const string resizedName(string filename, const PUPScreen& screen);
