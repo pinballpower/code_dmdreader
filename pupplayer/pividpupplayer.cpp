@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <string>
 #include <cstdlib>
+#include <chrono>
 
 #include <boost/log/trivial.hpp>
 
@@ -52,14 +53,18 @@ PividPUPPlayer::PividPUPPlayer()
 
 bool PividPUPPlayer::startVideoPlayback(string filename, PUPScreen& screen, bool loop)
 {
-	// after the video has been finished, return to default video
-	float duration = pivid.getDuration(filename);
-	int delayMilliseconds = (duration * 1000) - 200;
-	std::thread threadSwitchToDefault(&PividPUPPlayer::playDefaultVideo, this, std::ref(screen), filename, delayMilliseconds);
-	threadSwitchToDefault.detach();
+	if (!loop) {
+		// after the video has been finished, return to default video
+		string realFilename = resizedName(filename, screen);
+		float duration = pivid.getDuration(realFilename);
+		int delayMilliseconds = (duration * 1000) - 500;
+		std::thread threadSwitchToDefault(&PividPUPPlayer::playDefaultVideo, this, std::ref(screen), filename, delayMilliseconds);
+		threadSwitchToDefault.detach();
+	}
 
 	screen.currentFile = filename;
 	screen.loopCurrentFile = loop;
+	screen.startTimeStampMilliseconds = 0;
 	updatePIVID();
 	return true;
 }
@@ -99,7 +104,7 @@ bool PividPUPPlayer::initializeScreens()
 
 void PividPUPPlayer::updatePIVID() {
 	auto jsonStr = exportAsJSON().dump();
-	BOOST_LOG_TRIVIAL(trace) << jsonStr;
+	BOOST_LOG_TRIVIAL(info) << jsonStr;
 	pivid.sendRequest("/play", boost::beast::http::verb::post, jsonStr);
 }
 
@@ -130,6 +135,10 @@ const json PividPUPPlayer::exportAsJSON() {
 	json result;
 	vector<string> files;
 
+	result["zero_time"] = 0.0f;
+	result["main_buffer_time"] = 0.2;
+	result["main_loop_hz"] = 30;
+
 	result["screens"]["HDMI-1"]["mode"] = { 1920,1080,60 };
 	result["screens"]["HDMI-1"]["update_hz"] = 30;
 	result["screens"]["HDMI-1"]["layers"] = json::array();
@@ -152,11 +161,24 @@ const json PividPUPPlayer::exportScreenAsJSON(PUPScreen& screen) {
 		realName = resizedName(screen.currentFile, screen);
 		duration = pivid.getDuration(realName);
 	}
+
+	long startTimeMilliseconds = screen.startTimeStampMilliseconds;
+	if (startTimeMilliseconds <= 0) {
+		auto now = std::chrono::system_clock::now();
+		startTimeMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+		screen.startTimeStampMilliseconds = startTimeMilliseconds;
+	}
+
+	double startTime = ((double)startTimeMilliseconds) / 1000;
+
 	json result;
 	result["media"] = realName;
-	result["play"]["t"] = { 0, duration };
-	result["play"]["v"] = { 0, duration };
+	result["play"]["t"] = { startTime, startTime+duration};
+	result["play"]["v"] = 0;
+	result["play"]["rate"] = 1.0;
+	
 	result["play"]["repeat"] = screen.loopCurrentFile;
+
 	result["to_xy"] = { screen.composition.x , screen.composition.y };
 
 	return result;
@@ -180,6 +202,7 @@ void PividPUPPlayer::playDefaultVideo(PUPScreen& screen, string checkPlayingFile
 
 	screen.currentFile = screen.playList + "/" + screen.playFile;
 	screen.loopCurrentFile = true;
+	screen.startTimeStampMilliseconds = 0;
 	updatePIVID();
 }
 

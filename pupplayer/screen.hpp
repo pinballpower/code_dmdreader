@@ -36,6 +36,8 @@ public:
     // Coordinates on the real display that this will be displayed on
     CompositionGeometry composition;
 
+    // additional stuff used by pivid
     string currentFile = "";
     bool loopCurrentFile = false;
+    long startTimeStampMilliseconds = 0;
 };

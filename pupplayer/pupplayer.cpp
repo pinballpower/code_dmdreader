@@ -419,7 +419,7 @@ void PUPPlayer::processTrigger(string trigger)
 	const auto& triggerData = triggers[trigger];
 
 	if (! screens.contains(triggerData.screennum)) {
-		BOOST_LOG_TRIVIAL(error) << "[pupplayer] trigger " << trigger << " screen " << triggerData.screennum << "unknown, ignoring";
+		BOOST_LOG_TRIVIAL(info) << "[pupplayer] trigger " << trigger << " screen " << triggerData.screennum << " not configured, ignoring";
 		return;
 	}
 	auto& triggerScreen = screens[triggerData.screennum];
