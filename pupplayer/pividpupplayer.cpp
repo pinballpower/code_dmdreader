@@ -11,16 +11,23 @@ int roundup16(int i) {
 	return ((i + 15) / 16) * 16;
 }
 
-bool resizeFile(string filename, string newName, const PUPScreen& screen) 
+bool resizeFile(string filename, string newName, const PUPScreen& screen, string ffmpegOptions) 
 {
 	int width = roundup16(screen.composition.width);
 	int height = roundup16(screen.composition.height);
 
 	if (std::filesystem::exists(newName)) {
 		BOOST_LOG_TRIVIAL(info) << "[pivid] " << newName << " already exists";
-		return false;
+		return true;
 	}
-	string command = "ffmpeg -i " + filename + " -s " + to_string(width) + "x" + to_string(height) + " -an " + newName;
+
+	string command;
+	if (filename.ends_with(".png")) {
+		command = "cp \"" + filename + "\"" + newName;
+	}
+	else {
+		command = "ffmpeg -i \"" + filename + "\" -s " + to_string(width) + "x" + to_string(height) + " -an " + ffmpegOptions + " " + newName;
+	}
 
 	std::filesystem::path p = std::filesystem::path(newName);
 	p.remove_filename();
@@ -30,12 +37,17 @@ bool resizeFile(string filename, string newName, const PUPScreen& screen)
 	}
 
 	BOOST_LOG_TRIVIAL(info) << "[pivid] converting " << filename << " to " << newName << " using " << command;
-	return (std::system(command.c_str()) == 0);
+	std::system(command.c_str());
+
+	return std::filesystem::exists(newName);
 }
 
-string screenToPividJSON(const map<int, PUPScreen> screens)
+
+PividPUPPlayer::PividPUPPlayer()
 {
-	return "";
+	// use HVEC when resizing files
+	basedirResized = "x265";
+	ffmpegOptions = " -c:v libx265 ";
 }
 
 bool PividPUPPlayer::startVideoPlayback(string filename, PUPScreen& screen, bool loop)
@@ -50,20 +62,34 @@ bool PividPUPPlayer::stopVideoPlayback(PUPScreen& screen, bool waitUntilStopped)
 
 bool PividPUPPlayer::initializeScreens()
 {
+	// clear video file list
+	videoFiles.clear();
+
 	// prepare videos
 	for (auto screen : screens) {
 		vector<string> files = getFilesForScreen(screen.second.screenNum);
 		for (auto f : files) {
-			resizeFile(f, resizedName(f, screen.second), screen.second);
+			auto nameOfResizedFile = resizedName(f, screen.second);
+			if (resizeFile(f, nameOfResizedFile, screen.second, ffmpegOptions)) {
+				if (std::find(videoFiles.begin(), videoFiles.end(), nameOfResizedFile) == videoFiles.end()) {
+					videoFiles.push_back(nameOfResizedFile);
+				}
+			}
 		}
 	}
 
 	// start PIVID
 	pivid.startServer(std::filesystem::current_path().generic_string());
 
-	exportJSON();
+	updatePIVID();
 
 	return true;
+}
+
+void PividPUPPlayer::updatePIVID() {
+	auto jsonStr = exportAsJSON().dump();
+	BOOST_LOG_TRIVIAL(trace) << jsonStr;
+	pivid.sendRequest("/play", boost::beast::http::verb::post, jsonStr);
 }
 
 const string PividPUPPlayer::resizedName(string filename, const PUPScreen& screen) {
@@ -73,18 +99,26 @@ const string PividPUPPlayer::resizedName(string filename, const PUPScreen& scree
 	string ext = p.extension();
 	string basename = p.replace_extension();
 
+	string extNew = ".mp4";
+	if (ext == ".png") {
+		extNew = ext;
+	}
+
 	// remove original base directory
 	if (basename.starts_with(basedir)) {
 		basename = basename.substr(basedir.length());
 	}
 
-	string newName = basedirResized + "/" + basename + "-" + to_string(width) + "x" + to_string(height) + ".mp4";
+	string newName = basedirResized + "/" + basename + "-" + to_string(width) + "x" + to_string(height) + extNew;
+	std::replace(newName.begin(), newName.end(), ' ', '_'); // rmeove spaces
 	return newName;
 }
 
 const json PividPUPPlayer::exportAsJSON() {
 
 	json result;
+	vector<string> files;
+
 	result["screens"]["HDMI-1"]["mode"] = { 1920,1080,60 };
 	result["screens"]["HDMI-1"]["update_hz"] = 30;
 	result["screens"]["HDMI-1"]["layers"] = json::array();
@@ -93,17 +127,14 @@ const json PividPUPPlayer::exportAsJSON() {
 		auto& screen = s.second;
 		if (screen.currentFile != "") {
 			layers.push_back(exportScreenAsJSON(screen));
+			files.push_back(resizedName(screen.currentFile, screen));
 		}
 	}
+
 	return result;
 }
 
 const json PividPUPPlayer::exportScreenAsJSON(PUPScreen& screen) {
-	//string result = "{"
-	//	"\"media\": \"" + screen.currentFile + "\"," +
-	//	"\"play\" : { \"t\": [ 0,3 ], \"v\": [ 0,3 ], \"repeat\": true }," +
-	//	"\"to_xy\" : [" + std::to_string(screen.composition.x) + "," + std::to_string(screen.composition.y) + "] }";
-
 	string realName = "";
 	float duration = 0;
 	if (screen.currentFile != "") {

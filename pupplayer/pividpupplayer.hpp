@@ -7,15 +7,18 @@
 #include "pupplayer.hpp"
 #include "pivid.hpp"
 
-string screenToPividJSON(const map<int, PUPScreen> screens);
 
 class PividPUPPlayer : public PUPPlayer {
 
 public:
 
+	PividPUPPlayer();
+
 private:
-	string basedirResized="resized";
+	string basedirResized;
+	string ffmpegOptions;
 	PIVID pivid;
+	vector<string> videoFiles;
 
 	virtual bool startVideoPlayback(string filename, PUPScreen& screen, bool loop) override;
 	virtual bool stopVideoPlayback(PUPScreen& screen, bool waitUntilStopped = true) override;
@@ -24,5 +27,6 @@ private:
 	const string resizedName(string filename, const PUPScreen& screen);
 	const json exportAsJSON();
 	const json exportScreenAsJSON(PUPScreen& screen);
+	void updatePIVID();
 };
 

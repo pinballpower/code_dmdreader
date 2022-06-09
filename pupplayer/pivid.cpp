@@ -21,7 +21,7 @@ using tcp = net::ip::tcp;           // from <boost/asio/ip/tcp.hpp>
 
 using namespace std;
 
-boost::property_tree::ptree PIVID::sendRequest(string target) {
+boost::property_tree::ptree PIVID::sendRequest(string target, boost::beast::http::verb requestType, string body) {
 	boost::property_tree::ptree result;
 	try
 	{
@@ -42,10 +42,12 @@ boost::property_tree::ptree PIVID::sendRequest(string target) {
 		// Make the connection on the IP address we get from a lookup
 		stream.connect(results);
 
-		// Set up an HTTP GET request message
-		http::request<http::string_body> req{ http::verb::get, target, httpVersion };
+		// Set up an HTTP request message
+		http::request<http::string_body> req{ requestType, target, httpVersion };
 		req.set(http::field::host, host);
 		req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+		req.body() = body;
+		req.prepare_payload();
 
 		// Send the HTTP request to the remote host
 		http::write(stream, req);
