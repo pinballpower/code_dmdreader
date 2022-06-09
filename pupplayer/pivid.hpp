@@ -21,6 +21,7 @@ public:
 	PIVID();
 	~PIVID();
 
+	void killRunningServers();
 	void startServer(string mediaDirectory);
 
 	boost::property_tree::ptree sendRequest(string target, boost::beast::http::verb requestType = boost::beast::http::verb::get, string body="");

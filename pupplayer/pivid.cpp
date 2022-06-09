@@ -114,7 +114,14 @@ PIVID::~PIVID()
 	pividProcess.terminate();
 }
 
+void PIVID::killRunningServers()
+{
+	system("pkill pivid_server");
+}
+
 void PIVID::startServer(string mediaDirectory) {
+	killRunningServers();
+	this_thread::sleep_for(chrono::milliseconds(500));
 	string args = "--media_root=" + mediaDirectory;
 	pividProcess = boost::process::child(boost::process::search_path("pivid_server"), args);
 }
