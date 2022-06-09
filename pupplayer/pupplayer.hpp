@@ -60,6 +60,7 @@ protected:
 	void processTrigger(string trigger);
 	virtual bool updatePlayerState();
 	void playDefaultVideo(int screenId);
+
 	virtual bool startVideoPlayback(string filename, PUPScreen& screen, bool loop);
 	virtual bool stopVideoPlayback(PUPScreen& screen, bool waitUntilStopped=true);
 	virtual bool initializeScreens();

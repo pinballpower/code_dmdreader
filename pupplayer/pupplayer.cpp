@@ -455,7 +455,7 @@ void PUPPlayer::processTrigger(string trigger)
 	}
 
 	if (triggerData.action == TriggerAction::SET_BACKGROUND) {
-
+		triggerScreen.playFile = triggerData.playfile;
 	}
 
 	// TODO: Handle more trigger loop types
