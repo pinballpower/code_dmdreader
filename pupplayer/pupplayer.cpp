@@ -440,7 +440,7 @@ void PUPPlayer::processTrigger(string trigger)
 
 	// Handle priorities
 	if ((triggerData.priority < matchingPlayerState.priority) ||
-		(triggerData.priority == matchingPlayerState.priority) && (triggerData.loop == TriggerLoop::SKIP_SAME_PRIORITY))
+		(triggerData.priority == matchingPlayerState.priority) && (triggerData.action == TriggerAction::SKIP_SAME_PRIORITY))
 	{
 		BOOST_LOG_TRIVIAL(debug) << "[pupplayer] ignoring trigger " << trigger << " with priority " << triggerData.priority
 			<< " as a player with priority " << matchingPlayerState.priority << " is still running on screen " << triggerData.screennum;
@@ -448,10 +448,14 @@ void PUPPlayer::processTrigger(string trigger)
 	}
 
 	// When stopping make sure that the player is really stopped before going on with the next events
-	if (triggerData.loop == TriggerLoop::STOP_FILE) {
+	if (triggerData.action == TriggerAction::STOP_FILE) {
 		stopVideoPlayback(triggerScreen, true);
 		BOOST_LOG_TRIVIAL(debug) << "[pupplayer] trigger " << trigger << " stopped playback on screen  " << triggerData.screennum;
 		return;
+	}
+
+	if (triggerData.action == TriggerAction::SET_BACKGROUND) {
+
 	}
 
 	// TODO: Handle more trigger loop types
@@ -459,7 +463,7 @@ void PUPPlayer::processTrigger(string trigger)
 
 	bool loop = false;
 	// TODO: What's the difference between "loop" and "loopFile"?
-	if ((triggerData.loop == TriggerLoop::LOOP) || (triggerData.loop == TriggerLoop::LOOP_FILE)) {
+	if ((triggerData.action == TriggerAction::LOOP) || (triggerData.action == TriggerAction::LOOP_FILE)) {
 		loop = true;
 
 	}

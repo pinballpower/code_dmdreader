@@ -4,7 +4,7 @@
 
 using namespace std;
 
-enum class TriggerLoop {
+enum class TriggerAction {
     DEFAULT,
     LOOP,
     LOOP_FILE,
@@ -35,6 +35,6 @@ public:
     int length;         // unsupported
     int counter;        // 
     int rest_seconds;
-    TriggerLoop loop;
+    TriggerAction action;
     int defaults;
 };

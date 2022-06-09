@@ -33,30 +33,30 @@ PUPTrigger::PUPTrigger(string configLine)
         counter = parseInteger(fields[10]);
         rest_seconds = parseInteger(fields[11]);
 
-        loop = TriggerLoop::DEFAULT;
+        action = TriggerAction::DEFAULT;
         if (fields[12] == "SkipSamePrty") {
-            loop = TriggerLoop::SKIP_SAME_PRIORITY;
+            action = TriggerAction::SKIP_SAME_PRIORITY;
         }
         else if (fields[12] == "SplashResume") {
-            loop = TriggerLoop::SPLASH_RESUME;
+            action = TriggerAction::SPLASH_RESUME;
         }
         else if (fields[12] == "Loop") {
-            loop = TriggerLoop::LOOP;
+            action = TriggerAction::LOOP;
         }
         else if (fields[12] == "LoopFile") {
-            loop = TriggerLoop::LOOP_FILE;
+            action = TriggerAction::LOOP_FILE;
         }
         else if (fields[12] == "SkipSamePrty") {
-            loop = TriggerLoop::SKIP_SAME_PRIORITY;
+            action = TriggerAction::SKIP_SAME_PRIORITY;
         }
         else if (fields[12] == "StopFile") {
-            loop = TriggerLoop::STOP_FILE;
+            action = TriggerAction::STOP_FILE;
         }
         else if (fields[12] == "SetBG") {
-            loop = TriggerLoop::SET_BACKGROUND;
+            action = TriggerAction::SET_BACKGROUND;
         }
         else if (fields[12] == "") {
-            loop = TriggerLoop::DEFAULT;
+            action = TriggerAction::DEFAULT;
         }
         else {
             BOOST_LOG_TRIVIAL(error) << "[puptrigger] don't know trigger type " << fields[12] << ", using default";
