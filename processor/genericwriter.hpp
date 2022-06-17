@@ -12,22 +12,21 @@
 #include "../dmd/dmdframe.hpp"
 #include "frameprocessor.hpp"
 
-class FrameStore : public DMDFrameProcessor {
+class GenericWriter : public DMDFrameProcessor {
 
 public:
 
-	~FrameStore();
+	~GenericWriter();
 
 	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) override;
-	virtual DMDFrame processFrame(DMDFrame &f) override;
+	virtual DMDFrame processFrame(DMDFrame& f) override;
 
 	virtual void close() override;
 
-private:
+protected:
 
-	void writeFrameToFile(DMDFrame& f, uint32_t timestamp);
+	virtual void writeFrameToFile(DMDFrame& f, uint32_t timestamp);
 
-	ofstream outputfile;
 	bool isFinished = true;
 	bool ignore_duplicates = true;
 	bool async = false;
@@ -43,6 +42,6 @@ private:
 	/// Queue of frames that are not yet written including a timestamp
 	/// </summary>
 	queue<pair<DMDFrame, int>> frames_to_write;
- 
+
 	int frameno = 1;
 };

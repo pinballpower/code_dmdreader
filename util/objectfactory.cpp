@@ -9,7 +9,7 @@
 #include "../processor/frameprocessor.hpp"
 #include "../processor/frameinfologger.hpp"
 #include "../processor/palettecolorizer.hpp"
-#include "../processor/framestore.hpp"
+#include "../processor/txtwriter.hpp"
 #include "../render/framerenderer.hpp"
 #include "../services/service.hpp"
 #include "../services/pupeventplayback.hpp"
@@ -79,8 +79,8 @@ std::shared_ptr<DMDFrameProcessor> createProcessor(string name) {
 	else if (name == "palette") {
 		return std::make_shared<PaletteColorizer>();
 	}
-	else if (name == "store") {
-		return std::make_shared<FrameStore>();
+	else if (name == "txtwriter") {
+		return std::make_shared<TXTWriter>();
 	}
 	else {
 		BOOST_LOG_TRIVIAL(error) << "processor name " << name << " unknown";
