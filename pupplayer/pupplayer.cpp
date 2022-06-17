@@ -267,18 +267,27 @@ bool PUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost
 				auto screen = v.second;
 				int screenId = screen.get("screen", 0);
 				int displayId = screen.get("display_number", 0);
-				auto res = screen.get_child("resolution");
-				int width = res.get("width", 1920);
-				int height = res.get("height", 1080);
+				string displayName = screen.get("display_name", "");
+				int width = screen.get("width", 1920);
+				int height = screen.get("height", 1080);
 
 				if (screens.contains(screenId)) {
 					screens[screenId].displayNumber = displayId;
+					screens[screenId].displayName = displayName;
 					calculateScreenCoordinates(screenId, width, height);
 				}
 			}
 		}
 		catch (const boost::property_tree::ptree_bad_path& e) {
 			BOOST_LOG_TRIVIAL(error) << "[pupplayer] couldn't read screen definitions";
+		}
+
+		for (auto &s : screens) {
+			auto &screen = s.second;
+			if (screen.parentScreen >= 0) {
+				screen.displayName = screens[screen.parentScreen].displayName;
+				screen.displayNumber = screens[screen.parentScreen].displayNumber;
+			}
 		}
 	}
 

@@ -7,6 +7,15 @@
 #include "pupplayer.hpp"
 #include "pivid.hpp"
 
+class PIVIDDisplayData {
+
+public:
+	int width = 1920;
+	int height = 1080;
+	int hz = 60;
+	int updateRate = 30;
+};
+
 
 class PividPUPPlayer : public PUPPlayer {
 
@@ -19,6 +28,9 @@ private:
 	string ffmpegOptions;
 	PIVID pivid;
 	vector<string> videoFiles;
+	map<string, PIVIDDisplayData> displays;
+
+	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) override;
 
 	virtual bool startVideoPlayback(string filename, PUPScreen& screen, bool loop) override;
 	virtual bool stopVideoPlayback(PUPScreen& screen, bool waitUntilStopped = true) override;

@@ -17,6 +17,7 @@ public:
     bool hasDisplay() const;
 
     int screenNum = -1;
+
     string screenDescription;
     string playList;
     string playFile;
@@ -28,6 +29,7 @@ public:
 
     // real screen ccordinates
     int displayNumber = -1;
+    string displayName = "";
     float x = 0;
     float y = 0; 
     float width = 0;

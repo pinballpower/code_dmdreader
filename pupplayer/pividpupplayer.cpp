@@ -7,6 +7,7 @@
 #include <chrono>
 
 #include <boost/log/trivial.hpp>
+#include <boost/foreach.hpp>
 
 int roundup16(int i) {
 	return ((i + 15) / 16) * 16;
@@ -96,7 +97,6 @@ bool PividPUPPlayer::initializeScreens()
 
 	// start PIVID
 	pivid.startServer(std::filesystem::current_path().generic_string());
-
 	updatePIVID();
 
 	return true;
@@ -139,19 +139,34 @@ const json PividPUPPlayer::exportAsJSON() {
 	result["main_buffer_time"] = 0.2;
 	result["main_loop_hz"] = 30;
 
-	result["screens"]["HDMI-1"]["mode"] = { 1920,1080,60 };
-	result["screens"]["HDMI-1"]["update_hz"] = 30;
-	result["screens"]["HDMI-1"]["layers"] = json::array();
-	auto& layers = result["screens"]["HDMI-1"]["layers"];
-	for (auto& s : screens) {
-		auto& screen = s.second;
-		if (screen.currentFile != "") {
-			layers.push_back(exportScreenAsJSON(screen));
-			files.push_back(resizedName(screen.currentFile, screen));
-		}
-	}
+	for (const auto d : displays) {
 
+		auto name = d.first;
+		if (name == "") {
+			continue;
+		}
+
+		auto displayData = d.second;
+
+		result["screens"][name]["mode"] = { displayData.width,displayData.height,displayData.hz };
+		result["screens"][name]["update_hz"] = displayData.updateRate;
+		result["screens"][name]["layers"] = json::array();
+		auto& layers = result["screens"][name]["layers"];
+		for (auto& s : screens) {
+			auto& screen = s.second;
+			if (screen.displayName != name) {
+				continue;
+			}
+
+			if (screen.currentFile != "") {
+				layers.push_back(exportScreenAsJSON(screen));
+				files.push_back(resizedName(screen.currentFile, screen));
+			}
+		}
+		
+	}
 	return result;
+
 }
 
 const json PividPUPPlayer::exportScreenAsJSON(PUPScreen& screen) {
@@ -204,5 +219,32 @@ void PividPUPPlayer::playDefaultVideo(PUPScreen& screen, string checkPlayingFile
 	screen.loopCurrentFile = true;
 	screen.startTimeStampMilliseconds = 0;
 	updatePIVID();
+}
+
+
+bool PividPUPPlayer::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
+{
+	// Screen sizes
+	try {
+		BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt_source.get_child("screens")) {
+			PIVIDDisplayData displayData;
+			auto screen = v.second;
+			int screenId = screen.get("screen", 0);
+			string displayName = screen.get("display_name", "");
+			displayData.width = screen.get("width", 1920);
+			displayData.height = screen.get("height", 1080);
+			displayData.hz = screen.get("hz", 60);
+			displayData.updateRate = screen.get("refresh_rate", 30);
+
+			displays[displayName] = displayData;
+
+		}
+	}
+	catch (const boost::property_tree::ptree_bad_path& e) {
+		BOOST_LOG_TRIVIAL(error) << "[pividpupplayer] couldn't read screen definitions";
+		return false;
+	}
+
+	return PUPPlayer::configureFromPtree(pt_general, pt_source);
 }
 
