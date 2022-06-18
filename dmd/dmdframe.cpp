@@ -6,6 +6,8 @@
 #include <string>
 #include <cassert>
 
+#include <boost/log/trivial.hpp>
+
 #include "../util/crc32.hpp"
 
 #include "dmdframe.hpp"
@@ -89,6 +91,50 @@ const vector<uint8_t> DMDFrame::getPlaneData(int bitno)
 		calculatePlanes();
 	}
 	return planes[bitno];
+}
+
+RGBBuffer DMDFrame::createRGBBufferFromFrame() const
+{
+	bool alpha = false;
+	if (bitsperpixel == 32) {
+		alpha = true;
+	}
+	RGBBuffer result = RGBBuffer(width, height, alpha);
+
+	auto data = this->getPixelData().begin();
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			if (bitsperpixel <= 8) {
+				result.setPixel(x, y, *data, *data, *data);
+				data++;
+			}
+			else if (bitsperpixel == 24) {
+				uint8_t r = *data;
+				data++;
+				uint8_t g = *data;
+				data++;
+				uint8_t b = *data;
+				data++;
+				result.setPixel(x, y,r,g,b);
+			}
+			else if (bitsperpixel == 32) {
+				uint8_t r = *data;
+				data++;
+				uint8_t g = *data;
+				data++;
+				uint8_t b = *data;
+				data++;
+				uint8_t alpha = *data;
+				data++;
+				result.setPixel(x, y, r, g, b, alpha);
+			}
+			else {
+				BOOST_LOG_TRIVIAL(info) << "[DMDFrame] " << bitsperpixel << " unsupported, can't create RGBBuffer";
+				return result;
+			}
+		}
+	}
+	return result;
 }
 
 void DMDFrame::appendPixel(uint8_t px)

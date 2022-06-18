@@ -51,6 +51,8 @@ public:
 	const vector<uint8_t> getPixelData() const;
 	const vector<uint8_t> getPlaneData(int bitno);
 
+	RGBBuffer createRGBBufferFromFrame() const;
+
 	void appendPixel(uint8_t px);
 
 	bool isNull() const;
