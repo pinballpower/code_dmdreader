@@ -30,6 +30,7 @@ protected:
 	bool isFinished = true;
 	bool ignore_duplicates = true;
 	bool async = false;
+	bool supportsColoredFrames = false;
 
 	unsigned long startMillisec;
 
