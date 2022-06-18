@@ -21,7 +21,7 @@ bool TXTWriter::configureFromPtree(boost::property_tree::ptree pt_general, boost
 {
 	string name = pt_source.get("filename", "");
 	if (name == "") {
-		BOOST_LOG_TRIVIAL(error) << "filename has not been configured, aborting";
+		BOOST_LOG_TRIVIAL(error) << "[TXTWriter] filename has not been configured, aborting";
 		return false;
 	}
 	outputfile.open(name, ios::out);

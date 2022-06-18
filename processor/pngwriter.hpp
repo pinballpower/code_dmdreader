@@ -9,12 +9,18 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include "../dmd/dmdframe.hpp"
 #include "frameprocessor.hpp"
+#include "../dmd/dmdframe.hpp"
+#include "palettecolorizer.hpp"
 
 class PNGWriter : public GenericWriter {
 
-protected:
+public:
+	PNGWriter();
 
+protected:
+	string directory;
 	void writeFrameToFile(DMDFrame& f, uint32_t timestamp);
+
+	PaletteColorizer colorizer;
 };
