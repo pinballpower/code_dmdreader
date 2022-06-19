@@ -101,6 +101,25 @@ RGBBuffer RGBBuffer::fromImageFile(const string filename, bool useAlpha)
 	return res;
 }
 
+RGBBuffer RGBBuffer::getRegion(int x, int y, int width, int height) const
+{
+	RGBBuffer result = RGBBuffer(width, height, alpha);
+
+	int dstOffset = 0;
+	for (int srcY = y; srcY < y + height; srcY++) {
+		int srcOffset = (x + srcY * this->width) * bytesPerPixel;
+		for (int srcX = x; srcX < x + width; srcX++) {
+			for (int i = 0; i < bytesPerPixel; i++) {
+				result.data[dstOffset] = data[srcOffset];
+				srcOffset++;
+				dstOffset++;
+			}
+		}
+	}
+
+	return result;
+}
+
 bool RGBBuffer::writeToFile(const string filename) const
 {
 	if (filename.ends_with(".png")) {
