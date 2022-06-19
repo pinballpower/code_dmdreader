@@ -28,6 +28,7 @@ DMDPalette::DMDPalette(vector<uint32_t> colors, int bitsperpixel, string name1)
 		this->colors.push_back(c);
 	}
 
+	this->bitsperpixel = bitsperpixel;
 	this->name = name;
 }
 
@@ -52,10 +53,22 @@ int DMDPalette::getIndexOf(uint8_t r, uint8_t g, uint8_t b) const {
 bool DMDPalette::matchesImage(const RGBBuffer& buf) const
 {
 	const vector <uint8_t> data = buf.getData();
-	for (int i = 0; i < data.size(); i += 3) {
+	int bytesPerPixel = buf.alpha ? 4 : 3;
+
+	for (int i = 0; i < data.size(); i += bytesPerPixel) {
 		uint8_t r = data[i];
 		uint8_t g = data[i + 1];
 		uint8_t b = data[i + 2];
+		uint8_t alpha = 0xff;
+
+		if (bytesPerPixel == 4) {
+			alpha = data[i + 3];
+		}
+
+		if (alpha == 0) {
+			continue;
+		}
+
 		bool color_found = false;
 
 		for (const auto c : colors) {
