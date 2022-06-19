@@ -55,6 +55,9 @@ bool PaletteColorizer::configureFromPtree(boost::property_tree::ptree pt_general
 			fade = 256;
 		}
 		DMDColor c = DMDColor::fade(mycolor, fade);
+
+		BOOST_LOG_TRIVIAL(info) << std::hex << (int)c.r << ", " << std::hex << (int)c.g << ", ", c.b;
+
 		palette.push_back(c);
 		fade += step;
 	}

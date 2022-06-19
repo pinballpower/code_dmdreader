@@ -22,7 +22,16 @@ void PNGWriter::writeFrameToFile(DMDFrame& f, uint32_t timestamp)
 
 	// color frame using a standard PaletteColorizer
 	if (colored.getBitsPerPixel() <= 8) {
-		colorizer.processFrame(colored);
+		colored = colorizer.processFrame(colored);
 	}
 
+	RGBBuffer rgbBuffer = colored.createRGBBufferFromFrame();
+	string fileId = to_string(fileNumber);
+	while (fileId.length() < 6) {
+		fileId = "0" + fileId;
+	}
+	string filename = directory + "/frame" + fileId + ".png";
+	rgbBuffer.writeToFile(filename);
+
+	fileNumber++;
 }

@@ -31,14 +31,7 @@ bool TXTWriter::configureFromPtree(boost::property_tree::ptree pt_general, boost
 
 void TXTWriter::close()
 {
-	if (!frames_to_write.empty()) {
-		BOOST_LOG_TRIVIAL(info) << "[TXTWriter] writing " << frames_to_write.size() << " frames";
-	}
-	while (!frames_to_write.empty()) {
-		auto nextFrame = frames_to_write.front();
-		writeFrameToFile(nextFrame.first, nextFrame.second);
-		frames_to_write.pop();
-	}
+	GenericWriter::close();
 	outputfile.close();
 	BOOST_LOG_TRIVIAL(debug) << "[TXTWriter] " << frameno << " frames written";
 }

@@ -194,13 +194,13 @@ else()
 message(STATUS "not enabling colorisation module")
 endif()
 
-set (UTIL_SRC "util/crc32.cpp" "util/crc32.hpp"    "dmd/color.cpp" "util/image.hpp" "util/image.cpp" "util/objectfactory.hpp" "util/objectfactory.cpp" "util/bithelper.cpp" "util/bithelper.hpp" "stb/stb_image.h" "util/glob.hpp" "util/glob.cpp")
+set (UTIL_SRC "util/crc32.cpp" "util/crc32.hpp"    "dmd/color.cpp" "util/image.hpp" "util/image.cpp" "util/objectfactory.hpp" "util/objectfactory.cpp" "util/bithelper.cpp" "util/bithelper.hpp" "stb/stb_image.h" "stb/stb_image_write.h" "util/glob.hpp" "util/glob.cpp")
 set (RENDER_SRC "render/framerenderer.hpp"  "render/framerenderer.cpp" )
 set (DMDSOURCE_SRC  "dmdsource/pngsource.hpp" "dmdsource/pngsource.cpp" "dmdsource/dmdsource.hpp" "dmdsource/dmdsource.cpp" "dmdsource/datdmdsource.hpp" "dmdsource/datdmdsource.cpp" "dmdsource/nullsource.cpp" "dmdsource/txtdmdsource.hpp" "dmdsource/txtdmdsource.cpp")
 set (DMD_SRC "dmd/palette.hpp" "dmd/maskeddmdframe.hpp" "dmd/maskeddmdframe.cpp" "dmd/dmdframe.cpp" "dmd/dmdframe.hpp"  "dmd/palette.cpp"  )
 set (PROCESSOR_SRC "processor/pupcapture.cpp" "processor/frameprocessor.hpp" "processor/frameprocessor.cpp" "processor/frameinfologger.hpp" "processor/frameinfologger.cpp" "processor/palettecolorizer.hpp" "processor/palettecolorizer.cpp" "processor/txtwriter.hpp" "processor/txtwriter.cpp" "processor/scoredetector.hpp" "processor/scoredetector.cpp" "processor/genericwriter.hpp" "processor/genericwriter.cpp" "processor/pngwriter.hpp" "processor/pngwriter.cpp")
 set (SERVICES_SRC "services/service.cpp" "services/service.hpp" "services/serviceregistry.hpp" "services/serviceregistry.cpp" "services/pupeventplayback.hpp" "services/pupeventplayback.cpp")
-set (TEST_SRC "test/drmtest.hpp"  "test/drmtest.cpp" )
+set (TEST_SRC "test/drmtest.hpp"  "test/drmtest.cpp" "test/scoredetector.cpp" "test/scoredetector.hpp")
 
 set (ALL_SOURCES ${UTIL_SRC} ${RENDER_SRC} ${DMD_SRC} ${DMDSOURCE_SRC} ${PROCESSOR_SRC} ${COLOR_SRC} ${OPENGL_SRC} ${SPI_SRC} ${RPI_SRC} ${VIDEO_SRC} ${PUPPLAYER_SRC} ${SERVICES_SRC} ${TEST_SRC})
 

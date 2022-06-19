@@ -1,5 +1,5 @@
-#include "test/pividtest.cpp"
+#include "test/scoredetector.hpp"
 
 int main() {
-	testPIVID();
+	testScoreDetect();
 }

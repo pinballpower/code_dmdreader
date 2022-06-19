@@ -23,7 +23,9 @@ public:
 
 protected:
 	string directory;
-	void writeFrameToFile(DMDFrame& f, uint32_t timestamp);
+	virtual void writeFrameToFile(DMDFrame& f, uint32_t timestamp) override;
 
 	PaletteColorizer colorizer;
+
+	int fileNumber = 1;
 };
