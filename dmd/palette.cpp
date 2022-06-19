@@ -102,8 +102,16 @@ vector<DMDPalette> default_palettes() {
 		0xcc370000, 0xdd3c0000, 0xee400000, 0xff450000,
 		0xfd00fd00 };
 	DMDPalette pd_4_orange_mask = DMDPalette(pd_4_orange_masked_data, 4, "pd_4_orange_mask");
-
 	res.push_back(pd_4_orange_mask);
+
+	// this is used internally as the default palette for colorisations for 4bits/pixel
+	vector<uint32_t> pd_4_ffc300_data{
+		0x00000000, 0x100c0000, 0x21190000, 0x32260000,
+		0x43330000, 0x54400000, 0x654d0000, 0x765a0000,
+		0x87670000, 0x98740000, 0xa9810000, 0xba8e0000,
+		0xcb9b0000, 0xdca80000, 0xedb50000, 0xffc30000 };
+	DMDPalette pd_4_ffc300 = DMDPalette(pd_4_ffc300_data, 4, "pd_4_ffc300");
+	res.push_back(pd_4_ffc300);
 
 	return res;
 }
