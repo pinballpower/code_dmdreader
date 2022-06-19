@@ -45,7 +45,11 @@ DMDFrame::DMDFrame(const RGBBuffer rgbBuffer)
 {
 	this->width = rgbBuffer.width;
 	this->height = rgbBuffer.height;
-	this->bitsperpixel = 24;
+	if (rgbBuffer.alpha) {
+		this->bitsperpixel = 32;
+	} else  {
+		this->bitsperpixel = 24;
+	} 
 	checksum = 0;
 	pixel_mask = 0;
 	initMemory();
@@ -54,6 +58,44 @@ DMDFrame::DMDFrame(const RGBBuffer rgbBuffer)
 
 
 DMDFrame::~DMDFrame() {
+}
+
+DMDFrame DMDFrame::removeColors(int bitsPerPixel, DMDPalette palette, bool useAlpha)
+{
+	assert(this->bitsperpixel >= 24);
+	assert(bitsPerPixel < 8); // we need at least one bit for transparency
+
+	bool hasAlpha = (this->bitsperpixel == 32);
+
+	DMDFrame result = DMDFrame(width, height, bitsPerPixel);
+	result.data = vector<uint8_t>();
+	result.data.reserve(width * height);
+
+	for (auto dataIterator = data.cbegin(); dataIterator != data.cend(); ) {
+		uint8_t r, g, b, alpha=0xff;
+		r = *dataIterator;
+		dataIterator++;
+		g = *dataIterator;
+		dataIterator++;
+		b = *dataIterator;
+		dataIterator++;
+
+		uint8_t index = palette.getIndexOf(r, g, b);
+
+		if (hasAlpha) {
+			if (useAlpha) {
+				alpha = *dataIterator;
+				if (alpha < 0xff) {
+					index = 0xff; // this is a transparent pixel
+				};
+			}
+			dataIterator++;
+		}
+
+		result.data.push_back(index);
+	}
+
+	return result;
 }
 
 PIXVAL DMDFrame::getPixel(int x, int y) {
@@ -134,6 +176,37 @@ bool DMDFrame::isValid() const
 
 }
 
+bool DMDFrame::regionMatches(const DMDFrame& region, int x, int y, bool useAlpha) const
+{
+	assert(this->bitsperpixel < 8);
+	assert(region.bitsperpixel < 8);
+
+	const auto regionData = region.getPixelData();
+	auto toCompare = regionData.cbegin();
+
+	for (int srcY = y; srcY < y + region.height; srcY++) {
+		int srcOffset = (x + srcY * this->width);
+		for (int srcX = x; srcX < x + region.width; srcX++) {
+			uint8_t myData = data[srcOffset];
+			uint8_t dataToCompare = *toCompare;
+			srcOffset++;
+			toCompare++;
+
+			if (useAlpha) {
+				if (dataToCompare > 0x7f) {
+					continue; // alpha bit is set, this matches all pixels
+				}
+			}
+
+			if (myData != dataToCompare) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
 void DMDFrame::initMemory(int no_of_pixels) {
 	assert(((bitsperpixel <= 8) && (bitsperpixel >= 0)) || (bitsperpixel == 24) || (bitsperpixel == 32));
 
@@ -146,7 +219,7 @@ void DMDFrame::initMemory(int no_of_pixels) {
 	else if (bitsperpixel == 32) {
 		rowlen = width * 4;
 	}
-	datalen = rowlen * width;
+	datalen = rowlen * height;
 
 	pixel_mask = 0xff >> (8 - bitsperpixel);
 

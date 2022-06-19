@@ -10,6 +10,7 @@
 #include "../util/crc32.hpp"
 #include "../util/image.hpp"
 #include "color.hpp"
+#include "palette.hpp"
 
 #define  PIXVAL uint32_t  // up to 32bit/pixel
 
@@ -35,6 +36,8 @@ public:
 	DMDFrame(const RGBBuffer rgbBuffer);
 	~DMDFrame();
 
+	DMDFrame removeColors(int bitsPerPixel, DMDPalette palette, bool useAlpha = true);
+
 	PIXVAL getPixel(int x, int y);
 
 	bool hasSameSize(const DMDFrame &f2) const;
@@ -57,6 +60,8 @@ public:
 
 	bool isNull() const;
 	virtual bool isValid() const;
+
+	bool regionMatches(const DMDFrame& region, int x, int y, bool useAlpha=true) const;
 
 	string asString();
 
