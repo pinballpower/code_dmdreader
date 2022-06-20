@@ -20,6 +20,8 @@ public:
 	bool matchesImage(const RGBBuffer& buf) const;
 
 	int size() const;
+
+	static DMDPalette pd_4_ffc300();
 };
 
 const std::optional<DMDPalette> find_matching_palette(const vector<DMDPalette> palettes, const RGBBuffer buf);
