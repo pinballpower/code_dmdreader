@@ -93,7 +93,7 @@
       "environments": [
         {
           "CMAKE_INCLUDE_PATH": "/usr/include/libdrm:/opt/vc/include",
-          "CMAKE_BUILD_PARALLEL_LEVEL": "2"
+          "CMAKE_BUILD_PARALLEL_LEVEL": "1"
         }
       ]
     }
