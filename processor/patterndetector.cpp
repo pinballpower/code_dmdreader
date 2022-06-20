@@ -19,14 +19,14 @@ DMDFrame PatternDetector::processFrame(DMDFrame& f)
                 }
             }
             if (matches.length() > 0) {
-                positions = positions.substr(0, positions.length() - 1) + "x" + to_string(y);
+                positions = matcher.name+":"+positions.substr(0, positions.length() - 1) + "x" + to_string(y);
                 if (detectedPatterns.contains(positions)) {
                     detectedPatterns[positions] += 1;
                 }
                 else {
                     detectedPatterns[positions] = 1;
                 }
-                BOOST_LOG_TRIVIAL(info) << "[PatternDetector] " << matcher.name << ": " << positions << ": " << matches;
+                BOOST_LOG_TRIVIAL(info) << "[PatternDetector] frame " << f.getId() << ": " << positions << ": " << matches;
             }
         }
     }
