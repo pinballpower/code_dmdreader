@@ -20,6 +20,7 @@ class DMDFrame {
 
 protected:
 
+	int id = 0;
 	int width;
 	int height;
 	int bitsperpixel;
@@ -42,6 +43,9 @@ public:
 
 	bool hasSameSize(const DMDFrame &f2) const;
 	bool hasSameSizeAndChecksum(const DMDFrame &f2) const;
+
+	int getId() const;
+	void setId(int id);
 
 	int getWidth() const;
 	int getHeight() const;

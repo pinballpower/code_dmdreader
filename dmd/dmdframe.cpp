@@ -116,6 +116,16 @@ bool DMDFrame::hasSameSizeAndChecksum(const DMDFrame& f2) const {
 	}
 }
 
+int DMDFrame::getId() const
+{
+	return id;
+}
+
+void DMDFrame::setId(int id)
+{
+	this->id = id;
+}
+
 std::string DMDFrame::asString() {
 	char cs[8];
 	snprintf(cs, sizeof(cs), "%08x", checksum);
