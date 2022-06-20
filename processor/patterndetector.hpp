@@ -6,6 +6,7 @@
 #include "patternmatcher.hpp"
 #include "frameprocessor.hpp"
 
+
 class PatternDetector : public DMDFrameProcessor {
 
 public:
@@ -14,6 +15,9 @@ public:
 	virtual void close() override;
 
 private:
+
+	DMDPalette palette;
+	bool enableColorisation = false;
 
 	vector<PatternMatcher> matchers;
 	map<string,int> detectedPatterns;

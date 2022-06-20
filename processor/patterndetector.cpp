@@ -5,17 +5,80 @@
 
 using namespace std;
 
+class Rectangle {
+
+public:
+    int x1;
+    int y1;
+    int x2;
+    int y2;
+
+    Rectangle(int x, int y, int width, int height) {
+        this->x1 = x;
+        this->x2 = x + width;
+        this->y1 = y;
+        this->y2 = y + height;
+    }
+
+    bool contains(int x, int y) const {
+        return ((x >= x1) && (x < x2) && (y >= y1) && (y < y2));
+    }
+};
+
+DMDFrame coloriseFrame(const DMDFrame& f, const DMDPalette &palette, const vector<Rectangle>& highlightRectangles) {
+    DMDFrame result = DMDFrame(f.getWidth(), f.getHeight(), 24);
+    DMDColor c;
+
+    int x = 0;
+    int y = 0;
+
+    for (auto px : f.getPixelData()) {
+
+        if (px > palette.size()) {
+            c = DMDColor(0);
+            BOOST_LOG_TRIVIAL(warning) << "[palettecolorizer] pixel value " << px << " larger than palette (" << palette.size() << ")";
+        }
+        else {
+            c = palette.colors[px];
+        }
+
+        // highlight matches with blue color
+        for (const auto r : highlightRectangles) {
+            if (r.contains(x, y)) {
+                c.b = 0xff;
+                break;
+            }
+        }
+
+        result.appendPixel(c.r);
+        result.appendPixel(c.g);
+        result.appendPixel(c.b);
+
+        x++;
+        if (x >= f.getWidth()) {
+            y++;
+            x = 0;
+        }
+    }
+
+    return result;
+}
+
+
+
 DMDFrame PatternDetector::processFrame(DMDFrame& f)
 {
+    vector<Rectangle> matchRectangles;
     for (const auto matcher : matchers) {
-        for (int y = 0; y < f.getHeight() - matcher.height; y++) {
+        for (int y = 0; y <= f.getHeight() - matcher.height; y++) {
             string matches = "";
             string positions = "";
-            for (int x = 0; x < f.getWidth() - matcher.width; x++) {
+            for (int x = 0; x <= f.getWidth() - matcher.width; x++) {
                 auto match = matcher.matchAt(f, x, y);
                 if (match.has_value()) {
                     matches += match.value();
                     positions += to_string(x) + ",";
+                    matchRectangles.push_back(Rectangle(x, y, matcher.width, matcher.height));
                 }
             }
             if (matches.length() > 0) {
@@ -31,13 +94,20 @@ DMDFrame PatternDetector::processFrame(DMDFrame& f)
         }
     }
 
-    return f;
+    if (enableColorisation) {
+        return coloriseFrame(f, palette, matchRectangles);
+    }
+    else {
+        return f;
+    }
 }
+
 
 bool PatternDetector::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
 {
 	string directory = pt_source.get("directory", ".");
 	string pattern = pt_source.get("pattern", "*.png");
+    enableColorisation = pt_source.get("color_frames", false);
 
     filesystem::path folder(directory);
     if (!filesystem::is_directory(folder))
@@ -69,6 +139,11 @@ bool PatternDetector::configureFromPtree(boost::property_tree::ptree pt_general,
     }
 
     BOOST_LOG_TRIVIAL(info) << "[PatternDetector] loaded " << matchers.size() << " pattern(s) from " << directory << "/" << pattern;
+
+    if (enableColorisation) {
+        palette = DMDPalette::pd_4_ffc300();
+    }
+
     return true;
 }
 
