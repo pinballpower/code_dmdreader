@@ -37,4 +37,6 @@ private:
 
 	int bits = 0;
 	bool eof = false;
+
+	int id = 0;
 };
