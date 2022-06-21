@@ -9,6 +9,7 @@ using namespace std;
 
 DMDFrame coloriseFrame(const DMDFrame& f, const DMDPalette &palette, const vector<Rectangle>& highlightRectangles) {
     DMDFrame result = DMDFrame(f.getWidth(), f.getHeight(), 24);
+    result.setId(f.getId());
     DMDColor c;
 
     int x = 0;
@@ -88,7 +89,7 @@ DMDFrame PatternDetector::processFrame(DMDFrame& f)
 bool PatternDetector::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
 {
 	string directory = pt_source.get("directory", ".");
-	string pattern = pt_source.get("pattern", "*.png");
+	string pattern = pt_source.get("pattern", ".*png");
     enableColorisation = pt_source.get("color_frames", false);
 
     filesystem::path folder(directory);
