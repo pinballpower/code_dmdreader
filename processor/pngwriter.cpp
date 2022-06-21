@@ -27,7 +27,14 @@ void PNGWriter::writeFrameToFile(DMDFrame& f, uint32_t timestamp)
 	}
 
 	RGBBuffer rgbBuffer = colored.createRGBBufferFromFrame();
-	string fileId = to_string(fileNumber);
+
+	string fileId;
+	if (f.getId() > 0) {
+		fileId = to_string(f.getId());
+	} else {
+		fileId = to_string(fileNumber);
+	}
+
 	while (fileId.length() < 6) {
 		fileId = "0" + fileId;
 	}
