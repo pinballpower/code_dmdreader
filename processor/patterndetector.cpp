@@ -3,27 +3,9 @@
 #include <filesystem>
 #include <regex>
 
+#include "../util/data.hpp"
+
 using namespace std;
-
-class Rectangle {
-
-public:
-    int x1;
-    int y1;
-    int x2;
-    int y2;
-
-    Rectangle(int x, int y, int width, int height) {
-        this->x1 = x;
-        this->x2 = x + width;
-        this->y1 = y;
-        this->y2 = y + height;
-    }
-
-    bool contains(int x, int y) const {
-        return ((x >= x1) && (x < x2) && (y >= y1) && (y < y2));
-    }
-};
 
 DMDFrame coloriseFrame(const DMDFrame& f, const DMDPalette &palette, const vector<Rectangle>& highlightRectangles) {
     DMDFrame result = DMDFrame(f.getWidth(), f.getHeight(), 24);
