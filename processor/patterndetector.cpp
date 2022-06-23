@@ -1,56 +1,31 @@
 #include "patterndetector.hpp"
 
 #include <filesystem>
-#include <regex>
 
+#include "palettecolorizer.hpp"
 #include "../util/data.hpp"
+#include "../util/glob.hpp"
 
 using namespace std;
 
-DMDFrame coloriseFrame(const DMDFrame& f, const DMDPalette &palette, const vector<Rectangle>& highlightRectangles) {
-    DMDFrame result = DMDFrame(f.getWidth(), f.getHeight(), 24);
-    result.setId(f.getId());
-    DMDColor c;
 
-    int x = 0;
-    int y = 0;
-
-    for (auto px : f.getPixelData()) {
-
-        if (px > palette.size()) {
-            c = DMDColor(0);
-            BOOST_LOG_TRIVIAL(warning) << "[palettecolorizer] pixel value " << px << " larger than palette (" << palette.size() << ")";
-        }
-        else {
-            c = palette.colors[px];
-        }
-
-        // highlight matches with blue color
-        for (const auto r : highlightRectangles) {
-            if (r.contains(x, y)) {
-                c.b = 0xff;
-                break;
-            }
-        }
-
-        result.appendPixel(c.r);
-        result.appendPixel(c.g);
-        result.appendPixel(c.b);
-
-        x++;
-        if (x >= f.getWidth()) {
-            y++;
-            x = 0;
-        }
+void logMatches(int frameId, string matcherName, int y, string xPositions, bool writeHeader, ofstream& of) {
+    if (writeHeader) {
+        of << "\nFrame: " << frameId << "\n";
     }
-
-    return result;
+    of << "{ \n" 
+        << "  \"matcher\": \"" << matcherName << "\", \n"
+        << "  \"y\": " << y << ", \n"
+        << "  \"x\": [" << xPositions << "],\n"
+        << "  \"action\": \"\"\n"
+        << "},\n";
 }
 
 
 
 DMDFrame PatternDetector::processFrame(DMDFrame& f)
 {
+    bool writeHeader = true;
     vector<Rectangle> matchRectangles;
     for (const auto matcher : matchers) {
         for (int y = 0; y <= f.getHeight() - matcher.height; y++) {
@@ -65,20 +40,22 @@ DMDFrame PatternDetector::processFrame(DMDFrame& f)
                 }
             }
             if (matches.length() > 0) {
-                positions = matcher.name+":"+positions.substr(0, positions.length() - 1) + "x" + to_string(y);
-                if (detectedPatterns.contains(positions)) {
-                    detectedPatterns[positions] += 1;
+                string patternPositions = matcher.name+":"+positions.substr(0, positions.length() - 1) + "x" + to_string(y);
+                if (detectedPatterns.contains(patternPositions)) {
+                    detectedPatterns[patternPositions] += 1;
                 }
                 else {
-                    detectedPatterns[positions] = 1;
+                    detectedPatterns[patternPositions] = 1;
                 }
-                BOOST_LOG_TRIVIAL(info) << "[PatternDetector] frame " << f.getId() << ": " << positions << ": " << matches;
+                BOOST_LOG_TRIVIAL(info) << "[PatternDetector] frame " << f.getId() << ": " << patternPositions << ": " << matches;
+                logMatches(f.getId(), matcher.name, y, positions.substr(0, positions.length() - 1), writeHeader, jsonOutput);
+                writeHeader = false; // write it only once per frame
             }
         }
     }
 
     if (enableColorisation) {
-        return coloriseFrame(f, palette, matchRectangles);
+        return highlightRectangles(f, palette, matchRectangles);
     }
     else {
         return f;
@@ -88,40 +65,27 @@ DMDFrame PatternDetector::processFrame(DMDFrame& f)
 
 bool PatternDetector::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
 {
-	string directory = pt_source.get("directory", ".");
-	string pattern = pt_source.get("pattern", ".*png");
+	string patternFiles = pt_source.get("patterns", "*.png");
     enableColorisation = pt_source.get("color_frames", false);
+    string jsonOutputName = pt_source.get("json_output", "detectedpatterns.json");
+   
+    jsonOutput.open(jsonOutputName);
 
-    filesystem::path folder(directory);
-    if (!filesystem::is_directory(folder))
+    for (const auto& path : glob::rglob(patternFiles))
     {
-        BOOST_LOG_TRIVIAL(error) << "[PatternDetector] " << directory << " is not a directory";
-        return false;
-    }
-
-    vector<std::string> file_list;
-    auto match_expression = regex(pattern);
-
-    for (const auto& file : filesystem::directory_iterator(folder))
-    {
-        if (file.is_regular_file())
-        {
-            const auto basename = file.path().filename().string();
-            if (regex_match(basename, match_expression)) {
-                auto matcher = PatternMatcher(file.path().string());
-                if (matcher.hasPatterns()) {
-                    matchers.push_back(matcher);
-                }
-            }
+        const auto basename = path.filename().string();
+        auto matcher = PatternMatcher(path.string());
+        if (matcher.hasPatterns()) {
+            matchers.push_back(matcher);
         }
     }
 
     if (matchers.size() == 0) {
-        BOOST_LOG_TRIVIAL(warning) << "[PatternDetector] couldn't load any match patterns from " << directory << "/" << pattern;
+        BOOST_LOG_TRIVIAL(warning) << "[PatternDetector] couldn't load any match patterns from " << patternFiles;
         return false;
     }
 
-    BOOST_LOG_TRIVIAL(info) << "[PatternDetector] loaded " << matchers.size() << " pattern(s) from " << directory << "/" << pattern;
+    BOOST_LOG_TRIVIAL(info) << "[PatternDetector] loaded " << matchers.size() << " pattern(s) from " << patternFiles;
 
     if (enableColorisation) {
         palette = DMDPalette::pd_4_ffc300();
@@ -132,6 +96,8 @@ bool PatternDetector::configureFromPtree(boost::property_tree::ptree pt_general,
 
 void PatternDetector::close()
 {
+    jsonOutput.close();
+
     BOOST_LOG_TRIVIAL(info) << "[PatternDetector] detected patterns: ";
     for (auto pattern : detectedPatterns) {
         BOOST_LOG_TRIVIAL(info) << "[PatternDetector] " << pattern.first << ": " << pattern.second;

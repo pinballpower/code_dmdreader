@@ -2,6 +2,7 @@
 
 #include <map>
 #include <vector>
+#include <fstream>
 
 #include "patternmatcher.hpp"
 #include "frameprocessor.hpp"
@@ -21,4 +22,7 @@ private:
 
 	vector<PatternMatcher> matchers;
 	map<string,int> detectedPatterns;
+
+	ofstream jsonOutput;
+
 };
