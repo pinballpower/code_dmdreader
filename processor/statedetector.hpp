@@ -6,6 +6,7 @@
 #include "patternmatcher.hpp"
 #include "frameprocessor.hpp"
 #include "../util/glob.hpp"
+#include "../util/data.hpp"
 
 class MatchParameters {
 
@@ -33,7 +34,9 @@ public:
 class StateDetector : public DMDFrameProcessor {
 
 public:
+	string getMatch(const DMDFrame& frame, const MatchParameters& mp, vector<Rectangle>& matchRectangles);
 	virtual DMDFrame processFrame(DMDFrame& f) override;
+	void setVariable(string name, string value);
 	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) override;
 
 private:
