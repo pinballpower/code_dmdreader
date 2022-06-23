@@ -12,6 +12,7 @@
 #include "../processor/txtwriter.hpp"
 #include "../processor/pngwriter.hpp"
 #include "../processor/patterndetector.hpp"
+#include "../processor/statedetector.hpp"
 #include "../render/framerenderer.hpp"
 #include "../services/service.hpp"
 #include "../services/pupeventplayback.hpp"
@@ -89,6 +90,9 @@ std::shared_ptr<DMDFrameProcessor> createProcessor(string name) {
 	}
 	else if (name == "patterndetector") {
 		return std::make_shared<PatternDetector>();
+	}
+	else if (name == "statedetector") {
+		return std::make_shared<StateDetector>();
 	}
 	else {
 		BOOST_LOG_TRIVIAL(error) << "processor name " << name << " unknown";
