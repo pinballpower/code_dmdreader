@@ -62,3 +62,44 @@ bool PaletteColorizer::configureFromPtree(boost::property_tree::ptree pt_general
 	return true;
 
 }
+
+DMDFrame highlightRectangles(const DMDFrame& f, const DMDPalette& palette, const vector<Rectangle>& highlightRectangles)
+{
+	DMDFrame result = DMDFrame(f.getWidth(), f.getHeight(), 24);
+	result.setId(f.getId());
+	DMDColor c;
+
+	int x = 0;
+	int y = 0;
+
+	for (auto px : f.getPixelData()) {
+
+		if (px > palette.size()) {
+			c = DMDColor(0);
+			BOOST_LOG_TRIVIAL(warning) << "[palettecolorizer] pixel value " << px << " larger than palette (" << palette.size() << ")";
+		}
+		else {
+			c = palette.colors[px];
+		}
+
+		// highlight matches with blue color
+		for (const auto r : highlightRectangles) {
+			if (r.contains(x, y)) {
+				c.b = 0xff;
+				break;
+			}
+		}
+
+		result.appendPixel(c.r);
+		result.appendPixel(c.g);
+		result.appendPixel(c.b);
+
+		x++;
+		if (x >= f.getWidth()) {
+			y++;
+			x = 0;
+		}
+	}
+
+	return result;
+}

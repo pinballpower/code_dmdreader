@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "../util/data.hpp"
 #include "../dmd/color.hpp"
 #include "frameprocessor.hpp"
 
@@ -15,3 +16,6 @@ private:
 
 	vector<DMDColor> palette;
 };
+
+
+DMDFrame highlightRectangles(const DMDFrame& f, const DMDPalette& palette, const vector<Rectangle>& highlightRectangles);
