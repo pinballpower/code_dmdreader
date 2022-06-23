@@ -2,6 +2,7 @@
 
 #include <boost/log/trivial.hpp>
 
+
 #include "patternmatcher.hpp"
 #include "../util/image.hpp"
 #include "../dmd/palette.hpp"
@@ -17,13 +18,20 @@ PatternMatcher::PatternMatcher(string patternFile)
 	auto basename = fileBase.replace_extension("").string();
 	auto ext = fileBase.extension().string();
 
-	if (basename.find("-") == string::npos) {
-		BOOST_LOG_TRIVIAL(error) << "[PatternMatcher] filename " << patternFile << " not in format *-*.*, aborting";
-		return;
+	bool split = false;
+	int numCharacters = 1;
+	string characters = "X";
+
+	// it mit be a file with multiple patterns (in format *-ccccccccccc.png)
+	if (basename.find("-") != string::npos) {
+		split = true;
+		name = basename.substr(0, basename.find("-"));
+		characters = basename.substr(basename.find("-") + 1);
+		numCharacters = characters.length();
 	}
-	name = basename.substr(0,basename.find("-"));
-	string characters = basename.substr(basename.find("-")+1);
-	int numCharacters = characters.length();
+	else {
+		name = basename;
+	}
 	RGBBuffer img = RGBBuffer::fromImageFile(patternFile, true);
 
 	auto palette = find_matching_palette(default_palettes(), img);
