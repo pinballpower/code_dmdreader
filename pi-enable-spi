@@ -1,0 +1,6 @@
+#!/bin/sh
+cat /boot/config.txt | grep -v "dtparam=spi" > /tmp/config.txt
+echo "dtparam=spi=on" >> /tmp/config.txt
+sudo mv /tmp/config.txt /etc/config.txt
+echo "You need to reboot to activate SPI"
+
