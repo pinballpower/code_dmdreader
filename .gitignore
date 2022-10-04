@@ -23,3 +23,5 @@ samples/*.txt
 /samples/spagb_100
 /samples/gb_x265_b2s
 /samples/st_161hc
+/dmdreader
+/test.bin
