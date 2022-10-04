@@ -9,7 +9,7 @@ wget https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod
 tar xvfz libgpiod-$LIBGPIODVERSION.tar.gz
 rm libgpiod-$LIBGPIODVERSION.tar.gz
 cd libgpiod-$LIBGPIODVERSION
-./autogen.sh --enable-tools=yes
+./autogen.sh --enable-tools=yes --prefix=/usr
 make
 make install
 cd ..
