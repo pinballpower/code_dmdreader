@@ -209,9 +209,9 @@ add_executable (${PROJECT_NAME} "dmdreader.cpp" ${ALL_SOURCES} )
 target_include_directories(${PROJECT_NAME} PRIVATE ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBRARIES} ${ZLIB_LIBRARIES} ${VIDEO_LIBRARIES})
 
-add_executable (test "test.cpp" ${ALL_SOURCES} )
-target_include_directories(test PRIVATE ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
-target_link_libraries(test PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBRARIES} ${ZLIB_LIBRARIES} ${VIDEO_LIBRARIES})
+add_executable (test.bin "test.cpp" ${ALL_SOURCES} )
+target_include_directories(test.bin PRIVATE ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
+target_link_libraries(test.bin PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBRARIES} ${ZLIB_LIBRARIES} ${VIDEO_LIBRARIES})
 
 
 #
