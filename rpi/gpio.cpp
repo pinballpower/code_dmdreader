@@ -10,6 +10,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <poll.h>
+#include <chrono>
+#include <thread>
+#include <filesystem>
 
 #include <boost/log/trivial.hpp>
 #include "gpio.hpp"
@@ -30,7 +33,7 @@ string GPIO::asEdgeStr(GPIOEdge e)
 {
 	switch (e) {
 	case raising:
-		return "raising";
+		return "rising";
 	case falling:
 		return "falling";
 	case both:
@@ -42,22 +45,27 @@ string GPIO::asEdgeStr(GPIOEdge e)
 void GPIO::setupGPIO(int gpiono, bool output, GPIOEdge edge) {
 
 	string gpios = std::to_string(gpiono);
+	string gpiodir = "/sys/class/gpio/gpio" + gpios;
+	string dirname = gpiodir + "/direction";
 
-	// Export GPIO
-
-	try {
-		ofstream exportfile;
-		exportfile.exceptions(ifstream::badbit | ifstream::failbit);
-		exportfile.open("/sys/class/gpio/export");
-		exportfile << gpiono;
-	}
-	catch (std::ifstream::failure e) {
-		BOOST_LOG_TRIVIAL(error) << "[gpio] " << e.what();
-		throw GPIOException("error writing /sys/class/gpio/export", gpiono);
+	// Export GPIO if it isn't
+	if (!std::filesystem::is_directory(gpiodir)) {
+		try {
+			ofstream exportfile;
+			exportfile.exceptions(ifstream::badbit | ifstream::failbit);
+			exportfile.open("/sys/class/gpio/export");
+			exportfile << gpiono;
+			exportfile.close();
+			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		}
+		catch (std::ifstream::failure e) {
+			BOOST_LOG_TRIVIAL(error) << "[gpio] " << e.what();
+			throw GPIOException("error writing /sys/class/gpio/export", gpiono);
+		}
 	}
 
 	// Set direction
-	string dirname = "/sys/class/gpio/gpio" + gpios + "/direction";
+	
 	ofstream directionfile;
 	directionfile.exceptions(ifstream::badbit | ifstream::failbit);
 	try {
@@ -68,6 +76,7 @@ void GPIO::setupGPIO(int gpiono, bool output, GPIOEdge edge) {
 		else {
 			directionfile << "in\n";
 		}
+		directionfile.close();
 	}
 	catch (std::ifstream::failure e) {
 		throw GPIOException("error writing " + dirname, gpiono);
@@ -87,6 +96,7 @@ void GPIO::setupGPIO(int gpiono, bool output, GPIOEdge edge) {
 		catch (std::ifstream::failure e) {
 			throw GPIOException("error writing " + edgename, gpiono);
 		}
+		edgefile.close();
 	}
 }
 
