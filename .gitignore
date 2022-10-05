@@ -25,3 +25,4 @@ samples/*.txt
 /samples/st_161hc
 /dmdreader
 /test.bin
+/samples/gbrules.json
