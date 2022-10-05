@@ -11,7 +11,7 @@
     }
   },
   "processor": {
-    "store": {
+    "txtwriter": {
       "filename": "../output.txt",
       "ignore_duplicates": true,
       "async": true
