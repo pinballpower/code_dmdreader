@@ -11,7 +11,8 @@
 
 using namespace std;
 
-constexpr uint16_t FRAME_ID = 0xcc33;
+constexpr uint16_t FRAME_ID_NOCRC = 0xcc33;
+constexpr uint16_t FRAME_ID_CRC = 0x44ee;
 constexpr int MAX_QUEUED_FRAMES = 100;
 
 class SPISource : public DMDSource {
