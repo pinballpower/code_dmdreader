@@ -36,6 +36,7 @@ private:
 	SPI spi;
 	int notify_gpio = 0;
 	int droppedFrames = 0; 
+	int max_wait_ms = 10000; // maximum time to wait until doing a dummy SPI read (sync might be lost)
 
 	void loopSPIRead();
 

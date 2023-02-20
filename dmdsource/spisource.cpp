@@ -27,7 +27,7 @@ void SPISource::loopSPIRead() {
 		bool x = false;
 		if (!gpio.getValue(notify_gpio)) {
 			x = true;
-			edge_detected = gpio.waitForEdge(notify_gpio, 500);
+			edge_detected = gpio.waitForEdge(notify_gpio, max_wait_ms);
 		}
 
 		// If there is no edge detected, just do some dummy reads, we might just be within a frame
