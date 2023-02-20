@@ -26,3 +26,4 @@ samples/*.txt
 /dmdreader
 /test.bin
 /samples/gbrules.json
+spidump.txt
