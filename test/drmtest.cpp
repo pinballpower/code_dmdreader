@@ -1,5 +1,7 @@
 #include "drmtest.hpp"
 
+#ifdef USE_VIDEO
+
 #include <vector>
 #include "../drm/drmhelper.hpp"
 #include "../drm/drmframebuffer.hpp"
@@ -26,3 +28,5 @@ void demo_framebuffer() {
 		fb.push_back(std::move(x));
 	}
 }
+
+#endif
