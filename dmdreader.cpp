@@ -23,8 +23,6 @@
 #include "util/objectfactory.hpp"
 #include "services/serviceregistry.hpp"
 
-#include "pupplayer/pupplayer.hpp"
-
 using namespace std;
 
 vector<std::shared_ptr<DMDSource>> sources;
@@ -220,6 +218,7 @@ volatile bool isFinished = false;
 
 void signal_handler(int sig)
 {
+	BOOST_LOG_TRIVIAL(trace) << "[dmdreader] received quit signal, preparing exit " << filesystem::current_path();
 	isFinished = true;
 	terminateWhenFinished = true;
 }
@@ -308,6 +307,10 @@ int main(int argc, char** argv)
 		}
 
 		frameno++;
+
+		if ((frameno % 100000) == 0) {
+			BOOST_LOG_TRIVIAL(info) << "[dmdreader] received " << frameno / 10000 << " frames";
+		}
 
 	}
 
