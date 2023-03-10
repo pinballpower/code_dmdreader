@@ -10,7 +10,7 @@ tar xvfz libgpiod-$LIBGPIODVERSION.tar.gz
 rm libgpiod-$LIBGPIODVERSION.tar.gz
 cd libgpiod-$LIBGPIODVERSION
 ./autogen.sh --enable-tools=yes --prefix=/usr  --enable-bindings-cxx
-sudo make
-make install
+make
+sudo make install
 cd ..
 rm -rf libgpiod-$LIBGPIODVERSION
