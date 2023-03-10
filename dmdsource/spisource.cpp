@@ -79,12 +79,12 @@ void SPISource::loopSPIRead() {
 				queuedFrames.push(frame);
 				frameSemaphore.post();
 			} else {
-				BOOST_LOG_TRIVIAL(debug) << "[spisource] frame queue is full (" << queueLen << "), dropping frame";
+				BOOST_LOG_TRIVIAL(warning) << "[spisource] frame queue is full (" << queueLen << "), dropping frame";
 				droppedFrames++;
 			}
 		}
 		else {
-			BOOST_LOG_TRIVIAL(debug) << "[spisource] packet type " << packet_type << "unsupported, ignoring";
+			BOOST_LOG_TRIVIAL(info) << "[spisource] packet type " << packet_type << " unsupported, ignoring";
 		}
 
 		frames++;
