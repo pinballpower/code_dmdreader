@@ -15,6 +15,7 @@ uint16_t parse_u16(uint8_t* buf) {
 void SPISource::loopSPIRead() {
 	int length, packet_type;
 	int rows, columns, bitsperpixel;
+        uint32_t crc32 = 0;
 
 	int frames = 0;
 
@@ -27,7 +28,7 @@ void SPISource::loopSPIRead() {
 		bool x = false;
 		if (!gpio.getValue(notify_gpio)) {
 			x = true;
-			edge_detected = gpio.waitForEdge(notify_gpio, 500);
+			edge_detected = gpio.waitForEdge(notify_gpio, max_wait_ms);
 		}
 
 		// If there is no edge detected, just do some dummy reads, we might just be within a frame
@@ -60,7 +61,8 @@ void SPISource::loopSPIRead() {
 		}
 
 
-		if (packet_type == FRAME_ID) {
+		if ((packet_type == FRAME_ID_NOCRC) || (packet_type == FRAME_ID_CRC)) {
+                        int data_offset = 8;
 			rows = parse_u16(buf + 0);
 			columns = parse_u16(buf + 2);
 			bitsperpixel = parse_u16(buf + 6);
@@ -72,10 +74,15 @@ void SPISource::loopSPIRead() {
 				continue;
 			}
 
-			BOOST_LOG_TRIVIAL(debug) << "[spisource] got frame " << columns << "x" << rows << "x" << bitsperpixel;
+                        if (packet_type == FRAME_ID_CRC) {
+                                crc32 = 1;
+                                data_offset = 12; 
+                        }
+
+			BOOST_LOG_TRIVIAL(debug) << "[spisource] got frame " << columns << "x" << rows << "x" << bitsperpixel << " CRC=" << crc32;
 			int queueLen = queuedFrames.size();
 			if (queueLen < MAX_QUEUED_FRAMES) {
-				DMDFrame frame = DMDFrame(columns, rows, bitsperpixel, buf + 8, true);
+				DMDFrame frame = DMDFrame(columns, rows, bitsperpixel, buf + data_offset, true);
 				queuedFrames.push(frame);
 				frameSemaphore.post();
 			} else {

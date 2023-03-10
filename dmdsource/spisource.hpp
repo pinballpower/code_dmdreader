@@ -11,7 +11,8 @@
 
 using namespace std;
 
-constexpr uint16_t FRAME_ID = 0xcc33;
+constexpr uint16_t FRAME_ID_NOCRC = 0xcc33;
+constexpr uint16_t FRAME_ID_CRC = 0x44ee;
 constexpr int MAX_QUEUED_FRAMES = 100;
 
 class SPISource : public DMDSource {
@@ -36,6 +37,7 @@ private:
 	SPI spi;
 	int notify_gpio = 0;
 	int droppedFrames = 0; 
+	int max_wait_ms = 10000; // maximum time to wait until doing a dummy SPI read (sync might be lost)
 
 	void loopSPIRead();
 

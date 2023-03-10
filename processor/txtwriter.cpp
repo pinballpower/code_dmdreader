@@ -44,7 +44,12 @@ void TXTWriter::writeFrameToFile(DMDFrame& f, uint32_t timestamp)
 		string line = "";
 		int col = 0;
 		for (auto px : f.getPixelData()) {
-			line.push_back('0' + (char)px);
+                        // this is not a real hexadecimal conversion, but it works well for values from 0-15 that are expected
+                        if (px<10) {
+			 	line.push_back('0' + (char)px);
+                        } else { 
+				line.push_back('a' + (char)(px-10));
+                        }
 
 			if (col == f.getWidth() - 1) {
 				outputfile << line << std::endl;

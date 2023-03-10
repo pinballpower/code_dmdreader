@@ -11,8 +11,10 @@
     }
   },
   "processor": {
+    "frameinfo": {
+    },
     "txtwriter": {
-      "filename": "../output.txt",
+      "filename": "spidump.txt",
       "ignore_duplicates": true,
       "async": true
     }
