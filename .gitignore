@@ -27,3 +27,9 @@ samples/*.txt
 /test.bin
 /samples/gbrules.json
 spidump.txt
+/samples/trn_174h.zip
+/samples/trn_174h.cRZ
+/samples/trn_174h
+/samples/tronsingleframe.cRZ
+/samples/tronsingleframe.cRP
+/samples/tronsingleframe.cROM
