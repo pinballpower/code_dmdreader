@@ -39,7 +39,7 @@ void TXTWriter::close()
 void TXTWriter::writeFrameToFile(DMDFrame& f, uint32_t timestamp)
 {
 	if (outputfile.is_open()) {
-		outputfile << "$" << std::hex << std::setw(8) << std::setfill('0') << timestamp << std::endl;
+		outputfile << "0x" << std::hex << std::setw(8) << std::setfill('0') << timestamp << std::endl;
 
 		string line = "";
 		int col = 0;
