@@ -1,0 +1,3 @@
+[submodule "external/libserum"]
+	path = external/libserum
+	url = https://github.com/pinballpower/libserum
