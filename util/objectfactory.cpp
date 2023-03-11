@@ -29,6 +29,9 @@
 #ifdef USE_VIDEO
 #include "../pupplayer/pividpupplayer.hpp"
 #endif
+#ifdef USE_SERUM
+#include "../processor/serumcolorizer.hpp"
+#endif
 
 #if __has_include("../colorize/config.h")
 #include "../colorize/config.h"
@@ -74,6 +77,11 @@ std::shared_ptr<DMDFrameProcessor> createProcessor(string name) {
 #ifdef VNICOLORING
 	else if (name == "pin2dmd") {
 		return std::make_shared<Pin2DMDColorisation>();
+	}
+#endif
+#ifdef USE_SERUM
+	else if (name == "serum") {
+		return std::make_shared<SerumColorizer>();
 	}
 #endif
 	else if (name == "frameinfo") {
