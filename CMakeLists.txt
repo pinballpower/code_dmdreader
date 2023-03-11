@@ -206,8 +206,13 @@ endif()
 get_filename_component(SERUM_CMAKE "external/libserum/CMakeLists.txt" ABSOLUTE)
 if(EXISTS ${SERUM_CMAKE})
 message(STATUS "enabling SERUM colorisation module")
-#include(external/libserum/CMakeLists.txt)
 add_subdirectory("external/libserum")
+add_definitions(-DUSE_SERUM)
+set (SERUM_SRC "processor/serumcolorizer.cpp" "processor/serumcolorizer.hpp")
+
+set (SERUM_LIBRARIES Serum)
+
+message(STATUS ${LIBRARY_SOURCES})
 else()
 message(STATUS "libserum source not found in external/libserum, not enabling it")
 endif()
@@ -222,15 +227,16 @@ set (SCORE_SRC "processor/statedetector.hpp" "processor/statedetector.cpp" "proc
 set (SERVICES_SRC "services/service.cpp" "services/service.hpp" "services/serviceregistry.hpp" "services/serviceregistry.cpp" "services/pupeventplayback.hpp" "services/pupeventplayback.cpp")
 set (TEST_SRC "test/drmtest.hpp"  "test/drmtest.cpp" "test/scoredetector.cpp" "test/scoredetector.hpp")
 
-set (ALL_SOURCES ${UTIL_SRC} ${RENDER_SRC} ${DMD_SRC} ${DMDSOURCE_SRC} ${PROCESSOR_SRC} ${COLOR_SRC} ${OPENGL_SRC} ${SPI_SRC} ${RPI_SRC} ${VIDEO_SRC} ${PUPPLAYER_SRC} ${SERVICES_SRC} ${TEST_SRC} ${SCORE_SRC})
+set (ALL_SOURCES ${UTIL_SRC} ${RENDER_SRC} ${DMD_SRC} ${DMDSOURCE_SRC} ${PROCESSOR_SRC} ${COLOR_SRC} ${OPENGL_SRC} ${SPI_SRC} ${RPI_SRC} ${VIDEO_SRC} ${PUPPLAYER_SRC} ${SERVICES_SRC} ${TEST_SRC} ${SCORE_SRC} ${SERUM_SRC})
+message(STATUS ${ALL_SOURCES})
 
 add_executable (${PROJECT_NAME} "dmdreader.cpp" ${ALL_SOURCES} )
 target_include_directories(${PROJECT_NAME} PRIVATE ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBRARIES} ${ZLIB_LIBRARIES} ${VIDEO_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBRARIES} ${ZLIB_LIBRARIES} ${VIDEO_LIBRARIES} ${SERUM_LIBRARIES})
 
 add_executable (test.bin "test.cpp" ${ALL_SOURCES} )
 target_include_directories(test.bin PRIVATE ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
-target_link_libraries(test.bin PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBRARIES} ${ZLIB_LIBRARIES} ${VIDEO_LIBRARIES})
+target_link_libraries(test.bin PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBRARIES} ${ZLIB_LIBRARIES} ${VIDEO_LIBRARIES} ${SERUM_LIBRARIES})
 
 
 #
