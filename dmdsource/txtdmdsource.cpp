@@ -119,7 +119,12 @@ void TXTDMDSource::preloadNextFrame()
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				uint8_t pv = frametxt[y][x] - '0';
+				uint8_t pv = frametxt[y][x];
+				if (pv <= '9') {
+					pv = pv - '0';
+				} else {
+					pv = pv - 'a';
+				}
 				preloadedFrame.appendPixel(pv);
 			}
 		}
