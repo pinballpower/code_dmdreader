@@ -123,7 +123,7 @@ void TXTDMDSource::preloadNextFrame()
 				if (pv <= '9') {
 					pv = pv - '0';
 				} else {
-					pv = pv - 'a';
+					pv = pv - 'a'+10;
 				}
 				preloadedFrame.appendPixel(pv);
 			}
