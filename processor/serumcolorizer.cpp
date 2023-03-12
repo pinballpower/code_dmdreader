@@ -6,6 +6,7 @@
 bool SerumColorizer::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
 {
 	string serumfile = pt_source.get("file", "");
+	int ignoreUnknownFramesTimeout = pt_source.get("ignoreUnknownFramesTimesout", 1);
 
 	BOOST_LOG_TRIVIAL(info) << "[serumcolorizer] using " << serumfile;
 
@@ -19,6 +20,8 @@ bool SerumColorizer::configureFromPtree(boost::property_tree::ptree pt_general, 
 	else {
 		BOOST_LOG_TRIVIAL(error) << "[serumcolorizer] couldn't load SERUM colorisation from " << serumfile;
 	}
+
+	Serum_SetIgnoreUnknownFramesTimeout(ignoreUnknownFramesTimeout);
 
 	return ok;
 
@@ -40,17 +43,21 @@ DMDFrame SerumColorizer::processFrame(DMDFrame& f) {
 
 	// low level SERUM colorisation
 	uint8_t* framedata = new uint8_t[width*height];
-	memcpy((void*)f.getPixelData().data(), (void*)framedata, width * height);
+	uint8_t* dst = framedata;
+	auto src = f.getPixelData();
+	for (int i = 0; i < (width * height); i++) {
+		*dst = src[i];
+		dst++;
+	}
 	uint8_t palette[PALETTE_SIZE];
 	uint8_t rotations[ROTATION_SIZE];
 	uint32_t triggerID = 0;
+
+	uint32_t chksum = f.getChecksum();
 	bool coloredOk = Serum_Colorize(framedata, width, height, palette, rotations, &triggerID);
 
-	if (triggerID == 0xFFFFFFFF) {
-		if (!(colorizeUndetectedFrames)) {
-			return f;
-		}
-	}
+	if (!coloredOk)
+		return f;
 
 	// create colored data
 	vector<uint8_t> colordata;
