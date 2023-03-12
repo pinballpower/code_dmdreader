@@ -209,10 +209,7 @@ message(STATUS "enabling SERUM colorisation module")
 add_subdirectory("external/libserum")
 add_definitions(-DUSE_SERUM)
 set (SERUM_SRC "processor/serumcolorizer.cpp" "processor/serumcolorizer.hpp")
-
 set (SERUM_LIBRARIES Serum)
-
-message(STATUS ${LIBRARY_SOURCES})
 else()
 message(STATUS "libserum source not found in external/libserum, not enabling it")
 endif()
@@ -228,7 +225,6 @@ set (SERVICES_SRC "services/service.cpp" "services/service.hpp" "services/servic
 set (TEST_SRC "test/drmtest.hpp"  "test/drmtest.cpp" "test/scoredetector.cpp" "test/scoredetector.hpp")
 
 set (ALL_SOURCES ${UTIL_SRC} ${RENDER_SRC} ${DMD_SRC} ${DMDSOURCE_SRC} ${PROCESSOR_SRC} ${COLOR_SRC} ${OPENGL_SRC} ${SPI_SRC} ${RPI_SRC} ${VIDEO_SRC} ${PUPPLAYER_SRC} ${SERVICES_SRC} ${TEST_SRC} ${SCORE_SRC} ${SERUM_SRC})
-message(STATUS ${ALL_SOURCES})
 
 add_executable (${PROJECT_NAME} "dmdreader.cpp" ${ALL_SOURCES} )
 target_include_directories(${PROJECT_NAME} PRIVATE ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
