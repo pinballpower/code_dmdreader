@@ -110,8 +110,13 @@ void OpenGLRenderer::renderFrame(DMDFrame& f)
 			tx_pixel_count = 192 * 64;
 			vertices[9] = vertices[14] = 0.3333f;
 		}
+		else if ((f.getWidth() == 256) && f.getHeight() == 64) {
+			tx_width = tx_height = 256;
+			tx_pixel_count = 256*64;
+			vertices[9] = vertices[14] = 0.25f;
+		}
 		else {
-			BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] resolution " << f.getWidth() << "x" << f.getHeight() << "not supported";
+			BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] resolution " << f.getWidth() << "x" << f.getHeight() << " not supported";
 			return;
 		}
 	}
