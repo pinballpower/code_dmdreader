@@ -153,7 +153,7 @@ void OpenGLRenderer::renderFrame(DMDFrame& f)
 		memcpy(texturbuf, &data[0], tx_pixel_count * 3);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tx_width, tx_height, 0, GL_RGB, GL_UNSIGNED_BYTE, texturbuf);
 	}
-	else if (f.getBitsPerPixel() == 24) {
+	else if (f.getBitsPerPixel() == 32) {
 		// copy data into texture buffer
 		memcpy(texturbuf, &data[0], tx_pixel_count * 4);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tx_width, tx_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturbuf);
