@@ -6,7 +6,7 @@
 bool SerumColorizer::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
 {
 	string serumfile = pt_source.get("file", "");
-	int ignoreUnknownFramesTimeout = pt_source.get("ignoreUnknownFramesTimesout", 1);
+	int ignoreUnknownFramesTimeout = pt_source.get("ignoreUnknownFramesTimesout", 30);
 
 	BOOST_LOG_TRIVIAL(info) << "[serumcolorizer] using " << serumfile;
 
