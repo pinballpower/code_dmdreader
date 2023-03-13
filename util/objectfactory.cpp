@@ -13,7 +13,7 @@
 #include "../processor/pngwriter.hpp"
 #include "../processor/patterndetector.hpp"
 #include "../processor/statedetector.hpp"
-#include "../processor/upscalex2.hpp"
+#include "../processor/upscale.hpp"
 #include "../render/framerenderer.hpp"
 #include "../services/service.hpp"
 #include "../services/pupeventplayback.hpp"
@@ -106,8 +106,8 @@ std::shared_ptr<DMDFrameProcessor> createProcessor(string name) {
 	else if (name == "statedetector") {
 		return std::make_shared<StateDetector>();
 	}
-	else if (name == "upscalex2") {
-		return std::make_shared<UpscaleX2>();
+	else if (name == "upscale") {
+		return std::make_shared<Upscale>();
 	}
 	else {
 		BOOST_LOG_TRIVIAL(error) << "processor name " << name << " unknown";
