@@ -63,6 +63,7 @@ DMDFrame Upscale::processFrame(DMDFrame& f)
 
 bool Upscale::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {
 	// TODO: allow different upscalers
+	hqxInit();
 	upscaler = Upscaler::hq2x;
 
 	return true;
