@@ -1,3 +1,6 @@
 [submodule "external/libserum"]
 	path = external/libserum
 	url = https://github.com/pinballpower/libserum
+[submodule "external/code_dmd"]
+	path = external/code_dmd
+	url = https://github.com/pinballpower/code_dmd
