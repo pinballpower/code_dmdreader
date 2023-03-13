@@ -214,6 +214,19 @@ else()
 message(STATUS "libserum source not found in external/libserum, not enabling it")
 endif()
 
+# use rpi-rgb-led-matrix
+if (RPI)
+get_filename_component(RGB_MAKEFILE "external/rpi-rgb-led-matrix/Makefile" ABSOLUTE)
+if(EXISTS ${RGB_MAKEFILE})
+message(STATUS "enabling RGB LED matrix module")
+file(GLOB_RECURSE RGB_SRC_FILES external/rpi-rgb-led-matrix/lib/*.c*)
+file(GLOB_RECURSE RGB_HEADER_FILES external/rpi-rgb-led-matrix/include/*.h)
+include_directories(external/rpi-rgb-led-matrix/lib)
+include_directories(external/rpi-rgb-led-matrix/include)
+
+set (RGB_SRC ${RGB_SRC_FILES} ${RGB_HEADER_FILES})
+endif()
+endif()
 
 set (UTIL_SRC "util/data.hpp" "util/data.cpp" "util/crc32.cpp" "util/crc32.hpp" "dmd/color.cpp" "util/image.hpp" "util/image.cpp" "util/objectfactory.hpp" "util/objectfactory.cpp" "util/bithelper.cpp" "util/bithelper.hpp" "stb/stb_image.h" "stb/stb_image_write.h" "util/glob.hpp" "util/glob.cpp")
 set (RENDER_SRC "render/framerenderer.hpp"  "render/framerenderer.cpp" )
@@ -224,15 +237,17 @@ set (SCORE_SRC "processor/statedetector.hpp" "processor/statedetector.cpp" "proc
 set (SERVICES_SRC "services/service.cpp" "services/service.hpp" "services/serviceregistry.hpp" "services/serviceregistry.cpp" "services/pupeventplayback.hpp" "services/pupeventplayback.cpp")
 set (TEST_SRC "test/drmtest.hpp"  "test/drmtest.cpp" "test/scoredetector.cpp" "test/scoredetector.hpp")
 
-set (ALL_SOURCES ${UTIL_SRC} ${RENDER_SRC} ${DMD_SRC} ${DMDSOURCE_SRC} ${PROCESSOR_SRC} ${COLOR_SRC} ${OPENGL_SRC} ${SPI_SRC} ${RPI_SRC} ${VIDEO_SRC} ${PUPPLAYER_SRC} ${SERVICES_SRC} ${TEST_SRC} ${SCORE_SRC} ${SERUM_SRC})
+set (ALL_SOURCES ${UTIL_SRC} ${RENDER_SRC} ${DMD_SRC} ${DMDSOURCE_SRC} ${PROCESSOR_SRC} ${COLOR_SRC} ${OPENGL_SRC} ${SPI_SRC} ${RPI_SRC} ${VIDEO_SRC} ${PUPPLAYER_SRC} ${SERVICES_SRC} ${TEST_SRC} ${SCORE_SRC} ${SERUM_SRC} ${RGB_SRC})
 
 add_executable (${PROJECT_NAME} "dmdreader.cpp" ${ALL_SOURCES} )
 target_include_directories(${PROJECT_NAME} PRIVATE ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBRARIES} ${ZLIB_LIBRARIES} ${VIDEO_LIBRARIES} ${SERUM_LIBRARIES})
 
+if (COMPILE_TEST)
 add_executable (test.bin "test.cpp" ${ALL_SOURCES} )
 target_include_directories(test.bin PRIVATE ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
 target_link_libraries(test.bin PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBRARIES} ${ZLIB_LIBRARIES} ${VIDEO_LIBRARIES} ${SERUM_LIBRARIES})
+endif()
 
 
 #

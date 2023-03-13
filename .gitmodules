@@ -4,3 +4,6 @@
 [submodule "external/code_dmd"]
 	path = external/code_dmd
 	url = https://github.com/pinballpower/code_dmd
+[submodule "external/rpi-rgb-led-matrix"]
+	path = external/rpi-rgb-led-matrix
+	url = https://github.com/hzeller/rpi-rgb-led-matrix
