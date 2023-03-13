@@ -7,3 +7,6 @@
 [submodule "external/rpi-rgb-led-matrix"]
 	path = external/rpi-rgb-led-matrix
 	url = https://github.com/hzeller/rpi-rgb-led-matrix
+[submodule "external/hqx"]
+	path = external/hqx
+	url = https://github.com/pinballpower/hqx
