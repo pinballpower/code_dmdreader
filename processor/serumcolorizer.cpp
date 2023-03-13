@@ -61,7 +61,7 @@ DMDFrame SerumColorizer::processFrame(DMDFrame& f) {
 
 	// create colored data
 	vector<uint8_t> colordata;
-	colordata.reserve(width * height * 3);
+	colordata.reserve(width * height * 4);
 
 	uint8_t* colorindex = framedata;
 	uint8_t* color = NULL;
@@ -70,9 +70,10 @@ DMDFrame SerumColorizer::processFrame(DMDFrame& f) {
 		colordata.push_back(*color++); // red
 		colordata.push_back(*color++); // green 
 		colordata.push_back(*color++); // blue
+		colordata.push_back(0);        // alpha
 	}
 
-	DMDFrame res = DMDFrame(width, height, 24, colordata);
+	DMDFrame res = DMDFrame(width, height, 32, colordata);
 
 	return res;
 }

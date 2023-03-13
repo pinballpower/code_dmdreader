@@ -16,7 +16,7 @@ DMDFrame PaletteColorizer::processFrame(DMDFrame& f)
 	uint8_t* d = colordata;
 
 	DMDColor c;
-	DMDFrame result = DMDFrame(width, height, 24);
+	DMDFrame result = DMDFrame(width, height, 32);
 	for (auto px : f.getPixelData()) {
 		if (px > palette.size()) {
 			c = DMDColor(0);
@@ -28,6 +28,7 @@ DMDFrame PaletteColorizer::processFrame(DMDFrame& f)
 		result.appendPixel(c.r);
 		result.appendPixel(c.g);
 		result.appendPixel(c.b);
+		result.appendPixel(0);
 	}
 
 	return result;
