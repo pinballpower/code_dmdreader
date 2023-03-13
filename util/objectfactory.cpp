@@ -13,6 +13,7 @@
 #include "../processor/pngwriter.hpp"
 #include "../processor/patterndetector.hpp"
 #include "../processor/statedetector.hpp"
+#include "../processor/upscalex2.hpp"
 #include "../render/framerenderer.hpp"
 #include "../services/service.hpp"
 #include "../services/pupeventplayback.hpp"
@@ -31,6 +32,9 @@
 #endif
 #ifdef USE_SERUM
 #include "../processor/serumcolorizer.hpp"
+#endif
+#ifdef USE_LEDMATRIX
+#include "../render/ledmatrixrenderer.hpp"
 #endif
 
 #if __has_include("../colorize/config.h")
@@ -102,6 +106,9 @@ std::shared_ptr<DMDFrameProcessor> createProcessor(string name) {
 	else if (name == "statedetector") {
 		return std::make_shared<StateDetector>();
 	}
+	else if (name == "upscalex2") {
+		return std::make_shared<UpscaleX2>();
+	}
 	else {
 		BOOST_LOG_TRIVIAL(error) << "processor name " << name << " unknown";
 		return NULL;
@@ -121,6 +128,11 @@ std::shared_ptr<FrameRenderer> createRenderer(string name) {
 #ifdef USE_OPENGLPI4
 	else if (name == "opengl") {
 		return std::make_shared<Pi4Renderer>();
+	}
+#endif
+#ifdef USE_LEDMATRIX
+	else if (name == "ledmatrix") {
+		return std::make_shared<LEDMatrixRenderer>();
 	}
 #endif
 	else {
