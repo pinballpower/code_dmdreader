@@ -46,7 +46,7 @@
 std::shared_ptr<DMDSource> createSource(string name) {
 
 	if (name == "dat") {
-		return std::make_shared<DMDSource>();
+		return std::make_shared<DATDMDSource>();
 	} else if (name == "txt") {
 		return std::make_shared<TXTDMDSource>();
 	}
