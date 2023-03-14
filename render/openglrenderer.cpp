@@ -100,20 +100,24 @@ void OpenGLRenderer::renderFrame(DMDFrame& f)
 	if ((f.getWidth() != frame_width) || (f.getHeight() != frame_height)) {
 		frame_width = f.getWidth();
 		frame_height = f.getHeight();
-		if ((f.getWidth() == 128) && f.getHeight() == 32) {
+		if (frame_width == 128 && frame_height == 32) {
 			tx_width = tx_height = 128;
 			tx_pixel_count = 128 * 32;
 			vertices[9] = vertices[14] = 0.25f;
 		}
-		else if ((f.getWidth() == 192) && f.getHeight() == 64) {
+		else if (frame_width == 192 && frame_width == 64) {
 			tx_width = tx_height = 192;
 			tx_pixel_count = 192 * 64;
 			vertices[9] = vertices[14] = 0.3333f;
 		}
-		else if ((f.getWidth() == 256) && f.getHeight() == 64) {
+		else if (frame_width == 256 && frame_height == 64) {
 			tx_width = tx_height = 256;
 			tx_pixel_count = 256*64;
 			vertices[9] = vertices[14] = 0.25f;
+		}
+		else if (frame_width >256 || frame_height > 256) {
+			BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] resolutions > 256x256 not yet supported by OpenGL renderer";
+			return;
 		}
 		else {
 			BOOST_LOG_TRIVIAL(warning) << "[openglrenderer] resolution " << f.getWidth() << "x" << f.getHeight() << " not supported";
