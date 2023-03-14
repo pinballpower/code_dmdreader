@@ -2,6 +2,12 @@
 
 #include "frameprocessor.hpp"
 
+#include <cstdint>
+#include "../external/libserum/src/serum-decode.h"
+
+#define SERUM_MAXWIDTH 192
+#define SERUM_MAXHEIGHT 64
+
 class SerumColorizer : public DMDFrameProcessor {
 
 public:
@@ -12,5 +18,10 @@ private:
 	int width, height;
 
 	bool colorizeUndetectedFrames = false;
+	uint32_t checksumLastFrame = 0;
+
+	uint8_t srcbuffer[SERUM_MAXWIDTH * SERUM_MAXHEIGHT];
+	uint8_t palette[PALETTE_SIZE];
+	uint8_t rotations[ROTATION_SIZE];
 };
 

@@ -1,8 +1,5 @@
 #include "serumcolorizer.hpp"
 
-#include "../external/libserum/src/serum-decode.h"
-
-
 bool SerumColorizer::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
 {
 	string serumfile = pt_source.get("file", "");
@@ -19,6 +16,13 @@ bool SerumColorizer::configureFromPtree(boost::property_tree::ptree pt_general, 
 	}
 	else {
 		BOOST_LOG_TRIVIAL(error) << "[serumcolorizer] couldn't load SERUM colorisation from " << serumfile;
+	}
+
+	if ((width > SERUM_MAXWIDTH) || (height > SERUM_MAXHEIGHT)) {
+		BOOST_LOG_TRIVIAL(info) << "[serumcolorizer] dimensions too big, not using this colorisation";
+		width = 0;
+		height = 0;
+		ok = false;
 	}
 
 	Serum_SetIgnoreUnknownFramesTimeout(ignoreUnknownFramesTimeout);
@@ -42,19 +46,27 @@ DMDFrame SerumColorizer::processFrame(DMDFrame& f) {
 	}
 
 	// low level SERUM colorisation
-	uint8_t* framedata = new uint8_t[width*height];
-	uint8_t* dst = framedata;
-	auto src = f.getPixelData();
-	for (int i = 0; i < (width * height); i++) {
-		*dst = src[i];
-		dst++;
-	}
-	uint8_t palette[PALETTE_SIZE];
-	uint8_t rotations[ROTATION_SIZE];
-	uint32_t triggerID = 0;
+	uint32_t checksum = f.getChecksum();
+	bool coloredOk = false;
+	if (checksum != checksumLastFrame) {
+		uint8_t* dst = srcbuffer;
+		auto src = f.getPixelData();
+		for (int i = 0; i < (width * height); i++) {
+			*dst = src[i];
+			dst++;
+		}
+		
+		uint32_t triggerID = 0;
 
-	uint32_t chksum = f.getChecksum();
-	bool coloredOk = Serum_Colorize(framedata, width, height, palette, rotations, &triggerID);
+		uint32_t chksum = f.getChecksum();
+		coloredOk = Serum_Colorize(srcbuffer, width, height, palette, rotations, &triggerID);
+	}
+	else {
+		// if the source frame hasn't changed, just re-use the previous coloriation data
+		coloredOk = true;
+	}
+
+	// TODO: Implement color rotations
 
 	if (!coloredOk)
 		return f;
@@ -63,7 +75,7 @@ DMDFrame SerumColorizer::processFrame(DMDFrame& f) {
 	vector<uint8_t> colordata;
 	colordata.reserve(width * height * 4);
 
-	uint8_t* colorindex = framedata;
+	uint8_t* colorindex = srcbuffer;
 	uint8_t* color = NULL;
 	for (int i = 0; i < width * height; i++, colorindex++) {
 		color = &(palette[3 * (*colorindex)]);
