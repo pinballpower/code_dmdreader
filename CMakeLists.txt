@@ -237,6 +237,15 @@ add_definitions(-DUSE_HQX)
 set (HQX_SRC external/hqx/src/hq2x.c external/hqx/src/hq3x.c external/hqx/src/hq4x.c external/hqx/src/init.c external/hqx/src/common.h)
 endif()
 
+# XBR
+get_filename_component(XBR_INCLUDE "external/xbr/internal_hqx_common.h" ABSOLUTE)
+if(EXISTS ${XBR_INCLUDE})
+message(STATUS "enabling XBR upsampling")
+include_directories(external/xbr)
+add_definitions(-DUSE_XBR)
+set (XBR_SRC external/xbr/xbr.c external/xbr/hq2x.c external/xbr/hq3x.c external/xbr/hq4x.c external/xbr/filters.h external/xbr/internal_hqx_common.h)
+endif()
+
 set (UTIL_SRC "util/data.hpp" "util/data.cpp" "util/crc32.cpp" "util/crc32.hpp" "dmd/color.cpp" "util/image.hpp" "util/image.cpp" "util/objectfactory.hpp" "util/objectfactory.cpp" "util/bithelper.cpp" "util/bithelper.hpp" "stb/stb_image.h" "stb/stb_image_write.h" "util/glob.hpp" "util/glob.cpp")
 set (RENDER_SRC "render/framerenderer.hpp"  "render/framerenderer.cpp" )
 set (DMDSOURCE_SRC  "dmdsource/pngsource.hpp" "dmdsource/pngsource.cpp" "dmdsource/dmdsource.hpp" "dmdsource/dmdsource.cpp" "dmdsource/datdmdsource.hpp" "dmdsource/datdmdsource.cpp" "dmdsource/nullsource.cpp" "dmdsource/txtdmdsource.hpp" "dmdsource/txtdmdsource.cpp")
@@ -246,7 +255,7 @@ set (SCORE_SRC "processor/statedetector.hpp" "processor/statedetector.cpp" "proc
 set (SERVICES_SRC "services/service.cpp" "services/service.hpp" "services/serviceregistry.hpp" "services/serviceregistry.cpp" "services/pupeventplayback.hpp" "services/pupeventplayback.cpp")
 set (TEST_SRC "test/drmtest.hpp"  "test/drmtest.cpp" "test/scoredetector.cpp" "test/scoredetector.hpp")
 
-set (THIRDPARTY_SRC ${SERUM_SRC} ${RGB_SRC} ${HQX_SRC})
+set (THIRDPARTY_SRC ${SERUM_SRC} ${RGB_SRC} ${HQX_SRC} ${XBR_SRC})
 
 set (ALL_SOURCES ${UTIL_SRC} ${RENDER_SRC} ${DMD_SRC} ${DMDSOURCE_SRC} ${PROCESSOR_SRC} ${COLOR_SRC} ${OPENGL_SRC} ${SPI_SRC} ${RPI_SRC} ${VIDEO_SRC} ${PUPPLAYER_SRC} ${SERVICES_SRC} ${TEST_SRC} ${SCORE_SRC} ${THIRDPARTY_SRC})
 
