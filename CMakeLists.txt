@@ -228,15 +228,6 @@ set (RGB_SRC ${RGB_SRC_FILES} ${RGB_HEADER_FILES} render/ledmatrixrenderer.hpp r
 endif()
 endif()
 
-# HQX
-get_filename_component(HQX_MAKEFILE "external/hqx/Makefile.am" ABSOLUTE)
-if(EXISTS ${HQX_MAKEFILE})
-message(STATUS "enabling HQX upsampling")
-include_directories(external/hqx/include)
-add_definitions(-DUSE_HQX)
-set (HQX_SRC external/hqx/src/hq2x.c external/hqx/src/hq3x.c external/hqx/src/hq4x.c external/hqx/src/init.c external/hqx/src/common.h)
-endif()
-
 # XBR
 get_filename_component(XBR_INCLUDE "external/xbr/internal_hqx_common.h" ABSOLUTE)
 if(EXISTS ${XBR_INCLUDE})
