@@ -32,7 +32,7 @@ void testScoreDetect()
 		for (int y = 0; y < f1.getHeight() - f2.getHeight(); y++) {
 			auto match = pm.matchAt(f1, x, y);
 			if (match.has_value()) {
-				printf("%i,%i: %c\n", x, y, match);
+				printf("%i,%i: %c\n", x, y, match.value());
 			}
 		}
 	}
