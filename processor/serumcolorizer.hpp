@@ -20,6 +20,8 @@ private:
 	bool colorizeUndetectedFrames = false;
 	uint32_t checksumLastFrame = 0;
 
+	uint32_t timestampLastFrame = 0;
+
 	uint8_t srcbuffer[SERUM_MAXWIDTH * SERUM_MAXHEIGHT];
 	uint8_t palette[PALETTE_SIZE];
 	uint8_t rotations[ROTATION_SIZE];

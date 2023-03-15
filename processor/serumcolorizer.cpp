@@ -1,5 +1,11 @@
 #include "serumcolorizer.hpp"
 
+#include <chrono>
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::seconds;
+using std::chrono::system_clock;
+
 bool SerumColorizer::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
 {
 	string serumfile = pt_source.get("file", "");
@@ -33,6 +39,8 @@ bool SerumColorizer::configureFromPtree(boost::property_tree::ptree pt_general, 
 
 DMDFrame SerumColorizer::processFrame(DMDFrame& f) {
 
+	uint32_t now = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+
 	if (f.getBitsPerPixel() > 8) {
 		BOOST_LOG_TRIVIAL(debug) << "[serumcolorizer] frame has already " << f.getBitsPerPixel() << " bits/pixel, not colorizing it";
 		return f;
@@ -60,11 +68,17 @@ DMDFrame SerumColorizer::processFrame(DMDFrame& f) {
 
 		checksumLastFrame = checksum;
 		coloredOk = Serum_Colorize(srcbuffer, width, height, palette, rotations, &triggerID);
+		BOOST_LOG_TRIVIAL(info) << "[serumcolorizer] colored frame";
+
+		timestampLastFrame = now;
+
 	}
 	else {
 		// if the source frame hasn't changed, just re-use the previous coloriation data, but apply color rotations
 		coloredOk = true;
-		Serum_ApplyRotations(palette, rotations);
+		if (Serum_ApplyRotations(palette, rotations)) {
+			BOOST_LOG_TRIVIAL(debug) << "[serumcolorizer] timediff = " << now - timestampLastFrame << "ms";
+		}
 	}
 
 	if (!coloredOk)
@@ -85,6 +99,8 @@ DMDFrame SerumColorizer::processFrame(DMDFrame& f) {
 	}
 
 	DMDFrame res = DMDFrame(width, height, 32, colordata);
+
+	
 
 	return res;
 }
