@@ -32,6 +32,8 @@ protected:
 	bool async = false;
 	bool supportsColoredFrames = false;
 
+	int maxbitsperpixel = 4;
+
 	unsigned long startMillisec;
 
 	/// <summary>

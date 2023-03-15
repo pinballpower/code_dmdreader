@@ -32,8 +32,8 @@ bool GenericWriter::configureFromPtree(boost::property_tree::ptree pt_general, b
 
 DMDFrame GenericWriter::processFrame(DMDFrame& f)
 {
-	if (! supportsColoredFrames && (f.getBitsPerPixel() > 8)) {
-		BOOST_LOG_TRIVIAL(debug) << "[GenericWriter] storing colored frames not supported";
+	if (! supportsColoredFrames && (f.getBitsPerPixel() > maxbitsperpixel)) {
+		BOOST_LOG_TRIVIAL(debug) << "[GenericWriter] storing frames with more than " << maxbitsperpixel << " not supported";
 		return f;
 	}
 
