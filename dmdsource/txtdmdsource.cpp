@@ -150,8 +150,10 @@ DMDFrame TXTDMDSource::getNextFrame()
 		// no new frame from TXT file yet ready
 
 		if (frameEveryMs > 0) {
-			uint32_t sleepms = frameEveryMs - (timestamp - lastFrameSentMillis);
-			this_thread::sleep_for(std::chrono::milliseconds(sleepms));
+			int32_t sleepms = frameEveryMs - (timestamp - lastFrameSentMillis);
+			if (sleepms > 0) {
+				this_thread::sleep_for(std::chrono::milliseconds(sleepms));
+			}
 		}
 
 		timestamp = getCurrentTimestamp();
