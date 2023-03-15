@@ -55,4 +55,61 @@ A source that delivers no frames at all. Only useful for debugging purposes.
 
 ## Processors
 
+Processors are the backbone of the system. They can do all kinds of stuff. A processor just takes a frame, does something with in and returns a result frame. The result frame can be the same 
+as the input frame (e.g. if it's just used for triggering some action), but it can also be totally different. Examples are resizing, re-coloring, but a processor isn't limited to this.
+
+### frameinfo
+
+Logs some information on the frame to the console. Doesn't change the frame.
+
+### pupcapture
+
+Uses pupcapture files (usually used in VPins) to send triggers.
+
+TODO: Document usage
+
+### serum
+
+Uses a SERUM colorisation and apply it to the frames.
+
+|Parameter|Description|
+|---|---|
+|file|The colorisation file. Can be an uncomrpessed .cROM file or a compressed .cRZ file|
+|ignoreUnknownFramesTimesout|Timeout (ins ms) after that frames will not be colored if there is no matching colorisation|
+
+The coloriser will only process uncolored frames (max 8bits/pixel). If a frame can't be colored (e.g. if therer is no matching colorisation for it), it will be returned unprocessed.
+To deal with these you can e.g. add a "palette" colorizer after applying serum.
+
+#### About "ignoreUnknownFramesTimesout"
+
+Some colorisations don't colorise each available frame, but repeat one frame multiple times. This works as follows: A colorisation is looked up. If a match is found, 
+the frame is being colorised. If no match is found, the previous frame is just repeated for a maximum of ignoreUnknownFramesTimesout milliseconds. After this timeout has passed, it won't
+return colored frames until a new match has been found.
+
+### palette
+
+Color the frame with a fixed palette. Default is some orange color gradient that is similar to old-school DMDs.
+
+|Parameter|Description|
+|---|---|
+|colors|Number of colors - set this to the number of colors your source provides, e.g. 4 for WPC or 16 for SAM|
+|red|Red component of the brightest color|
+|green|Green component of the brightest color|
+|blue|Blue component of the brightest color|
+
+### txtwriter
+
+Doesn't process the frame, but write it to a TXT file. This processor only handled uncolored frames up to 4bit/pixel as the TXT format is only designed for this. 
+
+|Parameter|Description|
+|---|---|
+|filename|file to write|
+|ignore_duplicates|Only include a frame once. If a frame has been seen before, it won't be written into the file again|
+|async|Do not write the frames to the file when they are received, but when program finishes (either the source has no more frames or the program is gracefully terminated). This is recommended especially on the Raspberry Pi as I/O performance might be |
+
+### pngwriter
+### patterndetector
+### statedetector
+### upscale
+
 ## Renderers
