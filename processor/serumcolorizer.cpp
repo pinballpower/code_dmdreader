@@ -58,15 +58,14 @@ DMDFrame SerumColorizer::processFrame(DMDFrame& f) {
 		
 		uint32_t triggerID = 0;
 
-		uint32_t chksum = f.getChecksum();
+		checksumLastFrame = checksum;
 		coloredOk = Serum_Colorize(srcbuffer, width, height, palette, rotations, &triggerID);
 	}
 	else {
-		// if the source frame hasn't changed, just re-use the previous coloriation data
+		// if the source frame hasn't changed, just re-use the previous coloriation data, but apply color rotations
 		coloredOk = true;
+		Serum_ApplyRotations(palette, rotations);
 	}
-
-	// TODO: Implement color rotations
 
 	if (!coloredOk)
 		return f;
