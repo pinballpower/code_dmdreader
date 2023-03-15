@@ -31,6 +31,11 @@ set(ENABLE_BOOST_STATIC_LIBS ON)
 set (CONFIGDIR "/temp")
 endif()
 
+if (MSVC)
+    # see https://learn.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-1-c4530
+    add_compile_options(/EHsc)
+endif()
+
 #
 # Pi4
 #
