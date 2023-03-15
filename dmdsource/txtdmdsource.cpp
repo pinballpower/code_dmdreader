@@ -57,7 +57,7 @@ bool TXTDMDSource::openFile(string filename)
 
 uint32_t TXTDMDSource::getCurrentTimestamp()
 {
-	unsigned long now = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+	uint32_t now = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 	return now - startMillisec;
 }
 
