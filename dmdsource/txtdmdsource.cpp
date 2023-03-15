@@ -203,6 +203,8 @@ bool TXTDMDSource::configureFromPtree(boost::property_tree::ptree pt_general, bo
 	frameEveryMs = pt_source.get("frame_every_ms", 0);
 	bool res=openFile(pt_source.get("name", ""));
 	if (res) preloadNextFrame();
-	startMillisec = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+
+	// TXT file might not start with timestamp 0, therefore adapt the start timestamp according to the first frame in the file
+	startMillisec = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count() - preloadedFrameTimestamp;
 	return res;
 }
