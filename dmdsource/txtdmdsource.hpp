@@ -25,11 +25,14 @@ public:
 
 private:
 
+	DMDFrame currentFrame;
 	DMDFrame preloadedFrame;
 	uint32_t preloadedFrameTimestamp;
 	ifstream is;
 	bool useTimingData = true;
 	unsigned long startMillisec = 0;
+	unsigned long lastFrameSentMillis = 0;
+	unsigned int frameEveryMs = 0;
 
 	void preloadNextFrame();
 	bool openFile(string filename);

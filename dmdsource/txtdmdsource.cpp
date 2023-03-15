@@ -142,17 +142,41 @@ void TXTDMDSource::preloadNextFrame()
 
 DMDFrame TXTDMDSource::getNextFrame()
 {
-	DMDFrame res = std::move(preloadedFrame);
-	preloadNextFrame();
+	DMDFrame res;
+	uint32_t timestamp = getCurrentTimestamp();
 
-	if (useTimingData) {
-		uint32_t timestamp = getCurrentTimestamp();
-		while (timestamp < preloadedFrameTimestamp) {
-			this_thread::sleep_for(std::chrono::milliseconds(10));
-			timestamp = getCurrentTimestamp();
+	if ((useTimingData) && (timestamp < preloadedFrameTimestamp)) {
+
+		// no new frame from TXT file yet ready
+
+		if (frameEveryMs > 0) {
+			uint32_t sleepms = frameEveryMs - (timestamp - lastFrameSentMillis);
+			this_thread::sleep_for(std::chrono::milliseconds(sleepms));
 		}
+
+		timestamp = getCurrentTimestamp();
+
+		if (timestamp < preloadedFrameTimestamp) {
+			res = DMDFrame(currentFrame);
+		}
+		else {
+			while (timestamp < preloadedFrameTimestamp) {
+				this_thread::sleep_for(std::chrono::milliseconds(10));
+				timestamp = getCurrentTimestamp();
+			}
+			currentFrame = preloadedFrame;
+			res = std::move(preloadedFrame);
+			preloadNextFrame();
+
+		}
+
+	} else {
+		currentFrame = preloadedFrame;
+		res = std::move(preloadedFrame);
+		preloadNextFrame();
 	}
 
+	lastFrameSentMillis = getCurrentTimestamp();
 	return res;
 }
 
@@ -174,6 +198,7 @@ SourceProperties TXTDMDSource::getProperties() {
 bool TXTDMDSource::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) {
 	bits = pt_source.get("bitsperpixel", 4);
 	useTimingData = pt_source.get("use_timing_data", true);
+	frameEveryMs = pt_source.get("frame_every_ms", 0);
 	bool res=openFile(pt_source.get("name", ""));
 	if (res) preloadNextFrame();
 	startMillisec = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
