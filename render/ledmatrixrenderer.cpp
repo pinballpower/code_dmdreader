@@ -63,7 +63,7 @@ bool LEDMatrixRenderer::configureFromPtree(boost::property_tree::ptree pt_genera
     int x, y, i;
 
     width = pt_renderer.get("width", 128);
-    height = pt_renderer.get("heigt", 32);
+    height = pt_renderer.get("height", 32);
     pwm_bits = pt_renderer.get("pwm_bits", 8);
     
     // TODO: check what other configuration parameters could be useful
