@@ -6,37 +6,6 @@ using std::chrono::milliseconds;
 using std::chrono::seconds;
 using std::chrono::system_clock;
 
-bool SerumColorizer::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
-{
-	string serumfile = pt_source.get("file", "");
-	int ignoreUnknownFramesTimeout = pt_source.get("ignoreUnknownFramesTimesout", 30);
-
-	BOOST_LOG_TRIVIAL(info) << "[serumcolorizer] using " << serumfile;
-
-	unsigned int pnocolors = 0, pntriggers = 0;
-	width = height = 0;
-
-	bool ok = Serum_LoadFile(serumfile.c_str(), &width, &height, &pnocolors, &pntriggers);
-	if (ok) {
-		BOOST_LOG_TRIVIAL(info) << "[serumcolorizer] loaded SERUM colorisation from " << serumfile << width << "x" << height << " " << pnocolors << " colors, " << pntriggers << " triggers";
-	}
-	else {
-		BOOST_LOG_TRIVIAL(error) << "[serumcolorizer] couldn't load SERUM colorisation from " << serumfile;
-	}
-
-	if ((width > SERUM_MAXWIDTH) || (height > SERUM_MAXHEIGHT)) {
-		BOOST_LOG_TRIVIAL(info) << "[serumcolorizer] dimensions too big, not using this colorisation";
-		width = 0;
-		height = 0;
-		ok = false;
-	}
-
-	Serum_SetIgnoreUnknownFramesTimeout(ignoreUnknownFramesTimeout);
-
-	return ok;
-
-}
-
 DMDFrame SerumColorizer::processFrame(DMDFrame& f) {
 
 	uint32_t now = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
@@ -103,4 +72,43 @@ DMDFrame SerumColorizer::processFrame(DMDFrame& f) {
 	
 
 	return res;
+}
+
+
+bool SerumColorizer::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
+{
+	string serumfile = pt_source.get("file", "");
+	int ignoreUnknownFramesTimeout = pt_source.get("ignore_unknown_frames_timeout_ms", 30);
+	int maximumUnknownFramesToSkip = pt_source.get("maximum_unknown_frames_to_skip", 4);
+	int bpp = pt_source.get("bits_per_pixel", 4);
+
+	BOOST_LOG_TRIVIAL(info) << "[serumcolorizer] using " << serumfile;
+
+	unsigned int pnocolors = 0, pntriggers = 0;
+	width = height = 0;
+
+	bool ok = Serum_LoadFile(serumfile.c_str(), &width, &height, &pnocolors, &pntriggers);
+	if (ok) {
+		BOOST_LOG_TRIVIAL(info) << "[serumcolorizer] loaded SERUM colorisation from " << serumfile << width << "x" << height << " " << pnocolors << " colors, " << pntriggers << " triggers";
+	}
+	else {
+		BOOST_LOG_TRIVIAL(error) << "[serumcolorizer] couldn't load SERUM colorisation from " << serumfile;
+	}
+
+	if ((width > SERUM_MAXWIDTH) || (height > SERUM_MAXHEIGHT)) {
+		BOOST_LOG_TRIVIAL(info) << "[serumcolorizer] dimensions too big, not using this colorisation";
+		width = 0;
+		height = 0;
+		ok = false;
+	}
+
+	Serum_SetIgnoreUnknownFramesTimeout(ignoreUnknownFramesTimeout);
+	// Serum_SetMaximumUnknownFramesToSkip(maximumUnknownFramesToSkip);
+
+	// create a default palette
+	DMDPalette defaultPalette = DMDPalette(DMDColor(0xff, 0, 0), bpp, "default");
+	// Serum_SetStandardPalette(defaultPalette.asPackedColors().data(), bpp);
+
+	return ok;
+
 }
