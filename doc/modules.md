@@ -161,5 +161,6 @@ Note that dmdreader have to run as root to use this.
 |---|---|
 |width|width of the LED matrix (columns)|
 |height|height of the LED matrix (rows)|
+|pwm_bits|PWM bits per pixel (default 8, can be 1-11)|
 
 
