@@ -59,17 +59,20 @@ bool LEDMatrixRenderer::configureFromPtree(boost::property_tree::ptree pt_genera
     struct RGBLedMatrixOptions options;
     struct RGBLedRuntimeOptions rt_options;
     
-    int width, height;
+    int width, height, pwm_bits;
     int x, y, i;
 
     width = pt_renderer.get("width", 128);
     height = pt_renderer.get("heigt", 32);
+    pwm_bits = pt_renderer.get("pwm_bits", 8);
+    
     // TODO: check what other configuration parameters could be useful
 
     memset(&options, 0, sizeof(options));
     options.rows = height;
     options.cols = width;
     options.chain_length = 1;
+    options.hardware_mapping = "dmdreader";
 
     memset(&rt_options, 0, sizeof(rt_options));
     rt_options.gpio_slowdown = 4;
