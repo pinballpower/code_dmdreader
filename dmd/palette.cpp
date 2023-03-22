@@ -50,6 +50,17 @@ int DMDPalette::getIndexOf(uint8_t r, uint8_t g, uint8_t b) const {
 	return -1;
 }
 
+vector<uint8_t> DMDPalette::asPackedColors() const
+{
+	vector<uint8_t> res;
+	for (auto c : colors) {
+		res.push_back(c.r);
+		res.push_back(c.g);
+		res.push_back(c.b);
+	}
+	return res;
+}
+
 bool DMDPalette::matchesImage(const RGBBuffer& buf) const
 {
 	const vector <uint8_t> data = buf.getData();

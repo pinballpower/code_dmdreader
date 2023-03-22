@@ -16,6 +16,7 @@ public:
 
 	int getIndexOf(uint32_t color, bool ignore_alpha = true) const;
 	int getIndexOf(uint8_t r, uint8_t g, uint8_t b) const;
+	vector <uint8_t>asPackedColors() const;
 
 	bool matchesImage(const RGBBuffer& buf) const;
 
