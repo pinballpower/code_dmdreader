@@ -112,8 +112,54 @@ Doesn't process the frame, but write it to a TXT file. This processor only handl
 |async|Do not write the frames to the file when they are received, but when program finishes (either the source has no more frames or the program is gracefully terminated). This is recommended especially on the Raspberry Pi as I/O performance might be |
 
 ### pngwriter
+
+TODO 
+ 
 ### patterndetector
+
+TODO 
+
 ### statedetector
+
+TODO 
+
 ### upscale
 
+Increases the resolution of a DMDFrame. A usual use case is displaying 128x32 DMD content on a 256x64 display - upscaling it by factor 2
+It uses XBR or HQ upscaling - these algorithms are specifically designed for line art.
+
+|Parameter|Description|
+|---|---|
+|upscaler|Upscaler to use. This can by hq2x, hq3x, hqx4, xbr2x, xbr3x, xbr4x|
+
+
 ## Renderers
+
+### null
+
+Does nothing, just discards frames
+
+### opengl
+|Parameter|Description|
+|---|---|
+|width|width of the screen or windows to display on|
+|height|height of the screen or windows to display on|
+|dmd_x|x coordinate of the top-left corner of the DMD display (default 0)|
+|dmd_y|y coordinate of the top-left corner of the DMD display (default 0)|
+|dmd_width|width of the DMD display|
+|dmd_height|width of the DMD display|
+|overlay_texture|overlay a texture on each pixel (e.g. to render round pixels)|
+|scale_linear|use bilinear upscaling of the DMD image|
+|fragment_shader|fragment shader to use, check out the shader directory for the available fragment shaders|
+
+### ledmatrix
+
+Control an LED matrix connected to the DMDReader hardware. This is based on https://github.com/hzeller/rpi-rgb-led-matrix
+Note that dmdreader have to run as root to use this.
+
+|Parameter|Description|
+|---|---|
+|width|width of the LED matrix (columns)|
+|height|height of the LED matrix (rows)|
+
+
