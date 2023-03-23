@@ -168,5 +168,14 @@ Note that dmdreader have to run as root to use this.
 |width|width of the LED matrix (columns)|
 |height|height of the LED matrix (rows)|
 |pwm_bits|PWM bits per pixel (default 8, can be 1-11)|
+|rgb_sequence| RGB sequence as string, e.g. "gbr","rgb","bgr"|
+|multiplexing|multiplexing mode (see https://github.com/hzeller/rpi-rgb-led-matrix)|
+|scan_mode|0: non-interlaced, 1: interlaced|
+|dither_bits|dither the n LSB bits (0-2)|
+|lsb_nanoseconds|time the LSB is displayed, 50-300ns. shorter values increase load, but usually improve quality|
+|brightness|brightness in %|
+|rotate_180|rotate the display content by 180 degrees|
+
+
 
 
