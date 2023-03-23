@@ -1,6 +1,8 @@
 # DMDReader
 
-DMDReader is a software that reads the pinball DMD data provided in different formats including inputs from a real DMD (using https://github.com/pinballpower/code_dmd)
+DMDReader is a software that reads the pinball DMD data provided in different formats including inputs from a real DMD (using https://github.com/pinballpower/code_dmd).
+To use in in a real pinball a Raspberry Pi and a small add-on board is required. However, the software is not limited to the Raspberry Pi. 
+It also runs on Windows. This is especially helpful if you want to test a colorisation from a dump file.
 
 ## License
 The license has been changed from MIT to GPL v3 on 2.5.2022. In general, I'm not a big fan of the GPL and rather prefer the more open MIT license. 
