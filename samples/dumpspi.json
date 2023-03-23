@@ -13,7 +13,7 @@
   "processor": {
     "frameinfo": {},
     "txtwriter": {
-      "filename": "tron.txt",
+      "filename": "dump.txt",
       "async": true
     }
   },
