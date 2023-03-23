@@ -102,7 +102,7 @@ bool SerumColorizer::configureFromPtree(boost::property_tree::ptree pt_general, 
 		ok = false;
 	}
 
-	Serum_SetIgnoreUnknownFramesTimeout(ignoreUnknownFramesTimeout);
+	// Serum_SetIgnoreUnknownFramesTimeout(ignoreUnknownFramesTimeout);
 	// Serum_SetMaximumUnknownFramesToSkip(maximumUnknownFramesToSkip);
 
 	// create a default palette
