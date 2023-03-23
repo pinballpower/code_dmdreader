@@ -9,3 +9,9 @@ To make sure that won't happen with this software, the license of this software 
 anything about "commercial" or "non-commercial" use cases. If you want to create a commercial product based on this software, feel free to do so. 
 If you want to sell compiled versions of this software, you can do this as long as you provide users a way to access the full source code that's 
 needed to build their own software. This is also valid for any derivate work.
+
+## Documentation
+
+- [Installation](docs/install.md)
+- [Modules](docs/modules.md)
+- [Example configurations](docs/examples.md)
