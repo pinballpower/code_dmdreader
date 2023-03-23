@@ -1,0 +1,22 @@
+{
+  "general": {
+    "cwd_to_configdir": true,
+    "log": ""
+  },
+  "source": {
+    "spi": {
+      "device": "/dev/spidev1.0",
+      "speed": 4000000,
+      "notify_gpio": 7
+    }
+  },
+  "processor": {
+    "frameinfo": {},
+    "txtwriter": {
+      "filename": "tron.txt",
+      "async": true
+    }
+  },
+  "renderer": {
+  }
+}
