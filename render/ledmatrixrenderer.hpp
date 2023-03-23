@@ -22,4 +22,8 @@ private:
 	struct RGBLedMatrix* matrix = NULL;
 	struct LedCanvas* offscreen_canvas;
 
+	int width = 128;
+	int height = 32;
+	bool rotate_180 = false;
+
 };

@@ -19,7 +19,7 @@ void LEDMatrixRenderer::renderFrame(DMDFrame& f) {
     bool is32 = (f.getBitsPerPixel() == 32);
 
     auto pixeldata = f.getPixelData();
-    auto width = f.getWidth();
+    auto frame_width = f.getWidth();
 
     int x = 0;
     int y = 0;
@@ -35,10 +35,15 @@ void LEDMatrixRenderer::renderFrame(DMDFrame& f) {
         if (is32)
             px++;
 
-        led_canvas_set_pixel(offscreen_canvas, x, y, r, g, b);
+        if (rotate_180) {
+            led_canvas_set_pixel(offscreen_canvas, width-x, height-y, r, g, b);
+        }
+        else {
+            led_canvas_set_pixel(offscreen_canvas, x, y, r, g, b);
+        }
 
         x++;
-        if (x >= width) {
+        if (x >= frame_width) {
             x = 0;
             y++;
         }
@@ -59,12 +64,9 @@ bool LEDMatrixRenderer::configureFromPtree(boost::property_tree::ptree pt_genera
     struct RGBLedMatrixOptions options;
     struct RGBLedRuntimeOptions rt_options;
     
-    int width, height, pwm_bits;
-    int x, y, i;
-
     width = pt_renderer.get("width", 128);
     height = pt_renderer.get("height", 32);
-    pwm_bits = pt_renderer.get("pwm_bits", 8);
+    int pwm_bits = pt_renderer.get("pwm_bits", 8);
     string rgb_sequence = pt_renderer.get("rgb_sequence", "rgb");
 
     int multiplexing = pt_renderer.get("multiplexing", 0);
@@ -97,7 +99,7 @@ bool LEDMatrixRenderer::configureFromPtree(boost::property_tree::ptree pt_genera
         brightness = 100;
     }
 
-    // TODO: check what other configuration parameters could be useful
+    rotate_180 = pt_renderer.get("rotate_180", false);
 
     memset(&options, 0, sizeof(options));
     options.rows = height;
