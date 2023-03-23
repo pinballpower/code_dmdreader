@@ -7,6 +7,7 @@
 #include "../dmdsource/pngsource.hpp"
 #include "../processor/pupcapture.hpp"
 #include "../processor/frameprocessor.hpp"
+#include "../processor/fulllevel.hpp"
 #include "../processor/frameinfologger.hpp"
 #include "../processor/palettecolorizer.hpp"
 #include "../processor/txtwriter.hpp"
@@ -93,6 +94,9 @@ std::shared_ptr<DMDFrameProcessor> createProcessor(string name) {
 	}
 	else if (name == "palette") {
 		return std::make_shared<PaletteColorizer>();
+	}
+	else if (name == "fulllevel") {
+		return std::make_shared<FullLevel>();
 	}
 	else if (name == "txtwriter") {
 		return std::make_shared<TXTWriter>();
