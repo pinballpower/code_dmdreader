@@ -81,6 +81,9 @@ bool SerumColorizer::configureFromPtree(boost::property_tree::ptree pt_general, 
 	int ignoreUnknownFramesTimeout = pt_source.get("ignore_unknown_frames_timeout_ms", 30);
 	int maximumUnknownFramesToSkip = pt_source.get("maximum_unknown_frames_to_skip", 4);
 	int bpp = pt_source.get("bits_per_pixel", 4);
+	int default_r = pt_source.get("uncolored_r", 0xff);
+	int default_g = pt_source.get("uncolored_g", 0xff);
+	int default_b = pt_source.get("uncolored_b", 0xff);
 
 	BOOST_LOG_TRIVIAL(info) << "[serumcolorizer] using " << serumfile;
 
@@ -102,12 +105,12 @@ bool SerumColorizer::configureFromPtree(boost::property_tree::ptree pt_general, 
 		ok = false;
 	}
 
-	// Serum_SetIgnoreUnknownFramesTimeout(ignoreUnknownFramesTimeout);
-	// Serum_SetMaximumUnknownFramesToSkip(maximumUnknownFramesToSkip);
+	Serum_SetIgnoreUnknownFramesTimeout(ignoreUnknownFramesTimeout);
+	Serum_SetMaximumUnknownFramesToSkip(maximumUnknownFramesToSkip);
 
 	// create a default palette
-	DMDPalette defaultPalette = DMDPalette(DMDColor(0xff, 0, 0), bpp, "default");
-	// Serum_SetStandardPalette(defaultPalette.asPackedColors().data(), bpp);
+	DMDPalette defaultPalette = DMDPalette(DMDColor(default_r, default_g, default_b), bpp, "default");
+	Serum_SetStandardPalette(defaultPalette.asPackedColors().data(), bpp);
 
 	return ok;
 
