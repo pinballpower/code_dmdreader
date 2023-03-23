@@ -12,6 +12,6 @@ needed to build their own software. This is also valid for any derivate work.
 
 ## Documentation
 
-- [Installation](docs/install.md)
-- [Modules](docs/modules.md)
-- [Example configurations](docs/examples.md)
+- [Installation](doc/install.md)
+- [Modules](doc/modules.md)
+- [Example configurations](doc/examples.md)
