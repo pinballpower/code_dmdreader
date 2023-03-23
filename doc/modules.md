@@ -79,7 +79,13 @@ Uses a SERUM colorisation and apply it to the frames.
 |Parameter|Description|
 |---|---|
 |file|The colorisation file. Can be an uncomrpessed .cROM file or a compressed .cRZ file|
-|ignoreUnknownFramesTimesout|Timeout (ins ms) after that frames will not be colored if there is no matching colorisation|
+|ignore_unknown_frames_timeout_ms|Timeout (ins ms) after that frames will not be colored if there is no matching colorisation|
+|maximum_unknown_frames_to_skip|Skip at most that many fraes before switching to default palette coloring|
+|bits_per_pixel|bits per pixel (2-4), used for default palette generation|
+|uncolored_r|red component of the default palette (brightest value)|
+|uncolored_g|green component of the default palette (brightest value)|
+|uncolored_b|blue component of the default palette (brightest value)|
+
 
 The coloriser will only process uncolored frames (max 8bits/pixel). If a frame can't be colored (e.g. if therer is no matching colorisation for it), it will be returned unprocessed.
 To deal with these you can e.g. add a "palette" colorizer after applying serum.
