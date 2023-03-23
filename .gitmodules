@@ -1,12 +1,12 @@
 [submodule "external/libserum"]
 	path = external/libserum
-	url = https://github.com/pinballpower/libserum
+	url = https://github.com/PPUC/libserum
 [submodule "external/code_dmd"]
 	path = external/code_dmd
 	url = https://github.com/pinballpower/code_dmd
 [submodule "external/rpi-rgb-led-matrix"]
 	path = external/rpi-rgb-led-matrix
-	url = https://github.com/hzeller/rpi-rgb-led-matrix
+	url = https://github.com/pinballpower/rpi-rgb-led-matrix
 [submodule "external/xbr"]
 	path = external/xbr
 	url = https://github.com/pinballpower/libxbr-standalone
