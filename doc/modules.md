@@ -79,7 +79,13 @@ Uses a SERUM colorisation and apply it to the frames.
 |Parameter|Description|
 |---|---|
 |file|The colorisation file. Can be an uncomrpessed .cROM file or a compressed .cRZ file|
-|ignoreUnknownFramesTimesout|Timeout (ins ms) after that frames will not be colored if there is no matching colorisation|
+|ignore_unknown_frames_timeout_ms|Timeout (ins ms) after that frames will not be colored if there is no matching colorisation|
+|maximum_unknown_frames_to_skip|Skip at most that many fraes before switching to default palette coloring|
+|bits_per_pixel|bits per pixel (2-4), used for default palette generation|
+|uncolored_r|red component of the default palette (brightest value)|
+|uncolored_g|green component of the default palette (brightest value)|
+|uncolored_b|blue component of the default palette (brightest value)|
+
 
 The coloriser will only process uncolored frames (max 8bits/pixel). If a frame can't be colored (e.g. if therer is no matching colorisation for it), it will be returned unprocessed.
 To deal with these you can e.g. add a "palette" colorizer after applying serum.
@@ -162,5 +168,14 @@ Note that dmdreader have to run as root to use this.
 |width|width of the LED matrix (columns)|
 |height|height of the LED matrix (rows)|
 |pwm_bits|PWM bits per pixel (default 8, can be 1-11)|
+|rgb_sequence| RGB sequence as string, e.g. "gbr","rgb","bgr"|
+|multiplexing|multiplexing mode (see https://github.com/hzeller/rpi-rgb-led-matrix)|
+|scan_mode|0: non-interlaced, 1: interlaced|
+|dither_bits|dither the n LSB bits (0-2)|
+|lsb_nanoseconds|time the LSB is displayed, 50-300ns. shorter values increase load, but usually improve quality|
+|brightness|brightness in %|
+|rotate_180|rotate the display content by 180 degrees|
+
+
 
 
