@@ -21,15 +21,3 @@ Some examples are:
 I understand that this isn't a perfect solution. If you don't agree with this policy, you can simply fork the GPL part of this project and work on your own 
 version. That's just fine. We simply can't merge pull requests into this repository that do not qualify for closed-source use cases.
 I hope we can fully open-source this software at some point, but that's not something we can decide by ourself.
-
-## Rendering on the Raspberry Pi
-
-When displaying graphics, DMDReader uses OpenGL ES 3 and access the display using the "direct rendering manager" (DRM). This . However, there is one important limitation. Only a single 
-process can access the DRM. That means that even on a two-screen setup, you can't have two independent accessing the screens at the same time. 
-This complicates stuff as the video player that is needed for PubPacks need to be included directly into the main process.
-
-Below is a list of links to different documentation, sample code and more that helped during the development of the RPI graphical interface.
-
-## Additional resources
-
-I have created a [simple list with links to additional resources in the web](links.md). Feel free to send a pull request with additional resources.
