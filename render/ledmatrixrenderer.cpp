@@ -35,7 +35,7 @@ void LEDMatrixRenderer::renderFrame(DMDFrame& f) {
         if (is32)
             px++;
 
-        led_canvas_set_pixel(offscreen_canvas, x, y, r, b, g);
+        led_canvas_set_pixel(offscreen_canvas, x, y, r, g, b);
 
         x++;
         if (x >= width) {
@@ -72,6 +72,7 @@ bool LEDMatrixRenderer::configureFromPtree(boost::property_tree::ptree pt_genera
     options.rows = height;
     options.cols = width;
     options.chain_length = 1;
+    options.pwm_bits = pwm_bits;
     options.hardware_mapping = "dmdreader";
 
     memset(&rt_options, 0, sizeof(rt_options));
