@@ -1,4 +1,10 @@
 #!/bin/bash
+
+total_memory=$(free -b | awk 'NR==2 {print $2}')
+if [ $total_memory -lt 1000000000 ]; then
+ echo "Can't compile on a system with less than 1GB physical memory"
+fi
+
 if [ "$1" == "clean" ]; then
   find . -iwholename '*cmake*' -not -name CMakeLists.txt -delete
   rm Makefile
