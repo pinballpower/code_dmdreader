@@ -1,0 +1,21 @@
+{
+  "general": {
+    "cwd_to_configdir": true,
+    "log": ""
+  },
+  "source": {
+    "png": {
+	"files": [ "rgb-128x32.png" ],
+	"no_finish": true
+    }
+  },
+  "processor": {
+	"upscale": {}
+  },
+  "renderer": {
+      "ledmatrix": {
+          "width": 256,
+          "height":64 
+      }
+  }
+}
