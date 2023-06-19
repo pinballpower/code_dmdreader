@@ -1,6 +1,7 @@
 #!/bin/sh
-cat /boot/config.txt | grep -v "dtparam=spi" > /tmp/config.txt
+cat /boot/config.txt | grep -v "dtparam=spi" | grep -v audio=on > /tmp/config.txt
 echo "dtparam=spi=on" >> /tmp/config.txt
+
 sudo mv /tmp/config.txt /boot/config.txt
 echo "You need to reboot to activate SPI"
 
