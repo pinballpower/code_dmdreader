@@ -17,11 +17,16 @@ message(STATUS "RPI defined")
 else()
 find_path(RPI bcm_host.h)
 endif()
+
 if (RPI)
 message(STATUS "compiling for Raspberry Pi")
-set (CONFIGDIR "/etc/dmdreader")
 else()
 message(STATUS "not compiling for Raspberry Pi")
+endif()
+
+if (UNIX)
+message(STATUS "compiling for Unix")
+set (CONFIGDIR "/etc/dmdreader")
 endif()
 
 if(WIN32)
@@ -37,7 +42,7 @@ if (MSVC)
 endif()
 
 #
-# Pi4
+# Pi 3/4
 #
 if (RPI)
 message(STATUS "configuring OpenGL ES for Raspberry Pi")
