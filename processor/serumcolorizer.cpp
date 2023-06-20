@@ -37,7 +37,7 @@ DMDFrame SerumColorizer::processFrame(DMDFrame& f) {
 
 		checksumLastFrame = checksum;
 		coloredOk = Serum_Colorize(srcbuffer, width, height, palette, rotations, &triggerID);
-		BOOST_LOG_TRIVIAL(info) << "[serumcolorizer] colored frame";
+		BOOST_LOG_TRIVIAL(debug) << "[serumcolorizer] colored frame";
 
 		timestampLastFrame = now;
 
