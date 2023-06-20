@@ -9,15 +9,15 @@ add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING)
 
 project ("dmdreader")
 
-message(STATUS "$ENV{CMAKE_INCLUDE_PATH}")
+# message(STATUS "$ENV{CMAKE_INCLUDE_PATH}")
 
 set (DRM_INCLUDE_DIR "")
 
 # detect Raspberry Pi
-if (RPI) 
-message(STATUS "RPI defined")
-else()
-find_path(RPI bcm_host.h)
+message(STATUS "Target architecture: " ${CMAKE_SYSTEM_PROCESSOR})
+if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "armv7l")
+    message(STATUS "Target architecture: ARM v7l, assuming Raspberry Pi")
+    set (RPI 1)
 endif()
 
 if (RPI)
