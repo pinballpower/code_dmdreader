@@ -11,6 +11,8 @@ project ("dmdreader")
 
 message(STATUS "$ENV{CMAKE_INCLUDE_PATH}")
 
+set (DRM_INCLUDE_DIR "")
+
 # detect Raspberry Pi
 if (RPI) 
 message(STATUS "RPI defined")
