@@ -7,19 +7,28 @@
 
 DMDFrame PNGSource::getNextFrame()
 {
+	if (frames.empty()) {
+		return lastFrame;
+	}
+
 	DMDFrame frame = frames.front();
+	lastFrame=frame;
 	frames.pop();
 	return frame;
 }
 
 bool PNGSource::isFinished()
 {
-	return frames.empty();
+	if (no_finish) {
+		return false;
+	} else {
+		return frames.empty();
+	}
 }
 
 bool PNGSource::isFrameReady()
 {
-	return true;
+	return (! frames.empty());
 }
 
 bool PNGSource::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
@@ -32,5 +41,8 @@ bool PNGSource::configureFromPtree(boost::property_tree::ptree pt_general, boost
 			frames.push(DMDFrame(buff));
 		}
 	}
+
+        no_finish = pt_source.get("no_finish", true);
+
 	return true;
 }

@@ -17,6 +17,8 @@ public:
 private:
 
 	queue<DMDFrame> frames;
+	DMDFrame lastFrame;
 	int currentFrame = 0;
 
+	bool no_finish = 1;
 };
