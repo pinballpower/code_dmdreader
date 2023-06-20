@@ -1,0 +1,36 @@
+{
+  "general": {
+    "cwd_to_configdir": true,
+    "log": ""
+  },
+  "source": {
+    "txt": {
+      "name": "samples/baywatch.txt"
+    },
+    "vni": {
+      "basename": "samples/baywatch"
+    }
+  },
+  "processor": {
+    "pin2dmd": {
+      "basename": "samples/baywatch"
+    },
+    "palette": {
+      "colors": 4
+    }
+  },
+  "renderer": {
+      "opengl": {
+        "width": 1920,
+        "height": 1080,
+        "dmd_x": 0,
+        "dmd_y": 0,
+        "dmd_width": 1640,
+        "dmd_height": 640,
+        "overlay_texture": "img/circle_blurred.png",
+        "scale_linear": false,
+        "display": true,
+        "fragment_shader":  "shaders/pi4-192x64.fs"
+      }
+  }
+}
