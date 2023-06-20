@@ -1,0 +1,23 @@
+{
+  "general": {
+    "cwd_to_configdir": true,
+    "log": ""
+  },
+  "source": {
+    "spi": {
+      "device": "/dev/spidev0.0",
+      "speed": 4000000,
+      "notify_gpio": 17
+    }
+  },
+  "processor": {
+      "palette": {},
+      "upscale": {}
+  },
+  "renderer": {
+      "ledmatrix": {
+          "width": 256,
+          "height": 64
+      }
+  }
+}

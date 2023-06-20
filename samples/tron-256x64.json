@@ -1,0 +1,28 @@
+{
+  "general": {
+    "cwd_to_configdir": true,
+    "log": ""
+  },
+  "source": {
+    "spi": {
+      "device": "/dev/spidev0.0",
+      "speed": 4000000,
+      "notify_gpio": 17
+    }
+  },
+  "processor": {
+      "serum": {
+          "comment": "File from https://vpuniverse.com/files/file/14216-tron-legacy-stern-2011-dmd-64-colors-serum-format-v22-final/", 
+          "file": "trn_174h.cRZ"
+      },
+      "upscale": {
+          "upscaler": "xbr2x"
+      }
+  },
+  "renderer": {
+      "ledmatrix": {
+          "width": 256,
+          "height":64 
+      }
+  }
+}
