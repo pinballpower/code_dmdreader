@@ -42,17 +42,19 @@ if (MSVC)
 endif()
 
 #
-# Pi 3/4
+# OpenGL
 #
-if (RPI)
-message(STATUS "configuring OpenGL ES for Raspberry Pi")
+if (UNIX)
+message(STATUS "checking for OpenGL ES")
+set (OGL 1)
 
 find_path(DRM_INCLUDE_DIR "drm.h" /usr/include/libdrm)
 if (DRM_INCLUDE_DIR)
-message(STATUS "drm.h found in ${DRM_INCLUDE_DIR}")
+message(STATUS "drm.h found")
 include_directories(${DRM_INCLUDE_DIR})
 else()
-message(FATAL_ERROR "drm.h not found")
+message(STATUS "drm.h not found")
+set(OGL 0)
 endif()
 
 find_path(EGL_INCLUDE_DIR "egl.h" /usr/include/EGL)
@@ -60,7 +62,8 @@ if (EGL_INCLUDE_DIR)
 message(STATUS "egl.h found in ${EGL_INCLUDE_DIR}")
 include_directories(${EGL_INCLUDE_DIR})
 else()
-message(FATAL_ERROR "egl.h not found")
+message(STATUS "egl.h not found")
+set(OGL 0)
 endif()
 
 find_path(XF86_INCLUDE_DIR "xf86drm.h")
@@ -68,7 +71,8 @@ if (XF86_INCLUDE_DIR)
 message(STATUS "xf86drm.h found in ${XF86_INCLUDE_DIR}")
 include_directories(${XF86_INCLUDE_DIR})
 else()
-message(FATAL_ERROR "xf86drm.h not found")
+message(STATUS "xf86drm.h not found")
+set(OGL 0)
 endif()
 
 find_path(GL2_INCLUDE_DIR "gl2.h" /usr/include/GLES2)
@@ -76,26 +80,37 @@ if (GL2_INCLUDE_DIR)
 message(STATUS "gl2.h found in ${GL2_INCLUDE_DIR}")
 include_directories(${GL2_INCLUDE_DIR})
 else()
-message(FATAL_ERROR "gl2.h not found")
+message(STATUS "gl2.h not found")
+set(OGL 0)
 endif()
 
+if (OGL)
+message(STATUS "Enabling OpenGL ES")
+add_definitions(-DUSE_OPENGLPI4)
+set (PI_LIBRARIES EGL drm gbm GLESv2 gpiodcxx)
+set (OPENGL_SRC "render/pi4renderer.hpp" "render/pi4renderer.cpp" "render/openglrenderer.hpp" "render/openglrenderer.cpp" "render/openglshader.hpp" "render/openglshader.cpp" "drm/drmhelper.hpp" "drm/drmhelper.cpp")
+else()
+message(STATUS "Disabling OpenGL ES")
+endif()
+
+endif()
+
+if (UNIX)
 find_path(GPIOD_INCLUDE_DIR "gpiod.hpp")
 if (GPIOD_INCLUDE_DIR)
 message(STATUS "gpiod.hpp found in ${GPIOD_INCLUDE_DIR}")
 include_directories(${GPIOD_INCLUDE_DIR})
+set (SPI_SRC "dmdsource/spisource.hpp" "dmdsource/spisource.cpp" "rpi/spi.hpp" "rpi/spi.cpp" "rpi/gpio.hpp" "rpi/gpio.cpp")
+add_definitions(-DUSE_SPI)
+message(STATUS "Enabling SPI")
 else()
-message(FATAL_ERROR "gpiod.hpp not found")
+message(STATUS "Disabling SPI")
+endif()
 endif()
 
-add_definitions(-DUSE_OPENGLPI4)
-add_definitions(-DUSE_SPI)
-# set (PI_INCLUDE_DIRS "/usr/include:/usr/include/stb:/usr/include/libdrm")
-set (PI_LIBRARIES EGL drm gbm GLESv2 gpiodcxx)
-set (OPENGL_SRC "render/pi4renderer.hpp" "render/pi4renderer.cpp" "render/openglrenderer.hpp" "render/openglrenderer.cpp" "render/openglshader.hpp" "render/openglshader.cpp")
-set (SPI_SRC "dmdsource/spisource.hpp" "dmdsource/spisource.cpp" )
-set (RPI_SRC "drm/drmhelper.hpp" "drm/drmhelper.cpp"   "rpi/spi.hpp" "rpi/spi.cpp" "rpi/gpio.hpp" "rpi/gpio.cpp")
 
-# libavutil
+# PUPPlayer
+if (UNIX)
 find_path(LIBAV_INCLUDE_DIR "libavutil/hwcontext_drm.h")
 if (LIBAV_INCLUDE_DIR)
 message(STATUS "libavutil/hwcontext_drm.h found in ${LIBAV_INCLUDE_DIR}")
@@ -104,10 +119,6 @@ include_directories(${LIBAV_INCLUDE_DIR})
 set (VIDEO_SRC "drm/drmprimeout.cpp" "drm/drmprimeout.hpp" "drm/videoplayer.cpp" "drm/videoplayer.hpp" "drm/drmframebuffer.hpp" "drm/drmframebuffer.cpp" )
 set (PUPPLAYER_SRC "pupplayer/pupplayer.hpp" "pupplayer/pupplayer.cpp" "drm/videofile.hpp" "drm/videofile.cpp" "drm/videofileloader.cpp" "drm/videofileloader.hpp" "pupplayer/trigger.hpp" "pupplayer/trigger.cpp" "pupplayer/screen.hpp" "pupplayer/screen.cpp" "pupplayer/playlist.hpp" "pupplayer/playlist.cpp" "pupplayer/pivid.cpp" "pupplayer/pivid.hpp" "pupplayer/internalpupplayer.hpp" "pupplayer/internalpupplayer.cpp" "pupplayer/pividpupplayer.hpp" "pupplayer/pividpupplayer.cpp")
 set (VIDEO_LIBRARIES avcodec avfilter avutil avformat drm)
-else()
-message(FATAL_ERROR "libavutil/hwcontext_drm.h not found, you might need to install libavutil-dev ")
-endif()
-
 find_path(LIBAVCODEC_INCLUDE_DIR "libavcodec/avcodec.h")
 if (LIBAVCODEC_INCLUDE_DIR)
 include_directories(${LIBAVCODEC_INCLUDE_DIR})
@@ -115,6 +126,13 @@ message(STATUS "libavcodec/avcodec.h found in ${LIBAVCODEC_INCLUDE_DIR}")
 else()
 message(FATAL_ERROR "libavcodec/avcodec.h not found, you might need to install libavcodec-dev")
 endif()
+message(STATUS "Enabling native PUP player")
+else()
+message(STATUS "libavutil/hwcontext_drm.h not found")
+message(STATUS "Disabling native PUP player")
+endif()
+
+
 
 endif()
 
@@ -258,7 +276,7 @@ set (TEST_SRC "test/drmtest.hpp"  "test/drmtest.cpp" "test/scoredetector.cpp" "t
 
 set (THIRDPARTY_SRC ${SERUM_SRC} ${RGB_SRC} ${HQX_SRC} ${XBR_SRC})
 
-set (ALL_SOURCES ${UTIL_SRC} ${RENDER_SRC} ${DMD_SRC} ${DMDSOURCE_SRC} ${PROCESSOR_SRC} ${COLOR_SRC} ${OPENGL_SRC} ${SPI_SRC} ${RPI_SRC} ${VIDEO_SRC} ${PUPPLAYER_SRC} ${SERVICES_SRC} ${TEST_SRC} ${SCORE_SRC} ${THIRDPARTY_SRC})
+set (ALL_SOURCES ${UTIL_SRC} ${RENDER_SRC} ${DMD_SRC} ${DMDSOURCE_SRC} ${PROCESSOR_SRC} ${COLOR_SRC} ${OPENGL_SRC} ${SPI_SRC} ${RPI_SRC} ${VIDEO_SRC} ${PUPPLAYER_SRC} ${SERVICES_SRC} ${TEST_SRC} ${SCORE_SRC} ${THIRDPARTY_SRC} ${SPI_SRC})
 
 add_executable (${PROJECT_NAME} "dmdreader.cpp" ${ALL_SOURCES} )
 target_include_directories(${PROJECT_NAME} PRIVATE ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
