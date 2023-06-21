@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include "../external/libserum/src/serum-decode.h"
+#include "../external/libserum/src/serum-version.h"
 
 #define SERUM_MAXWIDTH 192
 #define SERUM_MAXHEIGHT 64
