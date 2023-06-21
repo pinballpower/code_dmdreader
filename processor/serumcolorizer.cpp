@@ -85,14 +85,14 @@ bool SerumColorizer::configureFromPtree(boost::property_tree::ptree pt_general, 
 	int default_g = pt_source.get("uncolored_g", 0xff);
 	int default_b = pt_source.get("uncolored_b", 0xff);
 
-	BOOST_LOG_TRIVIAL(info) << "[serumcolorizer] libserum " << SERUM_VERSION << " using " << serumfile;
+	BOOST_LOG_TRIVIAL(info) << "[serumcolorizer] libserum " << SERUM_VERSION;
 
 	unsigned int pnocolors = 0, pntriggers = 0;
 	width = height = 0;
 
 	bool ok = Serum_LoadFile(serumfile.c_str(), &width, &height, &pnocolors, &pntriggers);
 	if (ok) {
-		BOOST_LOG_TRIVIAL(info) << "[serumcolorizer] loaded SERUM colorisation from " << serumfile << width << "x" << height << " " << pnocolors << " colors, " << pntriggers << " triggers";
+		BOOST_LOG_TRIVIAL(info) << "[serumcolorizer] loaded SERUM colorisation from " << serumfile << " " << width << "x" << height << " " << pnocolors << " colors, " << pntriggers << " triggers";
 	}
 	else {
 		BOOST_LOG_TRIVIAL(error) << "[serumcolorizer] couldn't load SERUM colorisation from " << serumfile;
