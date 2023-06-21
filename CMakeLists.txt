@@ -318,7 +318,7 @@ install(DIRECTORY sample-configs DESTINATION ${CONFIGDIR} FILES_MATCHING PATTERN
 install(DIRECTORY img DESTINATION ${CONFIGDIR} FILES_MATCHING PATTERN "*.png")
 install(FILES samples/dmd-to-led.json DESTINATION ${CONFIGDIR} RENAME dmdreader.json) # Default config
 
-file(GLOB LIBS "external/libserum/*.so")
+file(GLOB LIBS "${CMAKE_CURRENT_BINARY_DIR}/external/libserum/*.so")
 message(STATUS LIBS)
 foreach(lib ${LIBS})
     install(FILES ${lib} DESTINATION lib)
