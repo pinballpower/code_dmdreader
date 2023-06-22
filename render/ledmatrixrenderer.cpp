@@ -36,7 +36,7 @@ void LEDMatrixRenderer::renderFrame(DMDFrame& f) {
             px++;
 
         if (rotate_180) {
-            led_canvas_set_pixel(offscreen_canvas, width-x, height-y, r, g, b);
+            led_canvas_set_pixel(offscreen_canvas, width-x-1, height-y-1, r, g, b);
         }
         else {
             led_canvas_set_pixel(offscreen_canvas, x, y, r, g, b);
