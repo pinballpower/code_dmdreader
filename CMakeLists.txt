@@ -185,7 +185,7 @@ set (VIDEO_SRC "drm/drmprimeout.cpp" "drm/drmprimeout.hpp" "drm/videoplayer.cpp"
 set (PUPPLAYER_SRC "pupplayer/pupplayer.hpp" "pupplayer/pupplayer.cpp" "drm/videofile.hpp" "drm/videofile.cpp" "drm/videofileloader.cpp" "drm/videofileloader.hpp" "pupplayer/trigger.hpp" "pupplayer/trigger.cpp" "pupplayer/screen.hpp" "pupplayer/screen.cpp" "pupplayer/playlist.hpp" "pupplayer/playlist.cpp" "pupplayer/pivid.cpp" "pupplayer/pivid.hpp" "pupplayer/internalpupplayer.hpp" "pupplayer/internalpupplayer.cpp" "pupplayer/pividpupplayer.hpp" "pupplayer/pividpupplayer.cpp")
 set (VIDEO_LIBRARIES avcodec avfilter avutil avformat drm)
 else()
-message(status "Disabling PUP Player")
+message(STATUS "Disabling PUP Player")
 endif()
 
 endif()
@@ -344,12 +344,10 @@ set (THIRDPARTY_SRC ${SERUM_SRC} ${RGB_SRC} ${HQX_SRC} ${XBR_SRC})
 set (ALL_SOURCES ${UTIL_SRC} ${RENDER_SRC} ${DMD_SRC} ${DMDSOURCE_SRC} ${PROCESSOR_SRC} ${COLOR_SRC} ${OPENGL_SRC} ${SPI_SRC} ${RPI_SRC} ${VIDEO_SRC} ${PUPPLAYER_SRC} ${SERVICES_SRC} ${TEST_SRC} ${SCORE_SRC} ${THIRDPARTY_SRC} ${SPI_SRC})
 
 add_executable (${PROJECT_NAME} "dmdreader.cpp" ${ALL_SOURCES} )
-target_include_directories(${PROJECT_NAME} PRIVATE ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBRARIES} ${ZLIB_LIBRARIES} ${VIDEO_LIBRARIES} ${SERUM_LIBRARIES})
 
 if (COMPILE_TEST)
 add_executable (test.bin "test.cpp" ${ALL_SOURCES} )
-target_include_directories(test.bin PRIVATE ${PI_INCLUDE_DIRS} ${DRM_INCLUDE_DIR})
 target_link_libraries(test.bin PUBLIC ${Boost_LIBRARIES} ${EXTRA_LIBS} ${OPENGL_LIBRARIES} ${PI_LIBRARIES} ${ZLIB_LIBRARIES} ${VIDEO_LIBRARIES} ${SERUM_LIBRARIES})
 endif()
 
