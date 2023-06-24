@@ -98,8 +98,8 @@ int DRMPrimeOut::renderFrame(AVFrame* frame)
 		}
 
 		if (drmModeAddFB2WithModifiers(drmFd,
-			av_frame_cropped_width(frame),
-			av_frame_cropped_height(frame),
+			frame->width,
+			frame->height,
 			desc->layers[0].format, bo_handles,
 			pitches, offsets, modifiers,
 			&da->framebufferHandle, DRM_MODE_FB_MODIFIERS /** 0 if no mods */) != 0) {
@@ -113,8 +113,8 @@ int DRMPrimeOut::renderFrame(AVFrame* frame)
 		compositionGeometry.x, compositionGeometry.y,
 		compositionGeometry.width, compositionGeometry.height,
 		0, 0,
-		av_frame_cropped_width(frame) << 16,
-		av_frame_cropped_height(frame) << 16);
+		frame->width << 16,
+		frame->height << 16);
 
 	if (ret != 0) {
 		BOOST_LOG_TRIVIAL(error) << "[drmprime_out] drmModeSetPlane failed:" << ERRSTR;
