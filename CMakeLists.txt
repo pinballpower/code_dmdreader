@@ -11,8 +11,6 @@ project ("dmdreader")
 
 # message(STATUS "$ENV{CMAKE_INCLUDE_PATH}")
 
-set (DRM_INCLUDE_DIR "")
-
 # detect Raspberry Pi
 message(STATUS "Target architecture: " ${CMAKE_SYSTEM_PROCESSOR})
 if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "armv7l")
@@ -20,7 +18,7 @@ if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "armv7l")
     set (RPI 1)
 endif()
 if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "armv8l")
-    message(STATUS "Target architecture: ARM v7l, assuming Raspberry Pi")
+    message(STATUS "Target architecture: ARM v8l, assuming Raspberry Pi")
     set (RPI 1)
 endif()
 
@@ -54,16 +52,28 @@ if (UNIX)
 message(STATUS "checking for OpenGL ES")
 set (OGL 1)
 
-find_path(DRM_INCLUDE_DIR "drm.h" /usr/include/libdrm)
+find_path(OPENGLES3_INCLUDE_DIR GLES3/gl3.h)
+if (OPENGLES3_INCLUDE_DIR)
+message(STATUS "GLES3/gl3.h found in ${OPENGLES3_INCLUDE_DIR}")
+include_directories(${OPENGLES3_INCLUDE_DIR})
+else()
+message(STATUS "GLES3/gl3.h not found")
+set(OGL 0)
+endif()
+
+find_path(DRM_INCLUDE_DIR libdrm/drm.h)
 if (DRM_INCLUDE_DIR)
-message(STATUS "drm.h found")
-include_directories(${DRM_INCLUDE_DIR})
+message(STATUS "drm.h found in ${DRM_INCLUDE_DIR}")
+include_directories(${DRM_INCLUDE_DIR}/libdrm)
 else()
 message(STATUS "drm.h not found")
 set(OGL 0)
 endif()
 
-find_path(EGL_INCLUDE_DIR "egl.h" /usr/include/EGL)
+find_path(OPENGLES3_INCLUDE_DIR GLES3/gl3.h)
+message(STATUS ${OPENGLES3_INCLUDE_DIR})
+
+find_path(EGL_INCLUDE_DIR "EGL/egl.h")
 if (EGL_INCLUDE_DIR)
 message(STATUS "egl.h found in ${EGL_INCLUDE_DIR}")
 include_directories(${EGL_INCLUDE_DIR})
@@ -317,9 +327,4 @@ install(DIRECTORY shaders DESTINATION ${CONFIGDIR} FILES_MATCHING PATTERN "*.?s"
 install(DIRECTORY sample-configs DESTINATION ${CONFIGDIR} FILES_MATCHING PATTERN "*.json")
 install(DIRECTORY img DESTINATION ${CONFIGDIR} FILES_MATCHING PATTERN "*.png")
 install(FILES samples/dmd-to-led.json DESTINATION ${CONFIGDIR} RENAME dmdreader.json) # Default config
-
-file(GLOB LIBS "${CMAKE_CURRENT_BINARY_DIR}/external/libserum/*.so")
-message(STATUS LIBS)
-foreach(lib ${LIBS})
-    install(FILES ${lib} DESTINATION lib)
-endforeach()
+install(DIRECTORY external/libserum DESTINATION lib FILES_MATCHING PATTERN "*.so")
