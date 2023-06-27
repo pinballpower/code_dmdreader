@@ -7,7 +7,7 @@
       "configurationType": "Debug",
       "ctestCommandArgs": "",
       "generator": "Ninja",
-      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "inheritEnvironments": [ "msvc_x64" ],
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "name": "x64-Debug",
       "variables": [
@@ -89,7 +89,6 @@
       "rsyncCommandArgs": "-t --delete",
       "remoteCopyBuildOutput": false,
       "remoteCopySourcesMethod": "rsync",
-      "variables": [],
       "environments": [
         {
           "CMAKE_INCLUDE_PATH": "/usr/include/libdrm:/opt/vc/include",
