@@ -10,6 +10,3 @@
 [submodule "external/xbr"]
 	path = external/xbr
 	url = https://github.com/pinballpower/libxbr-standalone
-[submodule "external/colorize"]
-	path = external/colorize
-	url = https://github.com/pinballpower/code_colorize
