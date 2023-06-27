@@ -12,7 +12,7 @@
     }
   },
   "processor": {
-    "pin2dmd": {
+    "vni": {
       "basename": "samples/baywatch"
     },
     "palette": {

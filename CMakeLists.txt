@@ -352,17 +352,38 @@ find_package(ZLIB REQUIRED)
 #
 # VNI/PAL
 #
-get_filename_component(COLOR_CMAKE "colorize/CMakeLists.txt" ABSOLUTE)
-if(EXISTS ${COLOR_CMAKE})
-  message(STATUS "Enabling VNI/PAL colorisation module")
-  add_subdirectory("colorize")
-else()
-  if(FORCE_VNI)
-    message(FATAL_ERROR "Couldn't enable VNI support, aborting")
-  else()
-    message(STATUS "Disabling VNI support")
-  endif()
-endif()
+set(VNI_SRC 
+	"processor/vni/palcoloring.hpp"  
+	"processor/vni/palpalette.hpp" 
+	"processor/vni/palcoloring.cpp" 
+	"processor/vni/palmapping.hpp" 
+	"processor/vni/switchmode.hpp" 
+	"processor/vni/palmapping.cpp" 
+	"processor/vni/streamhelper.hpp" 
+	"processor/vni/streamhelper.cpp" 
+	"processor/vni/palpalette.cpp" 
+	"processor/vni/animationframe.hpp" 
+	"processor/vni/animationframe.cpp" 
+	"processor/vni/animationplane.hpp" 
+	"processor/vni/animationset.hpp" 
+	"processor/vni/animation.hpp" 
+	"processor/vni/animation.cpp" 
+	"processor/vni/vnianimation.hpp" 
+	"processor/vni/vnianimation.cpp" 
+	"processor/vni/vnianimationframe.hpp" 
+	"processor/vni/vnianimationframe.cpp" 
+	"processor/vni/vnianimationplane.hpp"  
+	"processor/vni/vnianimationplane.cpp" 
+	"processor/vni/vnianimationset.hpp" 
+	"processor/vni/vnianimationset.cpp" 
+	"processor/vni/animationset.cpp"  
+	"processor/vni/heatshrink_config.hpp" 
+	"processor/vni/heatshrink_decoder.hpp" 
+	"processor/vni/heatshrink_decoder.cpp" 
+	"processor/vni/vnicolorisation.hpp" 
+	"processor/vni/vnicolorisation.cpp" 
+	"processor/vni/animationplane.cpp"
+)
 #
 # VNI/PAL end
 #
@@ -514,7 +535,7 @@ set(ALL_SOURCES
     ${DMD_SRC}
     ${DMDSOURCE_SRC}
     ${PROCESSOR_SRC}
-    ${COLOR_SRC}
+    ${VNI_SRC}
     ${OPENGL_SRC}
     ${SPI_SRC}
     ${RPI_SRC}

@@ -29,7 +29,7 @@
       "ignore_duplicates": true,
       "async": true
     },
-    "pin2dmd": {
+    "vni": {
       "basename": "../samples/ghostbusters"
     },
     "pubcapture": {

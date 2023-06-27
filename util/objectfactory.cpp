@@ -38,9 +38,8 @@
 #include "../render/ledmatrixrenderer.hpp"
 #endif
 
-#if __has_include("../colorize/config.h")
-#include "../colorize/config.h"
-#include "../colorize/pin2dmdcolorisation.hpp"
+#if __has_include("../processor/vni/vnicolorisation.hpp")
+#include "../processor/vni/vnicolorisation.hpp"
 #endif
 
 
@@ -64,7 +63,7 @@ std::shared_ptr<DMDSource> createSource(string name) {
 #endif
 #ifdef VNICOLORING
 	else if (name == "vni") {
-		return std::make_shared<Pin2DMDColorisation>();
+		return std::make_shared<VNIColorisation>();
 	}
 #endif
 	else {
@@ -80,8 +79,8 @@ std::shared_ptr<DMDFrameProcessor> createProcessor(string name) {
 		return std::make_shared<PUPCapture>();
 	}
 #ifdef VNICOLORING
-	else if (name == "pin2dmd") {
-		return std::make_shared<Pin2DMDColorisation>();
+	else if (name == "vni") {
+		return std::make_shared<VNIColorisation>();
 	}
 #endif
 #ifdef USE_SERUM
