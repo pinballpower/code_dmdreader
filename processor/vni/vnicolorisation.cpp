@@ -8,13 +8,6 @@
 #include "palette_colorizer.hpp"
 #include "../../util/crc32.hpp"
 
-// We can enable/disbale up to 8 license features
-#define LICENSE_VNI 0x01
-
-uint8_t license_features(const vector<uint8_t> hostid, const vector<uint8_t> license_code) {
-	return 0xff;
-}
-
 string to_hex(const vector<uint8_t> data) {
 	string res;
 	for (auto x : data) {
@@ -27,14 +20,6 @@ string to_hex(const vector<uint8_t> data) {
 
 bool VNIColorisation::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
 {
-	// The host id for all licensing stuff
-	vector<uint8_t> hostid = { 0,0,0,0,0,0,0,0 };
-	vector<uint8_t> license_code = { 0,0,0,0,0,0,0,0 };
-
-	BOOST_LOG_TRIVIAL(error) << "[vnicolorisation] hostid is " << to_hex(hostid);
-
-	uint8_t features = license_features(hostid, license_code);
-
 	bool ok = false;
 
 	string basename = pt_source.get("basename", "");
@@ -43,27 +28,17 @@ bool VNIColorisation::configureFromPtree(boost::property_tree::ptree pt_general,
 		return false;
 	}
 
-	if (features & LICENSE_VNI) {
+	if (std::filesystem::exists(basename + ".pal") && std::filesystem::exists(basename + ".vni")) {
+		BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] using " << basename << ".pal/.vni";
+	};
 
-		BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] VNI licensed";
+	coloring = PalColoring(basename + ".pal");
+	animations = VniAnimationSet(basename + ".vni");
 
-		if (std::filesystem::exists(basename + ".pal") && std::filesystem::exists(basename + ".vni")) {
-			BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] using " << basename << ".pal/.vni";
-		};
-
-		coloring = PalColoring(basename + ".pal");
-		animations = VniAnimationSet(basename + ".vni");
-
-		ok = true;
-	}
-
-	if (! ok) {
-		// TODO: pal/fsq
-		BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] .pal/.fsq not yet implemented";
-	}
+	ok = true; // TODO: fix this
 
 	if (!ok) {
-		BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] couldn't load a colorisation, aborting";
+		
 	}
 
 	// count animations and frames
@@ -74,6 +49,11 @@ bool VNIColorisation::configureFromPtree(boost::property_tree::ptree pt_general,
 
 	// Set default palette
 	col_palette = coloring.get_default_palette().get_colors();
+
+	BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] loaded colorisation: " 
+		<< animations.get_animations().size() << " animations, "
+		<< src_frame_count << " frames, "
+		<< coloring.num_palettes << " palettes";
 
 	return true;
 }
