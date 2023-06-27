@@ -1,9 +1,12 @@
 #pragma once
 
 #include <fstream>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
 
 #include "../dmd/dmdframe.hpp"
 #include "dmdsource.hpp"
+
 
 class TXTDMDSource : public DMDSource {
 
@@ -28,7 +31,10 @@ private:
 	DMDFrame currentFrame;
 	DMDFrame preloadedFrame;
 	uint32_t preloadedFrameTimestamp = -1;
-	ifstream is;
+
+	std::ifstream fileStream;
+	boost::iostreams::filtering_istream is;
+
 	bool useTimingData = true;
 	unsigned long startMillisec = 0;
 	unsigned long lastFrameSentMillis = 0;

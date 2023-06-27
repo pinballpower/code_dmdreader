@@ -41,11 +41,34 @@ TXTDMDSource::~TXTDMDSource()
 
 bool TXTDMDSource::openFile(const string& filename)
 {
-	is.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+	bool isCompressed;
+
+	fileStream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	try {
-		is.open(filename);
+		fileStream.open(filename, std::ios::binary);
+		if (!fileStream.is_open()) {
+			std::cerr << "Failed to open file: " << filename << std::endl;
+			return false;
+		}
+
+		// Check if the file is compressed
+		char magic[2];
+		fileStream.read(magic, 2);
+		isCompressed = (magic[0] == '\x1F' && magic[1] == '\x8B');
+
+		// Reset the file stream to the beginning
+		fileStream.clear();
+		fileStream.seekg(0, std::ios::beg);
+
+		// Set up the input stream with the appropriate filters
+		if (isCompressed) {
+			BOOST_LOG_TRIVIAL(info) << "[txtdmdsource] " << filename << "is compressed, uncompressing it while reading";
+			is.push(boost::iostreams::gzip_decompressor());
+		}
+
+		is.push(fileStream);
 	}
-	catch (std::ios_base::failure e) {
+	catch (const std::ifstream::failure& e) {
 		BOOST_LOG_TRIVIAL(error) << "[txtdmdsource] can't open file " << filename << ": " << e.what();
 		eof = true;
 		return false;
