@@ -7,9 +7,19 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING)
 
+project("dmdreader")
+
+#
+# force options start
+#
 option(FORCE_OPENGLES "force enable OpenGL ES" 0)
 if(FORCE_OPENGLES)
   message(STATUS "support for OpenGL ES required")
+endif()
+
+option(FORCE_OPENGLES "force enable OpenGL/GLAD" 0)
+if(FORCE_OPENGL)
+  message(STATUS "support for OpenGL required")
 endif()
 
 option(FORCE_SPI "force enable SPI" 0)
@@ -22,14 +32,19 @@ if(FORCE_SERUM)
   message(STATUS "support for Serum required")
 endif()
 
+option(FORCE_XBR "force enable XBR" 0)
+if(FORCE_XBR)
+  message(STATUS "support for XBR required")
+endif()
+
+
 option(FORCE_LEDMATRIX "force enable RGB LED matrix" 0)
 if(FORCE_LEDMATRIX)
   message(STATUS "support for LED matrix required")
 endif()
-
-project("dmdreader")
-
-# message(STATUS "$ENV{CMAKE_INCLUDE_PATH}")
+#
+# force options end
+#
 
 # detect Raspberry Pi
 message(STATUS "Target architecture: " ${CMAKE_SYSTEM_PROCESSOR})
@@ -67,7 +82,7 @@ if(MSVC)
 endif()
 
 #
-# OpenGL ES
+# OpenGL ES start
 #
 if(UNIX)
   message(STATUS "checking for OpenGL ES")
@@ -137,90 +152,100 @@ if(UNIX)
       message(FATAL_ERROR "couldn't enable OpenGL ES, aborting")
     endif()
   endif()
-
 endif()
+#
+# OpenGL ES end
+#
 
-if(UNIX)
-  find_path(GPIOD_INCLUDE_DIR "gpiod.hpp")
-  if(GPIOD_INCLUDE_DIR)
-    message(STATUS "gpiod.hpp found in ${GPIOD_INCLUDE_DIR}")
-    include_directories(${GPIOD_INCLUDE_DIR})
-    set(SPI_SRC "dmdsource/spisource.hpp" "dmdsource/spisource.cpp"
-                "rpi/spi.hpp" "rpi/spi.cpp" "rpi/gpio.hpp" "rpi/gpio.cpp")
-    add_definitions(-DUSE_SPI)
-    message(STATUS "Enabling SPI")
-  else()
-    message(STATUS "Disabling SPI")
-    if(FORCE_SPI)
-      message(FATAL_ERROR "couldn't enable SPI, aborting")
-    endif()
-  endif()
-endif()
-
-# PUPPlayer
-if(UNIX)
-
-  set(VIDEO 1)
-  if(DRM_INCLUDE_DIR)
-    message(STATUS "drm.h found")
-    include_directories(${DRM_INCLUDE_DIR})
-  else()
-    message(STATUS "drm.h not found, disabling video")
-    set(VIDEO 0)
-  endif()
-
-  find_path(LIBAV_INCLUDE_DIR "libavutil/hwcontext_drm.h")
-  if(LIBAV_INCLUDE_DIR)
-    message(STATUS "libavutil/hwcontext_drm.h found in ${LIBAV_INCLUDE_DIR}")
-  else()
-    message(STATUS "libavutil/hwcontext_drm.h not found, disabling video")
-    set(VIDEO 0)
-  endif()
-
-  find_path(LIBAVCODEC_INCLUDE_DIR "libavcodec/avcodec.h")
-  if(LIBAVCODEC_INCLUDE_DIR)
-    include_directories(${LIBAVCODEC_INCLUDE_DIR})
-    message(STATUS "libavcodec/avcodec.h found in ${LIBAVCODEC_INCLUDE_DIR}")
-  else()
-    message(STATUS "libavcodec/avcodec.h not found, disabling video")
-    set(VIDEO 0)
-  endif()
-
-  if(VIDEO)
-    message(STATUS "Enabling PUP player")
-    add_definitions(-DUSE_VIDEO)
-    include_directories(${LIBAV_INCLUDE_DIR})
-    set(VIDEO_SRC
-        "drm/drmprimeout.cpp" "drm/drmprimeout.hpp" "drm/videoplayer.cpp"
-        "drm/videoplayer.hpp" "drm/drmframebuffer.hpp" "drm/drmframebuffer.cpp")
-    set(PUPPLAYER_SRC
-        "pupplayer/pupplayer.hpp"
-        "pupplayer/pupplayer.cpp"
-        "drm/videofile.hpp"
-        "drm/videofile.cpp"
-        "drm/videofileloader.cpp"
-        "drm/videofileloader.hpp"
-        "pupplayer/trigger.hpp"
-        "pupplayer/trigger.cpp"
-        "pupplayer/screen.hpp"
-        "pupplayer/screen.cpp"
-        "pupplayer/playlist.hpp"
-        "pupplayer/playlist.cpp"
-        "pupplayer/pivid.cpp"
-        "pupplayer/pivid.hpp"
-        "pupplayer/internalpupplayer.hpp"
-        "pupplayer/internalpupplayer.cpp"
-        "pupplayer/pividpupplayer.hpp"
-        "pupplayer/pividpupplayer.cpp")
-    set(VIDEO_LIBRARIES avcodec avfilter avutil avformat drm)
-  else()
-    message(STATUS "Disabling PUP Player")
-  endif()
-
-endif()
 
 #
-# OpenGL/GLAD (only tested under Windows)
+# SPI start
+#
+find_path(GPIOD_INCLUDE_DIR "gpiod.hpp")
+if(GPIOD_INCLUDE_DIR)
+  message(STATUS "gpiod.hpp found in ${GPIOD_INCLUDE_DIR}")
+  include_directories(${GPIOD_INCLUDE_DIR})
+  set(SPI_SRC "dmdsource/spisource.hpp" "dmdsource/spisource.cpp"
+              "rpi/spi.hpp" "rpi/spi.cpp" "rpi/gpio.hpp" "rpi/gpio.cpp")
+  add_definitions(-DUSE_SPI)
+  message(STATUS "Enabling SPI")
+else()
+  if(FORCE_SPI)
+    message(FATAL_ERROR "couldn't enable SPI, aborting")
+  else()
+    message(STATUS "Disabling SPI")
+  endif()
+endif()
+#
+# SPI end
+#
+
+#
+# PUPPlayer start
+#
+set(VIDEO 1)
+if(DRM_INCLUDE_DIR)
+  message(STATUS "drm.h found")
+  include_directories(${DRM_INCLUDE_DIR})
+else()
+  message(STATUS "drm.h not found, disabling video")
+  set(VIDEO 0)
+endif()
+
+find_path(LIBAV_INCLUDE_DIR "libavutil/hwcontext_drm.h")
+if(LIBAV_INCLUDE_DIR)
+  message(STATUS "libavutil/hwcontext_drm.h found in ${LIBAV_INCLUDE_DIR}")
+else()
+  message(STATUS "libavutil/hwcontext_drm.h not found, disabling video")
+  set(VIDEO 0)
+endif()
+
+find_path(LIBAVCODEC_INCLUDE_DIR "libavcodec/avcodec.h")
+if(LIBAVCODEC_INCLUDE_DIR)
+  include_directories(${LIBAVCODEC_INCLUDE_DIR})
+  message(STATUS "libavcodec/avcodec.h found in ${LIBAVCODEC_INCLUDE_DIR}")
+else()
+  message(STATUS "libavcodec/avcodec.h not found, disabling video")
+  set(VIDEO 0)
+endif()
+
+if(VIDEO)
+  message(STATUS "Enabling PUP player")
+  add_definitions(-DUSE_VIDEO)
+  include_directories(${LIBAV_INCLUDE_DIR})
+  set(VIDEO_SRC
+      "drm/drmprimeout.cpp" "drm/drmprimeout.hpp" "drm/videoplayer.cpp"
+      "drm/videoplayer.hpp" "drm/drmframebuffer.hpp" "drm/drmframebuffer.cpp")
+  set(PUPPLAYER_SRC
+      "pupplayer/pupplayer.hpp"
+      "pupplayer/pupplayer.cpp"
+      "drm/videofile.hpp"
+      "drm/videofile.cpp"
+      "drm/videofileloader.cpp"
+      "drm/videofileloader.hpp"
+      "pupplayer/trigger.hpp"
+      "pupplayer/trigger.cpp"
+      "pupplayer/screen.hpp"
+      "pupplayer/screen.cpp"
+      "pupplayer/playlist.hpp"
+      "pupplayer/playlist.cpp"
+      "pupplayer/pivid.cpp"
+      "pupplayer/pivid.hpp"
+      "pupplayer/internalpupplayer.hpp"
+      "pupplayer/internalpupplayer.cpp"
+      "pupplayer/pividpupplayer.hpp"
+      "pupplayer/pividpupplayer.cpp")
+  set(VIDEO_LIBRARIES avcodec avfilter avutil avformat drm)
+else()
+  message(STATUS "Disabling PUP Player")
+endif()
+#
+# PUPPlayer start
+#
+
+
+#
+# OpenGL/GLAD start (only tested under Windows)
 #
 if(NOT (RPI))
   message(STATUS "Checking for OpenGL")
@@ -288,11 +313,22 @@ if(NOT (RPI))
   if(OPENGL_GLAD)
     add_definitions(-DUSE_GLAD)
     message(STATUS "Enabling OpenGL/GLAD output")
+  else()
+    if(FORCE_OPENGL)
+      message(FATAL_ERROR "Couldn't enable OpenGL/GLAD , aborting")
+    else()
+      message(STATUS "Disabling OpenGL/GLAD output")
+    endif()
   endif()
 endif()
+#
+# OpenGL/GLAD end
+#
+
+
 
 #
-# Boost
+# Boost start
 #
 if(ENABLE_BOOST_STATIC_LIBS)
   set(Boost_USE_STATIC_LIBS ON)
@@ -317,8 +353,13 @@ if(EXISTS ${COLOR_CMAKE})
 else()
   message(STATUS "Disabling VNI/PAL colorisation module")
 endif()
+#
+# Boost start
+#
 
-# use libserum if it exists
+#
+# libserum start
+# 
 get_filename_component(SERUM_CMAKE "external/libserum/CMakeLists.txt" ABSOLUTE)
 if(EXISTS ${SERUM_CMAKE})
   message(STATUS "Enabling SERUM colorisation module")
@@ -328,13 +369,19 @@ if(EXISTS ${SERUM_CMAKE})
   set(SERUM_LIBRARIES Serum)
   add_library(libSerum STATIC IMPORTED)
 else()
-  message(STATUS "Disabling SERUM colorisation module")
   if(FORCE_SERUM)
-    message(FATAL_ERROR "couldn't enable libserum, aborting")
+    message(FATAL_ERROR "Couldn't enable libserum, aborting")
+  else()
+    message(STATUS "Disabling SERUM colorisation module")
   endif()
 endif()
+#
+# libserum start
+# 
 
-# use rpi-rgb-led-matrix
+#
+# rpi-rgb-led-matrix start
+#
 if(RPI)
   get_filename_component(RGB_MAKEFILE "external/rpi-rgb-led-matrix/Makefile"
                          ABSOLUTE)
@@ -348,14 +395,21 @@ if(RPI)
     set(RGB_SRC ${RGB_SRC_FILES} ${RGB_HEADER_FILES}
                 render/ledmatrixrenderer.hpp render/ledmatrixrenderer.cpp)
   else()
-    message(STATUS "Disabling RGB LED matrix module")
     if(FORCE_LEDMATRIX)
-      message(FATAL_ERROR "couldn't enable RGB LED matrix, aborting")
+      message(FATAL_ERROR "Couldn't enable RGB LED matrix, aborting")
+    else()
+      message(STATUS "Disabling RGB LED matrix module")
     endif()
   endif()
 endif()
+#
+# rpi-rgb-led-matrix start
+#
 
-# XBR
+
+#
+# XBR start
+#
 get_filename_component(XBR_INCLUDE "external/xbr/internal_hqx_common.h"
                        ABSOLUTE)
 if(EXISTS ${XBR_INCLUDE})
@@ -367,8 +421,17 @@ if(EXISTS ${XBR_INCLUDE})
       external/xbr/hq4x.c external/xbr/filters.h
       external/xbr/internal_hqx_common.h)
 else()
-  message(STATUS "Disabling XBR upsampling")
+  if(FORCE_XBR)
+    message(FATAL_ERROR "Couldn't enable XBR, aborting")
+  else()
+    message(STATUS "Disabling XBR upsampling")
+  endif()
 endif()
+#
+# XBR end
+#
+
+
 
 set(UTIL_SRC
     "util/data.hpp"
