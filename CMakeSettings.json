@@ -20,6 +20,21 @@
           "name": "VCPKG_TARGET_TRIPLET",
           "value": "x64-windows-static",
           "type": "STRING"
+        },
+        {
+          "name": "FORCE_XBR",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "FORCE_SERUM",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "FORCE_VNI",
+          "value": "True",
+          "type": "BOOL"
         }
       ]
     },

@@ -37,6 +37,10 @@ if(FORCE_XBR)
   message(STATUS "support for XBR required")
 endif()
 
+option(FORCE_VNI "force enable VNI/PAL" 0)
+if(FORCE_VNI)
+  message(STATUS "support for VNI/PAL required")
+endif()
 
 option(FORCE_LEDMATRIX "force enable RGB LED matrix" 0)
 if(FORCE_LEDMATRIX)
@@ -345,14 +349,25 @@ link_directories(${Boost_LIBRARY_DIR})
 message(STATUS "Boost libs: ${Boost_LIBRARIES}")
 find_package(ZLIB REQUIRED)
 
-# also use colorisation files if they exists
+#
+# VNI/PAL
+#
 get_filename_component(COLOR_CMAKE "colorize/CMakeLists.txt" ABSOLUTE)
 if(EXISTS ${COLOR_CMAKE})
   message(STATUS "Enabling VNI/PAL colorisation module")
   add_subdirectory("colorize")
 else()
-  message(STATUS "Disabling VNI/PAL colorisation module")
+  if(FORCE_VNI)
+    message(FATAL_ERROR "Couldn't enable VNI support, aborting")
+  else()
+    message(STATUS "Disabling VNI support")
+  endif()
 endif()
+#
+# VNI/PAL end
+#
+
+
 #
 # Boost start
 #
