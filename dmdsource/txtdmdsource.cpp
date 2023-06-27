@@ -30,7 +30,7 @@ TXTDMDSource::TXTDMDSource()
 {
 }
 
-TXTDMDSource::TXTDMDSource(string filename)
+TXTDMDSource::TXTDMDSource(const string& filename)
 {
 	openFile(filename);
 }
@@ -39,7 +39,7 @@ TXTDMDSource::~TXTDMDSource()
 {
 }
 
-bool TXTDMDSource::openFile(string filename)
+bool TXTDMDSource::openFile(const string& filename)
 {
 	is.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	try {

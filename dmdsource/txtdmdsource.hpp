@@ -10,7 +10,7 @@ class TXTDMDSource : public DMDSource {
 public:
 
 	TXTDMDSource();
-	TXTDMDSource(string filename);
+	TXTDMDSource(const string& filename);
 	~TXTDMDSource();
 
 
@@ -27,7 +27,7 @@ private:
 
 	DMDFrame currentFrame;
 	DMDFrame preloadedFrame;
-	uint32_t preloadedFrameTimestamp;
+	uint32_t preloadedFrameTimestamp = -1;
 	ifstream is;
 	bool useTimingData = true;
 	unsigned long startMillisec = 0;
@@ -35,7 +35,7 @@ private:
 	unsigned int frameEveryMs = 0;
 
 	void preloadNextFrame();
-	bool openFile(string filename);
+	bool openFile(const string& filename);
 	uint32_t getCurrentTimestamp();
 
 	int bits = 0;
