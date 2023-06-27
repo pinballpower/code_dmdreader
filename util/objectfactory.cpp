@@ -37,8 +37,7 @@
 #ifdef USE_LEDMATRIX
 #include "../render/ledmatrixrenderer.hpp"
 #endif
-
-#if __has_include("../processor/vni/vnicolorisation.hpp")
+#ifdef USE_VNI
 #include "../processor/vni/vnicolorisation.hpp"
 #endif
 
@@ -61,7 +60,7 @@ std::shared_ptr<DMDSource> createSource(string name) {
 		return std::make_shared<SPISource>();
 	}
 #endif
-#ifdef VNICOLORING
+#ifdef USE_VNI
 	else if (name == "vni") {
 		return std::make_shared<VNIColorisation>();
 	}
@@ -78,7 +77,7 @@ std::shared_ptr<DMDFrameProcessor> createProcessor(string name) {
 	if (name == "pupcapture") {
 		return std::make_shared<PUPCapture>();
 	}
-#ifdef VNICOLORING
+#ifdef USE_VNI
 	else if (name == "vni") {
 		return std::make_shared<VNIColorisation>();
 	}

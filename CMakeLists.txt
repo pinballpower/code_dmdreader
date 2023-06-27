@@ -384,6 +384,7 @@ set(VNI_SRC
 	"processor/vni/vnicolorisation.cpp" 
 	"processor/vni/animationplane.cpp"
 )
+add_definitions(-DUSE_VNI)
 #
 # VNI/PAL end
 #
