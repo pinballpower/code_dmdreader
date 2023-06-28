@@ -100,7 +100,7 @@ bool LEDMatrixRenderer::configureFromPtree(boost::property_tree::ptree pt_genera
     }
 
     int row_addr_type = pt_renderer.get("row_address_type", 0);
-    if ((brightness < 0) || (brightness > 100)) {
+    if ((row_addr_type < 0) || (row_addr_type > 4)) {
         BOOST_LOG_TRIVIAL(info) << "[ledmatrixrenderer] row_address_type can be only is 0-4, ignoring " << brightness;
         row_addr_type = 100;
     }
