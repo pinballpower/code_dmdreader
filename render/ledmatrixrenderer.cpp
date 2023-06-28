@@ -99,6 +99,12 @@ bool LEDMatrixRenderer::configureFromPtree(boost::property_tree::ptree pt_genera
         brightness = 100;
     }
 
+    int row_addr_type = pt_renderer.get("row_address_type", 0);
+    if ((brightness < 0) || (brightness > 100)) {
+        BOOST_LOG_TRIVIAL(info) << "[ledmatrixrenderer] row_address_type can be only is 0-4, ignoring " << brightness;
+        row_addr_type = 100;
+    }
+
     rotate_180 = pt_renderer.get("rotate_180", false);
 
     memset(&options, 0, sizeof(options));
@@ -113,6 +119,7 @@ bool LEDMatrixRenderer::configureFromPtree(boost::property_tree::ptree pt_genera
     options.pwm_dither_bits = dither_bits;
     options.pwm_lsb_nanoseconds = lsb_nanoseconds;
     options.brightness = brightness;
+    options.row_address_type = row_addr_type;
 
     memset(&rt_options, 0, sizeof(rt_options));
     rt_options.gpio_slowdown = 4;
