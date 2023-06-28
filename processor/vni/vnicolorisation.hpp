@@ -9,19 +9,12 @@
 #include "palcoloring.hpp"
 #include "vnianimationset.hpp"
 
-class VNIColorisation : public DMDFrameProcessor, public DMDSource {
+class VNIColorisation : public DMDFrameProcessor {
 
 public:
 
 	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source);
-
-	virtual DMDFrame process_frame(DMDFrame &f);
-
-	// DMDSource methods
-	// DMDFrame next_frame(bool blocking = true);
-	virtual bool isFinished();
-	virtual bool isFrameReady();
-	virtual SourceProperties getProperties();
+	virtual DMDFrame processFrame(DMDFrame& f) override;
 
 private:
 

@@ -58,7 +58,7 @@ bool VNIColorisation::configureFromPtree(boost::property_tree::ptree pt_general,
 	return true;
 }
 
-DMDFrame VNIColorisation::process_frame(DMDFrame &f)
+DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 {
 	if (f.isNull()) {
 		BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] got NULL frame doing nothing";
@@ -157,41 +157,9 @@ DMDFrame VNIColorisation::process_frame(DMDFrame &f)
 		color_data=color_animation_frame(f, af, len);
 	}
 
-	DMDFrame res = DMDFrame(w, h, 24, color_data);
+	DMDFrame res = DMDFrame(w, h, 32, color_data);
 
 	return res;
-}
-//
-//DMDFrame vniColorisation::next_frame(bool blocking)
-//{
-//	Animation anim = animations.get_animations()[src_current_animation];
-//
-//	DMDFrame frame = anim.get_frame(src_current_frame_in_animation).as_dmd_frame(anim.width, anim.height);
-//	if (src_current_frame_in_animation < anim.size() - 1) {
-//		src_current_frame_in_animation++;
-//	}
-//	else {
-//		src_current_frame_in_animation = 0;
-//		src_current_animation++;
-//	}
-//	src_current_frame++;
-//
-//	return frame;
-//}
-
-bool VNIColorisation::isFinished()
-{
-	return !(isFrameReady());
-}
-
-bool VNIColorisation::isFrameReady()
-{
-	return src_current_frame < src_frame_count;
-}
-
-SourceProperties VNIColorisation::getProperties()
-{
-	return SourceProperties(animations.max_width, animations.max_height, 8);
 }
 
 vector <uint8_t> VNIColorisation::color_animation_frame(const DMDFrame &src_frame, const AnimationFrame &anim_frame, int len)
@@ -263,6 +231,7 @@ vector <uint8_t> VNIColorisation::color_animation_frame(const DMDFrame &src_fram
 		res.push_back(c.r);
 		res.push_back(c.g);
 		res.push_back(c.b);
+		res.push_back(0);
 	}
 
 	return res;

@@ -60,11 +60,6 @@ std::shared_ptr<DMDSource> createSource(string name) {
 		return std::make_shared<SPISource>();
 	}
 #endif
-#ifdef USE_VNI
-	else if (name == "vni") {
-		return std::make_shared<VNIColorisation>();
-	}
-#endif
 	else {
 		BOOST_LOG_TRIVIAL(error) << "source name " << name << " unknown";
 		return NULL;
