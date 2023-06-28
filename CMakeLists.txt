@@ -419,24 +419,22 @@ endif()
 #
 # rpi-rgb-led-matrix start
 #
-if(RPI)
-  get_filename_component(RGB_MAKEFILE "external/rpi-rgb-led-matrix/Makefile"
-                         ABSOLUTE)
-  if(EXISTS ${RGB_MAKEFILE})
-    message(STATUS "Enabling RGB LED matrix module")
-    file(GLOB_RECURSE RGB_SRC_FILES external/rpi-rgb-led-matrix/lib/*.c*)
-    file(GLOB_RECURSE RGB_HEADER_FILES external/rpi-rgb-led-matrix/include/*.h)
-    include_directories(external/rpi-rgb-led-matrix/lib)
-    include_directories(external/rpi-rgb-led-matrix/include)
-    add_definitions(-DUSE_LEDMATRIX)
-    set(RGB_SRC ${RGB_SRC_FILES} ${RGB_HEADER_FILES}
-                render/ledmatrixrenderer.hpp render/ledmatrixrenderer.cpp)
+get_filename_component(RGB_MAKEFILE "external/rpi-rgb-led-matrix/Makefile"
+                       ABSOLUTE)
+if(EXISTS ${RGB_MAKEFILE})
+  message(STATUS "Enabling RGB LED matrix module")
+  file(GLOB_RECURSE RGB_SRC_FILES external/rpi-rgb-led-matrix/lib/*.c*)
+  file(GLOB_RECURSE RGB_HEADER_FILES external/rpi-rgb-led-matrix/include/*.h)
+  include_directories(external/rpi-rgb-led-matrix/lib)
+  include_directories(external/rpi-rgb-led-matrix/include)
+  add_definitions(-DUSE_LEDMATRIX)
+  set(RGB_SRC ${RGB_SRC_FILES} ${RGB_HEADER_FILES}
+              render/ledmatrixrenderer.hpp render/ledmatrixrenderer.cpp)
+else()
+  if(FORCE_LEDMATRIX)
+    message(FATAL_ERROR "Couldn't enable RGB LED matrix, aborting")
   else()
-    if(FORCE_LEDMATRIX)
-      message(FATAL_ERROR "Couldn't enable RGB LED matrix, aborting")
-    else()
-      message(STATUS "Disabling RGB LED matrix module")
-    endif()
+    message(STATUS "Disabling RGB LED matrix module")
   endif()
 endif()
 #
