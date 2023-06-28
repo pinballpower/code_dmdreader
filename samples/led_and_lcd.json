@@ -1,0 +1,28 @@
+{
+  "comment":  "This shows how to use LED matrix and HDMI output in parallel (Pi4 required)",
+  "general": {
+    "cwd_to_configdir": true,
+    "log": ""
+  },
+  "source": {
+    "txt": {
+      "name": "dump1.txt.gz",
+      "bits_per_pixel": 4
+    }
+  },
+  "processor": {
+    "palette": {}
+  },
+  "renderer": {
+    "ledmatrix": {
+      "width": 128,
+      "height": 64
+    },
+    "opengl": {
+      "width": 640,
+      "height": 480,
+      "dmd_width": 640,
+      "dmd_height": 160
+    }
+  }
+}
