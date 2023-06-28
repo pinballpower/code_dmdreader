@@ -5,17 +5,17 @@
   },
   "source": {
     "png": {
-	"files": [ "rgb-128x32.png" ],
-	"no_finish": true
+	    "files": [ "rgb-128x32.png" ],
+	    "no_finish": true
     }
   },
   "processor": {
-	"upscale": {}
+	  "upscale": {}
   },
   "renderer": {
-      "ledmatrix": {
-          "width": 256,
-          "height":64 
-      }
+    "ledmatrix": {
+      "width": 256,
+      "height":64 
+    }
   }
 }
