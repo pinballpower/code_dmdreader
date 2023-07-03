@@ -18,4 +18,3 @@ needed to build their own software. This is also valid for any derivate work.
 - [Modules](doc/modules.md)
 - [Example configurations](doc/examples.md)
 - [Using VNI colorisations](doc/vni.md)
-- [Tested configurations](doc/tested.md)
