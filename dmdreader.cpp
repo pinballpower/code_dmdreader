@@ -250,7 +250,7 @@ int main(int argc, char** argv)
 	std::time_t t1 = std::time(nullptr);
 
 	if (!read_config(config_file)) {
-		BOOST_LOG_TRIVIAL(error) << "[dmdreader]couldn't configure DMDReader, aborting";
+		BOOST_LOG_TRIVIAL(error) << "[dmdreader] couldn't configure DMDReader, aborting";
 		exit(1);
 	}
 
