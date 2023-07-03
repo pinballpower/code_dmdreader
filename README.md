@@ -17,3 +17,4 @@ needed to build their own software. This is also valid for any derivate work.
 - [Installation](doc/install.md)
 - [Modules](doc/modules.md)
 - [Example configurations](doc/examples.md)
+- [Using VNI colorisations](doc/vni.md)
