@@ -105,7 +105,7 @@ void OpenGLRenderer::renderFrame(DMDFrame& f)
 			tx_pixel_count = 128 * 32;
 			vertices[9] = vertices[14] = 0.25f;
 		}
-		else if (frame_width == 192 && frame_width == 64) {
+		else if (frame_width == 192 && frame_height == 64) {
 			tx_width = tx_height = 192;
 			tx_pixel_count = 192 * 64;
 			vertices[9] = vertices[14] = 0.3333f;
