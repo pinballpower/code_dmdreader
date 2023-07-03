@@ -4,6 +4,7 @@
 #include <cstring>
 #include <map>
 #include <vector>
+#include <optional>
 
 #include "palpalette.hpp"
 #include "palmapping.hpp"
