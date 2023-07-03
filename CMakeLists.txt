@@ -347,6 +347,8 @@ find_package(
 include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIR})
 message(STATUS "Boost libs: ${Boost_LIBRARIES}")
+add_definitions("-DBOOST_ALLOW_DEPRECATED_HEADERS")
+add_definitions("-DBOOST_BIND_GLOBAL_PLACEHOLDERS")
 find_package(ZLIB REQUIRED)
 
 #
@@ -421,7 +423,7 @@ endif()
 #
 get_filename_component(RGB_MAKEFILE "external/rpi-rgb-led-matrix/Makefile"
                        ABSOLUTE)
-if(EXISTS ${RGB_MAKEFILE})
+if((EXISTS ${RGB_MAKEFILE}) AND (${RPI}) )
   message(STATUS "Enabling RGB LED matrix module")
   file(GLOB_RECURSE RGB_SRC_FILES external/rpi-rgb-led-matrix/lib/*.c*)
   file(GLOB_RECURSE RGB_HEADER_FILES external/rpi-rgb-led-matrix/include/*.h)
