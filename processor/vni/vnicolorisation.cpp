@@ -93,7 +93,7 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 			BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] found colormapping for unmasked frame";
 		}
 		else {
-			// try to find an colormapping that matches
+			// try to find a colormapping that matches
 			for (auto mask : coloring.masks) {
 				chk = crc32vect(pd, mask, true);
 				BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] plane masked crc32(full frame) " << chk;
