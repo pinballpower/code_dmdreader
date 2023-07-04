@@ -22,6 +22,7 @@
 #include "dmdsource/dmdsource.hpp"
 #include "util/objectfactory.hpp"
 #include "services/serviceregistry.hpp"
+#include "util/counter.hpp"
 
 using namespace std;
 
@@ -346,6 +347,14 @@ int main(int argc, char** argv)
 	renderers.clear();
 
 	serviceRegistry.clear();
+
+#ifdef ENABLE_REPORTING
+	std::vector<std::pair<std::string, int>> allCounters = Counter::getInstance().getAllCounters();
+	for (const auto& counterPair : allCounters) {
+		BOOST_LOG_TRIVIAL(info) << "[report] " << counterPair.first << ": " << counterPair.second;
+	}
+
+#endif
 
 	BOOST_LOG_TRIVIAL(info) << "[dmdreader] exiting";
 

@@ -7,6 +7,7 @@
 
 #include "palette_colorizer.hpp"
 #include "../../util/crc32.hpp"
+#include "../../util/counter.hpp"
 
 string to_hex(const vector<uint8_t> data) {
 	string res;
@@ -73,6 +74,8 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 
 	uint32_t chk;
 	BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] got frame " << f.getWidth() << "x" << f.getHeight() << " " << f.getBitsPerPixel() << "bpp, checksum " << f.getChecksum();
+	INC_COUNTER("vnicolorisation::frames");
+
 	int w = f.getWidth();
 	int h = f.getHeight();
 	int len = w * h;
@@ -91,6 +94,7 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 
 		if (map) {
 			BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] found colormapping for unmasked frame";
+			INC_COUNTER("vnicolorisation::found_unmasked");
 		}
 		else {
 			// try to find a colormapping that matches
@@ -101,6 +105,7 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 
 				if (map) {
 					BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] found colormapping on masked frame";
+					INC_COUNTER("vnicolorisation::found_unmasked");
 					break;
 				}
 			}
@@ -132,11 +137,15 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 				// stop animation if one if running
 				animation_active = false;
 			}
-		}
 
-		if (map) {
 			break;
 		}
+	}
+
+	if (!map) {
+		BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] no mapping found";
+		INC_COUNTER("vnicolorisation::found_not");
+
 	}
 
 	// Play animation
@@ -182,6 +191,8 @@ vector <uint8_t> VNIColorisation::color_animation_frame(const DMDFrame &src_fram
 	auto anim_frame_data = anim_frame.get_frame_data();
 	auto animIter = anim_frame_data.cbegin();
 
+	BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] mode " << col_mode;
+
 	// loop through pixels
 	for (auto src_px: src_frame.getPixelData()) {
 
@@ -220,7 +231,8 @@ vector <uint8_t> VNIColorisation::color_animation_frame(const DMDFrame &src_fram
 			else {
 				c = col_palette[src_px];
 			}
-		}		else if (col_mode == ModePalette) {
+		}		
+		else if (col_mode == ModePalette) {
 			c = col_palette[src_px];
 		}
 		else {

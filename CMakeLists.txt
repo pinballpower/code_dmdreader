@@ -469,6 +469,7 @@ endif()
 #
 
 
+add_definitions(-DENABLE_REPORTING)
 
 set(UTIL_SRC
     "util/data.hpp"
@@ -485,7 +486,9 @@ set(UTIL_SRC
     "stb/stb_image.h"
     "stb/stb_image_write.h"
     "util/glob.hpp"
-    "util/glob.cpp")
+    "util/glob.cpp"
+    "util/counter.hpp"
+    "util/counter.cpp")
 set(RENDER_SRC "render/framerenderer.hpp" "render/framerenderer.cpp")
 set(DMDSOURCE_SRC
     "dmdsource/pngsource.hpp"
