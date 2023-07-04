@@ -191,7 +191,7 @@ vector <uint8_t> VNIColorisation::color_animation_frame(const DMDFrame &src_fram
 	auto anim_frame_data = anim_frame.get_frame_data();
 	auto animIter = anim_frame_data.cbegin();
 
-	BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] mode " << col_mode;
+	BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] mode " << col_mode;
 
 	// loop through pixels
 	for (auto src_px: src_frame.getPixelData()) {
