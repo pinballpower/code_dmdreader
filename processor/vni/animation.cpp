@@ -56,8 +56,17 @@ Animation::Animation()
 }
 
 
+void Animation::start(bool restart) {
+	if (restart) {
+		current_frame = 0;
+	}
+	else if (!isActive()) {
+		current_frame = 0;
+	}
+}
+
 void Animation::start() {
-	current_frame = 0;
+	start(false);
 }
 
 void Animation::stop() {

@@ -42,7 +42,11 @@ public:
 	const AnimationFrame getFrame(int index) const;
 	const std::optional<AnimationFrame> getNextFrame(); // get next frame from a running animation
 
-	void start();
+	// start the animation. If restart is true, it will always start with frame 0, otherwise it won't effect an animation that's
+	// already active
+	void start(bool restart);
+	void start(); // start with restart=False
+
 	void stop();
 	bool isActive() const;
 

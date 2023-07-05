@@ -31,3 +31,24 @@ PaletteMapping::PaletteMapping(istream& is)
 		duration = 0;
 	}
 }
+
+
+void PaletteMapping::start() {
+	framesLeft = duration;
+}
+
+void PaletteMapping::stop() {
+	framesLeft = 0;
+
+}
+
+bool PaletteMapping::nextFrame() {
+	if (framesLeft > 0) {
+		framesLeft--;
+	}
+	return framesLeft != 0;
+}
+
+bool PaletteMapping::isActive() {
+	return framesLeft != 0;
+}

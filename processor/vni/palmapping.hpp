@@ -29,4 +29,12 @@ public:
 
 	PaletteMapping();
 	PaletteMapping(istream& is);
+
+	void start();
+	void stop();
+	bool nextFrame();
+	bool isActive();
+
+private:
+	int framesLeft = 0;
 };
