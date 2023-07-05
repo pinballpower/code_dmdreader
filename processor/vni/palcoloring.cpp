@@ -105,7 +105,7 @@ PalColoring::PalColoring(string filename)
 
 	avail = file_len - is.tellg();
 	if (avail) {
-		BOOST_LOG_TRIVIAL(warning) << "[coloring] erad error, finished reading, but still " << avail << " bytes left";
+		BOOST_LOG_TRIVIAL(warning) << "[coloring] read error, finished reading, but still " << avail << " bytes left";
 	}
 
 	is.close();
