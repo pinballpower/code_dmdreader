@@ -106,32 +106,17 @@ std::optional<PaletteMapping> VNIColorisation::findMapForPlaneData(const vector<
 }
 
 void  VNIColorisation::setPalette(const vector<DMDColor> colors) {
+	previous_col_palette = std::move(col_palette);
 	col_palette = colors;
 }
 
-DMDFrame VNIColorisation::processFrame(DMDFrame& f)
-{
-	if (f.isNull()) {
-		BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] got NULL frame doing nothing";
-		return f;
-	}
+void VNIColorisation::previousPalette() {
+	col_palette = std::move(previous_col_palette);
+}
 
-	if (f.getBitsPerPixel() > 8) {
-		BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] frame is already colored, doing nothing";
-		return std::move(f);
-	}
-
-	uint32_t chk;
-	BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] got frame " << f.getWidth() << "x" << f.getHeight() << " " << f.getBitsPerPixel() << "bpp, checksum " << f.getChecksum();
-	INC_COUNTER(FRAMES);
-
-	int w = f.getWidth();
-	int h = f.getHeight();
-	int len = w * h;
-	int plane_len = len / 8;
+bool VNIColorisation::triggerAnimation(const DMDFrame& f) {
 
 	std::optional<PaletteMapping> map = std::nullopt;
-	bool found_mapping = true;
 
 	// find colormapping
 	for (int i = 0; i < f.getBitsPerPixel(); i++) {
@@ -166,9 +151,36 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 				animation_active = false;
 			}
 
-			break;
+			return true;
 		}
 	}
+
+	return false; // no mapping found
+}
+
+DMDFrame VNIColorisation::processFrame(DMDFrame& f)
+{
+	if (f.isNull()) {
+		BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] got NULL frame doing nothing";
+		return f;
+	}
+
+	if (f.getBitsPerPixel() > 8) {
+		BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] frame is already colored, doing nothing";
+		return std::move(f);
+	}
+
+	uint32_t chk;
+	BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] got frame " << f.getWidth() << "x" << f.getHeight() << " " << f.getBitsPerPixel() << "bpp, checksum " << f.getChecksum();
+	INC_COUNTER(FRAMES);
+
+	int w = f.getWidth();
+	int h = f.getHeight();
+	int len = w * h;
+	int plane_len = len / 8;
+
+	
+	bool found_mapping = triggerAnimation(f);
 
 	// Play animation
 	vector<uint8_t> color_data;
@@ -181,6 +193,7 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 		if ((col_frames_left == 0) || (col_anim_frame >= col_animation.size())) {
 			animation_active = false;
 			col_mode = ModePalette;
+			previousPalette();
 		}
 	}
 	else {
@@ -192,6 +205,11 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 
 	return res;
 }
+
+
+
+
+
 
 vector <uint8_t> VNIColorisation::colorAnimationFrame(const DMDFrame &src_frame, const AnimationFrame &anim_frame, int len)
 {
