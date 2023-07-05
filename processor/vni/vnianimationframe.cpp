@@ -23,12 +23,12 @@ VniAnimationFrame::VniAnimationFrame(ifstream& is, int file_version)
 	assert(bit_length <= 8);
 
 	if (file_version < 3) {
-		read_planes(is, plane_size);
+		readPlanes(is, plane_size);
 	}
 	else {
 		bool compressed = (read_u8(is) != 0);
 		if (!compressed) {
-			read_planes(is, plane_size);
+			readPlanes(is, plane_size);
 
 		}
 		else {
@@ -38,7 +38,7 @@ VniAnimationFrame::VniAnimationFrame(ifstream& is, int file_version)
 	}
 }
 
-void VniAnimationFrame::read_planes(ifstream& is, int plane_size)
+void VniAnimationFrame::readPlanes(ifstream& is, int plane_size)
 {
 	for (int i = 0; i < bit_length; i++) {
 		uint8_t marker = read_u8(is);

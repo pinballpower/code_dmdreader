@@ -26,7 +26,7 @@ VniAnimation::VniAnimation(ifstream& is, int file_version) {
 	BOOST_LOG_TRIVIAL(trace) << "[vinanimation] offset " << is.tellg() << " read animation frame count as " << num_frames;
 
 	if (file_version >= 2) {
-		read_palettes_and_colors(is);
+		readPalettesAndColors(is);
 	}
 	if (file_version >= 3) {
 		read_u8(is); // AnimationEditMode not used
@@ -69,7 +69,7 @@ VniAnimation::VniAnimation(ifstream& is, int file_version) {
 	}
 };
 
-void VniAnimation::read_palettes_and_colors(ifstream& is)
+void VniAnimation::readPalettesAndColors(ifstream& is)
 
 {
 	read_int16_be(is); // palette index unused

@@ -45,7 +45,7 @@ PalColoring::PalColoring(string filename)
 	for (int i = 0; i < num_palettes; i++) {
 		PalPalette p = PalPalette(is);
 		palettes[p.index] = p;
-		if ((default_palette_index == 0) && (p.is_default())) {
+		if ((default_palette_index == 0) && (p.isDefault())) {
 			default_palette_index = (uint8_t)i;
 		}
 	}
@@ -111,12 +111,12 @@ PalColoring::PalColoring(string filename)
 	is.close();
 }
 
-const Palette PalColoring::get_palette(uint32_t index) const
+const Palette PalColoring::getPalette(uint32_t index) const
 {
 	return palettes.at(index);
 }
 
-const Palette PalColoring::get_default_palette() const
+const Palette PalColoring::getDefaultPalette() const
 {
 	return palettes.at(default_palette_index);
 }

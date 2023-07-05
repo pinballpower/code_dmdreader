@@ -10,5 +10,5 @@ public:
 	VniAnimationFrame(ifstream& is, int file_version);
 
 private:
-	void read_planes(ifstream& is, int planeSize);
+	void readPlanes(ifstream& is, int planeSize);
 };

@@ -21,8 +21,8 @@ public:
 
 	PalColoring();
 	PalColoring(string filename);
-	const Palette get_palette(uint32_t index) const;
-	const Palette get_default_palette() const;
+	const Palette getPalette(uint32_t index) const;
+	const Palette getDefaultPalette() const;
 	const std::optional<PaletteMapping> find_mapping(uint32_t checksum) const;
 
 protected:

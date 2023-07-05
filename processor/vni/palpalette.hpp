@@ -30,7 +30,7 @@ public:
 	~PalPalette();
 	PalPalette(istream& is);
 
-	bool is_default() const;
-	bool is_persistent() const;
+	bool isDefault() const;
+	bool isPersistent() const;
 
 };

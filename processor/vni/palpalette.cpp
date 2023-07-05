@@ -39,12 +39,12 @@ PalPalette::PalPalette (istream& is) {
 
 
 
-bool PalPalette::is_default() const
+bool PalPalette::isDefault() const
 {
 	return (type == 1 || type == 2);
 }
 
-bool PalPalette::is_persistent() const
+bool PalPalette::isPersistent() const
 {
 	return (type == 1);
 }

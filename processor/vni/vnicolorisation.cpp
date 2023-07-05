@@ -46,14 +46,14 @@ bool VNIColorisation::configureFromPtree(boost::property_tree::ptree pt_general,
 		return false;
 	}
 
-	if (animations.get_animations().size() == 0) {
+	if (animations.getAnimations().size() == 0) {
 		BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] couldn't load any animations from .vni file";
 		return false;
 	}
 
 	// count animations and frames
 	src_frame_count = 0;
-	for (auto &a : animations.get_animations()) {
+	for (auto &a : animations.getAnimations()) {
 		src_frame_count += a.second.size();
 	}
 
@@ -61,7 +61,7 @@ bool VNIColorisation::configureFromPtree(boost::property_tree::ptree pt_general,
 	setDefaultPalette();
 
 	BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] loaded colorisation: " 
-		<< animations.get_animations().size() << " animations, "
+		<< animations.getAnimations().size() << " animations, "
 		<< src_frame_count << " frames, "
 		<< coloring.num_palettes << " palettes";
 
@@ -116,7 +116,7 @@ void VNIColorisation::setPreviousPalette() {
 
 void VNIColorisation::setDefaultPalette() {
 	previous_col_palette = std::move(col_palette);
-	setPalette(coloring.get_default_palette().get_colors());
+	setPalette(coloring.getDefaultPalette().get_colors());
 }
 
 bool VNIColorisation::triggerAnimation(const DMDFrame& f) {
@@ -132,17 +132,18 @@ bool VNIColorisation::triggerAnimation(const DMDFrame& f) {
 		if (map) {
 			uint16_t index = map->palette_index;
 
-			setPalette(coloring.get_palette(index).get_colors());
+			setPalette(coloring.getPalette(index).get_colors());
 			col_mode = map->mode;
 
 			// Should the palette be used only for  specific number of frames?
 			if (map->duration) {
 				col_frames_left = map->duration;
-				BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] switching to palette " << index << " for " << col_frames_left << " frames";
+				BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] switching to palette " << index << " for " << col_frames_left << " frames";
+				// TODO: Implement start/stop/isActive
 			}
 			else {
 				col_frames_left = -1;
-				BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] switching to palette " << index;
+				BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] switching to palette " << index;
 			}
 
 			if (map->IsAnimation()) {
@@ -223,7 +224,7 @@ vector <uint8_t> VNIColorisation::colorAnimationFrame(const DMDFrame &src_frame,
 	uint8_t src_mask = 0xff >> (8 - src_frame.getBitsPerPixel());
 	uint8_t color_mask = ~src_mask & 0x7f;
 
-	auto anim_frame_data = anim_frame.get_frame_data();
+	auto anim_frame_data = anim_frame.getFrameData();
 	auto animIter = anim_frame_data.cbegin();
 
 	BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] mode " << col_mode;

@@ -29,8 +29,8 @@ public:
 	int height;
 
 
-	int num_frames() const;
-	int bit_length() const;
+	int getNumFrames() const;
+	int getBitLength() const;
 	int size() const;
 
 	/// <summary>

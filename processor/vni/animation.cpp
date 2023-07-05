@@ -1,11 +1,11 @@
 #include "animation.hpp"
 
-int Animation::num_frames() const
+int Animation::getNumFrames() const
 {
 	return frames.size();
 }
 
-int Animation::bit_length() const
+int Animation::getBitLength() const
 {
 	if (frames.size() > 0) {
 		return frames[0].bit_length;

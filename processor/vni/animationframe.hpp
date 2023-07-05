@@ -25,11 +25,11 @@ public:
 	/// Get the frame in 8-bit per pixel data
 	/// </summary>
 	/// <returns></returns>
-	const vector<uint8_t> get_frame_data() const;
+	const vector<uint8_t> getFrameData() const;
 
-	const vector<AnimationPlane> get_planes() const;
+	const vector<AnimationPlane> getPlanes() const;
 
-	virtual DMDFrame as_dmd_frame(int width, int height) const;
+	virtual DMDFrame asDMDFrame(int width, int height) const;
 
 protected:
 

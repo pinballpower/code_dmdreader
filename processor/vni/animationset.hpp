@@ -11,7 +11,7 @@ public:
 	int version;
 	const Animation find(int offset);
 
-	const map<uint32_t, Animation> get_animations() const;
+	const map<uint32_t, Animation> getAnimations() const;
 
 protected:
 	map<uint32_t, Animation> animations;
