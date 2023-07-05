@@ -22,7 +22,7 @@ private:
 	VniAnimationSet animations;
 
 	vector <uint8_t> colorAnimationFrame(const DMDFrame &src_frame, const AnimationFrame &anim_frame, int len);
-	std::optional<PaletteMapping> findMapForPlaneData(const vector<uint8_t> pd) const;
+	std::unique_ptr<PaletteMapping> findMapForPlaneData(const vector<uint8_t> pd) const;
 	void setPalette(const vector<DMDColor> colors);
 	void setPreviousPalette();
 	void setDefaultPalette();

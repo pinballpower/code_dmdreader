@@ -3,7 +3,7 @@
 #include "../dmd/palette.hpp"
 #include "palette_colorizer.hpp"
 
-DMDFrame color_frame(const DMDFrame frame, const DMDPalette palette)
+DMDFrame colorFrame(const DMDFrame frame, const DMDPalette palette)
 {
 	int width = frame.getWidth();
 	int height = frame.getHeight();

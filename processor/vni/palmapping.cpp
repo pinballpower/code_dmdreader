@@ -11,6 +11,11 @@ bool PaletteMapping::IsAnimation() const
 
 PaletteMapping::PaletteMapping()
 {
+	checksum = 0;
+	duration = 0;
+	mode = SwitchMode::ModeUndefined;
+	offset = 0;
+	palette_index = 0;
 }
 
 PaletteMapping::PaletteMapping(istream& is)
@@ -52,3 +57,4 @@ bool PaletteMapping::nextFrame() {
 bool PaletteMapping::isActive() {
 	return framesLeft != 0;
 }
+

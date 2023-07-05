@@ -8,5 +8,6 @@ enum SwitchMode {
 	ModeFollow = 4,
 	ModeLayeredColorMask = 5,
 	ModeFollowReplace = 6,
-	ModeMaskedReplace = 7
+	ModeMaskedReplace = 7,
+	ModeUndefined = 8
 };

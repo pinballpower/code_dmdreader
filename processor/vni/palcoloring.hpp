@@ -23,7 +23,7 @@ public:
 	PalColoring(string filename);
 	const Palette getPalette(uint32_t index) const;
 	const Palette getDefaultPalette() const;
-	const std::optional<PaletteMapping> find_mapping(uint32_t checksum) const;
+	std::unique_ptr<PaletteMapping> findMapping(uint32_t checksum) const;
 
 protected:
 	map<uint16_t, PalPalette> palettes;

@@ -121,11 +121,11 @@ const Palette PalColoring::getDefaultPalette() const
 	return palettes.at(default_palette_index);
 }
 
-const std::optional<PaletteMapping> PalColoring::find_mapping(uint32_t checksum) const
+std::unique_ptr<PaletteMapping> PalColoring::findMapping(uint32_t checksum) const
 {
 	try {
-		return mappings.at(checksum);
+		return std::make_unique<PaletteMapping>(mappings.at(checksum));
 	} catch(out_of_range e) {
-		return std::nullopt;
+		return nullptr;
 	}
 }

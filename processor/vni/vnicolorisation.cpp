@@ -73,12 +73,12 @@ bool VNIColorisation::configureFromPtree(boost::property_tree::ptree pt_general,
 	return true;
 }
 
-std::optional<PaletteMapping> VNIColorisation::findMapForPlaneData(const vector<uint8_t> pd) const {
-	std::optional<PaletteMapping> map = std::nullopt;
+std::unique_ptr<PaletteMapping> VNIColorisation::findMapForPlaneData(const vector<uint8_t> pd) const {
+	std::unique_ptr<PaletteMapping> map;
 
 	uint32_t chk = crc32vect(pd, true);
 	BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] plane crc32(full frame) " << chk;
-	map = coloring.find_mapping(chk);
+	map = coloring.findMapping(chk);
 
 	if (map) {
 		BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] found colormapping for unmasked frame";
@@ -89,7 +89,7 @@ std::optional<PaletteMapping> VNIColorisation::findMapForPlaneData(const vector<
 		for (auto mask : coloring.masks) {
 			chk = crc32vect(pd, mask, true);
 			BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] plane masked crc32(full frame) " << chk;
-			map = coloring.find_mapping(chk);
+			map = coloring.findMapping(chk);
 
 			if (map) {
 				BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] found colormapping on masked frame";
@@ -121,7 +121,7 @@ void VNIColorisation::setDefaultPalette() {
 
 bool VNIColorisation::triggerAnimation(const DMDFrame& f) {
 
-	std::optional<PaletteMapping> map = std::nullopt;
+	std::unique_ptr<PaletteMapping> map;
 
 	// find colormapping
 	for (int i = 0; i < f.getBitsPerPixel(); i++) {
