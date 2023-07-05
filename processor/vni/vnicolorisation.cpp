@@ -41,10 +41,14 @@ bool VNIColorisation::configureFromPtree(boost::property_tree::ptree pt_general,
 	coloring = PalColoring(basename + ".pal");
 	animations = VniAnimationSet(basename + ".vni");
 
-	ok = true; // TODO: fix this
+	if (coloring.num_palettes == 0) {
+		BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] couldn't load any palette data from .pal file";
+		return false;
+	}
 
-	if (!ok) {
-		
+	if (animations.get_animations().size() == 0) {
+		BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] couldn't load any animations from .vni file";
+		return false;
 	}
 
 	// count animations and frames
@@ -54,7 +58,7 @@ bool VNIColorisation::configureFromPtree(boost::property_tree::ptree pt_general,
 	}
 
 	// Set default palette
-	col_palette = coloring.get_default_palette().get_colors();
+	setPalette(coloring.get_default_palette().get_colors());
 
 	BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] loaded colorisation: " 
 		<< animations.get_animations().size() << " animations, "
@@ -101,6 +105,10 @@ std::optional<PaletteMapping> VNIColorisation::findMapForPlaneData(const vector<
 	return map;
 }
 
+void  VNIColorisation::setPalette(const vector<DMDColor> colors) {
+	col_palette = colors;
+}
+
 DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 {
 	if (f.isNull()) {
@@ -134,7 +142,7 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 		if (map) {
 			uint16_t index = map->palette_index;
 
-			col_palette = coloring.get_palette(index).get_colors();
+			setPalette(coloring.get_palette(index).get_colors());
 			col_mode = map->mode;
 
 			// Should the palette be used only for  specific number of frames?
@@ -166,7 +174,7 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 	vector<uint8_t> color_data;
 	if (animation_active) {
 
-		color_data=color_animation_frame(f, col_animation.get_frame(col_anim_frame), len);
+		color_data= colorAnimationFrame(f, col_animation.get_frame(col_anim_frame), len);
 
 		col_frames_left--;
 		col_anim_frame++;
@@ -177,7 +185,7 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 	}
 	else {
 		AnimationFrame af;
-		color_data=color_animation_frame(f, af, len);
+		color_data= colorAnimationFrame(f, af, len);
 	}
 
 	DMDFrame res = DMDFrame(w, h, 32, color_data);
@@ -185,7 +193,7 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 	return res;
 }
 
-vector <uint8_t> VNIColorisation::color_animation_frame(const DMDFrame &src_frame, const AnimationFrame &anim_frame, int len)
+vector <uint8_t> VNIColorisation::colorAnimationFrame(const DMDFrame &src_frame, const AnimationFrame &anim_frame, int len)
 {
 	if (col_mode == ModeEvent) {
 		BOOST_LOG_TRIVIAL(error) << "[vnicolorisation] mode EVENT not supported, ignoring";

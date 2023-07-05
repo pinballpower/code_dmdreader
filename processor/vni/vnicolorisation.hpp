@@ -21,8 +21,9 @@ private:
 	PalColoring coloring;
 	VniAnimationSet animations;
 
-	vector <uint8_t> color_animation_frame(const DMDFrame &src_frame, const AnimationFrame &anim_frame, int len);
+	vector <uint8_t> colorAnimationFrame(const DMDFrame &src_frame, const AnimationFrame &anim_frame, int len);
 	std::optional<PaletteMapping> findMapForPlaneData(const vector<uint8_t> pd) const;
+	void setPalette(const vector<DMDColor> colors);
 
 	// for use as a DMDSource
 	int src_current_animation = 0;
