@@ -9,6 +9,11 @@
 #include "../../util/crc32.hpp"
 #include "../../util/counter.hpp"
 
+#define FOUND_UNMASKED		"vnicolorisation::found::unmasked"
+#define FOUND_MASKED		"vnicolorisation::found::masked"
+#define FOUND_NOT			"vnicolorisation::found::not_found"
+#define FRAMES				"vnicolorisation::frames"
+
 string to_hex(const vector<uint8_t> data) {
 	string res;
 	for (auto x : data) {
@@ -56,6 +61,11 @@ bool VNIColorisation::configureFromPtree(boost::property_tree::ptree pt_general,
 		<< src_frame_count << " frames, "
 		<< coloring.num_palettes << " palettes";
 
+	REGISTER_COUNTER(FOUND_UNMASKED);
+	REGISTER_COUNTER(FOUND_MASKED);
+	REGISTER_COUNTER(FOUND_NOT);
+	REGISTER_COUNTER(FRAMES);
+
 	return true;
 }
 
@@ -68,7 +78,7 @@ std::optional<PaletteMapping> VNIColorisation::findMapForPlaneData(const vector<
 
 	if (map) {
 		BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] found colormapping for unmasked frame";
-		INC_COUNTER("vnicolorisation::found_unmasked");
+		INC_COUNTER(FOUND_UNMASKED);
 	}
 	else {
 		// try to find a colormapping that matches
@@ -79,10 +89,13 @@ std::optional<PaletteMapping> VNIColorisation::findMapForPlaneData(const vector<
 
 			if (map) {
 				BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] found colormapping on masked frame";
-				INC_COUNTER("vnicolorisation::found_unmasked");
+				INC_COUNTER(FOUND_MASKED);
 				break;
 			}
 		}
+		INC_COUNTER(FOUND_NOT);
+		BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] no mapping found";
+
 	}
 
 	return map;
@@ -97,13 +110,12 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 
 	if (f.getBitsPerPixel() > 8) {
 		BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] frame is already colored, doing nothing";
-
 		return std::move(f);
 	}
 
 	uint32_t chk;
 	BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] got frame " << f.getWidth() << "x" << f.getHeight() << " " << f.getBitsPerPixel() << "bpp, checksum " << f.getChecksum();
-	INC_COUNTER("vnicolorisation::frames");
+	INC_COUNTER(FRAMES);
 
 	int w = f.getWidth();
 	int h = f.getHeight();
@@ -148,12 +160,6 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 
 			break;
 		}
-	}
-
-	if (!map) {
-		BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] no mapping found";
-		INC_COUNTER("vnicolorisation::found_not");
-
 	}
 
 	// Play animation
