@@ -24,13 +24,9 @@ private:
 	vector <uint8_t> colorAnimationFrame(const DMDFrame &src_frame, const AnimationFrame &anim_frame, int len);
 	std::optional<PaletteMapping> findMapForPlaneData(const vector<uint8_t> pd) const;
 	void setPalette(const vector<DMDColor> colors);
-	void previousPalette();
+	void setPreviousPalette();
+	void setDefaultPalette();
 	bool triggerAnimation(const DMDFrame& f);
-
-	// for use as a DMDSource
-	int src_current_animation = 0;
-	int src_current_frame = 0;
-	int src_current_frame_in_animation = 0;
 
 	/// <summary>
 	/// Number of all frames in all animations
@@ -44,8 +40,6 @@ private:
 	vector<DMDColor> previous_col_palette;
 	int col_frames_left = -1;
 	Animation col_animation;
-	bool animation_active = false;
-	int col_anim_frame = 0;
 	SwitchMode col_mode = ModePalette;
 
 	// Features defined by the license

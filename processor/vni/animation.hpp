@@ -38,15 +38,23 @@ public:
 	/// </summary>
 	uint32_t offset;
 
-	const vector<AnimationFrame> get_frames() const;
-	const AnimationFrame get_frame(int index) const;
+	const vector<AnimationFrame> getFrames() const;
+	const AnimationFrame getFrame(int index) const;
+	const std::optional<AnimationFrame> getNextFrame(); // get next frame from a running animation
+
+	void start();
+	void stop();
+	bool isActive() const;
 
 protected:
 	/// <summary>
 	/// the frames of the animation
 	/// </summary>
 	vector<AnimationFrame> frames;
-
 	vector<vector<uint8_t>> masks;
+
+
+private:
+	int current_frame = -1;
 
 };

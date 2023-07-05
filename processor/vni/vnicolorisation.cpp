@@ -52,13 +52,13 @@ bool VNIColorisation::configureFromPtree(boost::property_tree::ptree pt_general,
 	}
 
 	// count animations and frames
-	src_frame_count = src_current_animation = src_current_frame = 0;
+	src_frame_count = 0;
 	for (auto &a : animations.get_animations()) {
 		src_frame_count += a.second.size();
 	}
 
 	// Set default palette
-	setPalette(coloring.get_default_palette().get_colors());
+	setDefaultPalette();
 
 	BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] loaded colorisation: " 
 		<< animations.get_animations().size() << " animations, "
@@ -110,8 +110,13 @@ void  VNIColorisation::setPalette(const vector<DMDColor> colors) {
 	col_palette = colors;
 }
 
-void VNIColorisation::previousPalette() {
+void VNIColorisation::setPreviousPalette() {
 	col_palette = std::move(previous_col_palette);
+}
+
+void VNIColorisation::setDefaultPalette() {
+	previous_col_palette = std::move(col_palette);
+	setPalette(coloring.get_default_palette().get_colors());
 }
 
 bool VNIColorisation::triggerAnimation(const DMDFrame& f) {
@@ -142,13 +147,12 @@ bool VNIColorisation::triggerAnimation(const DMDFrame& f) {
 
 			if (map->IsAnimation()) {
 				col_animation = animations.find(map->offset);
-				col_anim_frame = 0;
-				animation_active = true;
+				col_animation.start();
 				BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] starting animation " << col_animation.name << " (offset " << map->offset << ")";
 			}
 			else if (col_mode == ModePalette) {
 				// stop animation if one if running
-				animation_active = false;
+				col_animation.stop();
 			}
 
 			return true;
@@ -184,16 +188,12 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 
 	// Play animation
 	vector<uint8_t> color_data;
-	if (animation_active) {
-
-		color_data= colorAnimationFrame(f, col_animation.get_frame(col_anim_frame), len);
-
-		col_frames_left--;
-		col_anim_frame++;
-		if ((col_frames_left == 0) || (col_anim_frame >= col_animation.size())) {
-			animation_active = false;
+	if (col_animation.isActive()) {
+		color_data= colorAnimationFrame(f, col_animation.getNextFrame().value(), len);
+		// animation finished?
+		if (! col_animation.isActive()) {
 			col_mode = ModePalette;
-			previousPalette();
+			setDefaultPalette(); // or should it be setPreviousPalette?
 		}
 	}
 	else {
@@ -205,11 +205,6 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 
 	return res;
 }
-
-
-
-
-
 
 vector <uint8_t> VNIColorisation::colorAnimationFrame(const DMDFrame &src_frame, const AnimationFrame &anim_frame, int len)
 {

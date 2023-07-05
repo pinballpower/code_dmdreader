@@ -20,15 +20,31 @@ int Animation::size() const
 	return frames.size();
 }
 
-const vector<AnimationFrame> Animation::get_frames() const
+const vector<AnimationFrame> Animation::getFrames() const
 {
 	return frames;
 }
 
-const AnimationFrame Animation::get_frame(int index) const
+const AnimationFrame Animation::getFrame(int index) const
 {
 	return frames[index];
 }
+
+const std::optional<AnimationFrame> Animation::getNextFrame() {
+	if (!(isActive())) {
+		return {};
+	}
+	
+	auto res = getFrame(current_frame);
+	current_frame += 1;
+
+	if (current_frame >= frames.size()) {
+		stop();
+	}
+
+	return res;
+}
+
 
 Animation::Animation()
 {
@@ -37,4 +53,18 @@ Animation::Animation()
 	//animation_duration = 0;
 	offset = 0;
 	switch_mode = ModePalette;
+}
+
+
+void Animation::start() {
+	current_frame = 0;
+}
+
+void Animation::stop() {
+	current_frame = -1;
+}
+
+bool Animation::isActive() const {
+	return (current_frame >= 0) && 
+		(current_frame < frames.size());
 }

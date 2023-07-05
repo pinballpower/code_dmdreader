@@ -82,3 +82,5 @@ void VniAnimation::read_palettes_and_colors(ifstream& is)
 	is.ignore(num_colors * 3); // embedded colors unused
 };
 
+
+
