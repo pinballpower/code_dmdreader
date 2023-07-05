@@ -8,9 +8,8 @@ Counter& Counter::getInstance() {
 void Counter::increment(const std::string& name) {
     counts[name]++;
 }
-
 void Counter::reset(const std::string& name) {
-    counts.erase(name);
+    counts[name] = 0;
 }
 
 int Counter::getCount(const std::string& name) const {

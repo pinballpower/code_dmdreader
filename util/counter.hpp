@@ -23,8 +23,10 @@ public:
 
 #ifdef ENABLE_REPORTING
 #define INC_COUNTER(name) Counter::getInstance().increment(name)
+#define REGISTER_COUNTER(name) Counter::getInstance().reset(name)
 #else
 #define INC_COUNTER(name)
+#define REGISTER_COUNTER(name)
 #endif
 
 #endif // COUNTER_HPP
