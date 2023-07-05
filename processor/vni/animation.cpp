@@ -70,10 +70,14 @@ void Animation::start() {
 }
 
 void Animation::stop() {
-	current_frame = -1;
+	current_frame = frames.size();
 }
 
 bool Animation::isActive() const {
 	return (current_frame >= 0) && 
 		(current_frame < frames.size());
+}
+
+const int Animation::framesLeft() const {
+	return frames.size() - current_frame;
 }
