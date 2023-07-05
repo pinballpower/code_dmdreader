@@ -59,6 +59,35 @@ bool VNIColorisation::configureFromPtree(boost::property_tree::ptree pt_general,
 	return true;
 }
 
+std::optional<PaletteMapping> VNIColorisation::findMapForPlaneData(const vector<uint8_t> pd) const {
+	std::optional<PaletteMapping> map = std::nullopt;
+
+	uint32_t chk = crc32vect(pd, true);
+	BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] plane crc32(full frame) " << chk;
+	map = coloring.find_mapping(chk);
+
+	if (map) {
+		BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] found colormapping for unmasked frame";
+		INC_COUNTER("vnicolorisation::found_unmasked");
+	}
+	else {
+		// try to find a colormapping that matches
+		for (auto mask : coloring.masks) {
+			chk = crc32vect(pd, mask, true);
+			BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] plane masked crc32(full frame) " << chk;
+			map = coloring.find_mapping(chk);
+
+			if (map) {
+				BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] found colormapping on masked frame";
+				INC_COUNTER("vnicolorisation::found_unmasked");
+				break;
+			}
+		}
+	}
+
+	return map;
+}
+
 DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 {
 	if (f.isNull()) {
@@ -88,28 +117,7 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 	for (int i = 0; i < f.getBitsPerPixel(); i++) {
 		vector<uint8_t> pd = f.getPlaneData(i);
 
-		uint32_t chk = crc32vect(pd,true);
-		BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] plane " << std::hex << i << " crc32(full frame) " << chk;
-		map = coloring.find_mapping(chk);
-
-		if (map) {
-			BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] found colormapping for unmasked frame";
-			INC_COUNTER("vnicolorisation::found_unmasked");
-		}
-		else {
-			// try to find a colormapping that matches
-			for (auto mask : coloring.masks) {
-				chk = crc32vect(pd, mask, true);
-				BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] plane masked crc32(full frame) " << chk;
-				map = coloring.find_mapping(chk);
-
-				if (map) {
-					BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] found colormapping on masked frame";
-					INC_COUNTER("vnicolorisation::found_unmasked");
-					break;
-				}
-			}
-		}
+		map = findMapForPlaneData(pd);
 
 		if (map) {
 			uint16_t index = map->palette_index;
