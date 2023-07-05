@@ -28,7 +28,7 @@ protected:
 	/// <summary>
 	/// Stores bit planes
 	/// </summary>
-	vector<vector <uint8_t>>planes;
+	mutable  vector<vector <uint8_t>>planes;
 
 public:
 
@@ -56,7 +56,7 @@ public:
 	void setSize(int width, int height, int bits_per_pixel);
 
 	const vector<uint8_t> getPixelData() const;
-	const vector<uint8_t> getPlaneData(int bitno);
+	const vector<uint8_t> getPlaneData(int bitno) const;
 
 	RGBBuffer createRGBBufferFromFrame() const;
 
@@ -74,7 +74,7 @@ protected:
 	void initMemory(int no_of_pixels = 0);
 	void copyPixelData(uint8_t* dat, int len);
 	void copyPackedPixelData(uint8_t* packedData, int numPixels, int bitsperpixel);
-	void calculatePlanes();
+	void calculatePlanes() const;
 
 	int getBytesPerPixel() const;
 

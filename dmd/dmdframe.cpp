@@ -137,7 +137,7 @@ std::string DMDFrame::asString() {
 /// </summary>
 /// <param name="bitno">The plane number 0: LSB</param>
 /// <returns></returns>
-const vector<uint8_t> DMDFrame::getPlaneData(int bitno)
+const vector<uint8_t> DMDFrame::getPlaneData(int bitno) const
 {
 	if (planes.size() < bitsperpixel) {
 		calculatePlanes();
@@ -278,7 +278,7 @@ void DMDFrame::copyPackedPixelData(uint8_t* packedData, int numPixels, int bitsp
 	}
 }
 
-void DMDFrame::calculatePlanes()
+void DMDFrame::calculatePlanes() const
 {
 	if (planes.size() > 0) {
 		planes.clear();
