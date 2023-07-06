@@ -108,6 +108,9 @@ PalColoring::PalColoring(string filename)
 		BOOST_LOG_TRIVIAL(warning) << "[coloring] read error, finished reading, but still " << avail << " bytes left";
 	}
 
+	BOOST_LOG_TRIVIAL(trace) << "[coloring] mappings read: ";
+	BOOST_LOG_TRIVIAL(trace) << debugChecksums();
+
 	is.close();
 }
 
@@ -128,4 +131,13 @@ std::unique_ptr<PaletteMapping> PalColoring::findMapping(uint32_t checksum) cons
 	} catch(out_of_range e) {
 		return nullptr;
 	}
+}
+
+const string PalColoring::debugChecksums() const {
+	std::ostringstream oss;
+	for (const auto& pair : mappings) {
+		oss << "0x" << std::setfill('0') << std::setw(8) << std::hex << pair.first << ":" << std::dec << pair.first << ":" << pair.second.mode;
+		oss << "\n";
+	}
+	return oss.str();
 }

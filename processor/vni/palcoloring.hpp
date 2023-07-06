@@ -25,6 +25,8 @@ public:
 	const Palette getDefaultPalette() const;
 	std::unique_ptr<PaletteMapping> findMapping(uint32_t checksum) const;
 
+	const string debugChecksums() const; // export all checksums as a string with one checksum per line
+
 protected:
 	map<uint16_t, PalPalette> palettes;
 	map<uint32_t, PaletteMapping> mappings;
