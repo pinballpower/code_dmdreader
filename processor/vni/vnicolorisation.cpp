@@ -77,7 +77,7 @@ std::unique_ptr<PaletteMapping> VNIColorisation::findMapForPlaneData(const vecto
 	std::unique_ptr<PaletteMapping> map;
 
 	uint32_t chk = crc32vect(pd, true);
-	BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] plane crc32(full frame) " << chk;
+	BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] plane crc32(full frame) " << std::hex << chk;
 	map = coloring.findMapping(chk);
 
 	if (map) {
@@ -86,19 +86,21 @@ std::unique_ptr<PaletteMapping> VNIColorisation::findMapForPlaneData(const vecto
 	}
 	else {
 		// try to find a colormapping that matches
+		int i = 0;
 		for (auto mask : coloring.masks) {
 			chk = crc32vect(pd, mask, true);
-			BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] plane masked crc32(full frame) " << chk;
+			BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] plane masked crc32(full frame) " << std::hex << chk  << " with mask " << i;
 			map = coloring.findMapping(chk);
 
 			if (map) {
-				BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] found colormapping on masked frame";
+				BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] found colormapping on masked frame";
 				INC_COUNTER(FOUND_MASKED);
 				break;
 			}
+			i++;
 		}
 		INC_COUNTER(FOUND_NOT);
-		BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] no mapping found";
+		BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] no mapping found";
 
 	}
 
@@ -149,7 +151,7 @@ bool VNIColorisation::triggerAnimation(const DMDFrame& f) {
 			if (map->IsAnimation()) {
 				col_animation = animations.find(map->offset);
 				col_animation.start();
-				BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] starting animation " << col_animation.name << " (offset " << map->offset << ")";
+				BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] starting animation " << col_animation.name << ", " << col_animation.framesLeft() << " frames left";
 			}
 			else if (col_mode == ModePalette) {
 				// stop animation if one if running
@@ -158,7 +160,7 @@ bool VNIColorisation::triggerAnimation(const DMDFrame& f) {
 
 			return true;
 		}
-	}
+	} 
 
 	return false; // no mapping found
 }
@@ -191,8 +193,6 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 	if (col_animation.isActive()) {
 
 		auto x = col_animation.framesLeft();
-
-		BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] getNextFrame, frames left before: " << col_animation.framesLeft();
 		color_data= colorAnimationFrame(f, col_animation.getNextFrame().value(), len);
 		BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] getNextFrame, frames left after: " << col_animation.framesLeft();
 		// animation finished?
