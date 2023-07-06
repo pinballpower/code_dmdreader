@@ -1,0 +1,25 @@
+{
+   "general":{
+      "cwd_to_configdir":true,
+      "log":""
+   },
+   "source":{
+      "spi":{
+         "device":"/dev/spidev0.0",
+         "speed":4000000,
+         "notify_gpio":17
+      }
+   },
+   "processor":{
+      "vni":{
+         "basename":"sttng_l7"
+      }
+   },
+   "renderer":{
+      "ledmatrix":{
+         "width":128,
+         "height":32,
+         "rgb_sequence":"rbg"
+      }
+   }
+}
