@@ -152,7 +152,7 @@ bool read_config(string filename) {
 				if (proc->configureFromPtree(pt_general, v.second)) {
 					BOOST_LOG_TRIVIAL(info) << "[readconfig] successfully initialized processor " << v.first;
 					processors.push_back(proc);
-					REGISTER_PROFILE(TIMING_PROCESSOR + proc->name);
+					REGISTER_PROFILE(TIMING_PROCESSOR + proc->name, "us");
 				}
 			}
 			else {
@@ -368,6 +368,13 @@ int main(int argc, char** argv)
 	std::vector<std::pair<std::string, int>> allCounters = Counter::getInstance().getAllCounters();
 	for (const auto& counterPair : allCounters) {
 		BOOST_LOG_TRIVIAL(info) << "[report] " << counterPair.first << ": " << counterPair.second;
+	}
+
+	std::vector<std::pair<std::string, ProfilerRecord>> allProfilers = Profiler::getInstance().getAllRecords();
+	for (const auto& profilerPair : allProfilers) {
+		auto data = profilerPair.second;
+		BOOST_LOG_TRIVIAL(info) << "[report] " << profilerPair.first << ": "
+			<< data.avg() << data.unit << " avg, " << data.min << "-" << data.max << data.unit;
 	}
 
 #endif

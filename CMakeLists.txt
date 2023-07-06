@@ -472,8 +472,8 @@ endif()
 # XBR end
 #
 
-
 add_definitions(-DENABLE_REPORTING)
+add_definitions(-DENABLE_PROFILING)
 
 set(UTIL_SRC
     "util/data.hpp"
