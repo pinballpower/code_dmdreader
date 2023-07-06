@@ -26,6 +26,10 @@
 
 using namespace std;
 
+#define COUNT_FRAMES				"dmreader::frames::all"
+#define COUNT_FRAMES_SUPPRESSED		"dmreader::frames::supressed"
+#define COUNT_FRAMES_PROCESSED		"dmreader::frames::processes"
+
 vector<std::shared_ptr<DMDSource>> sources;
 vector<std::shared_ptr<DMDFrameProcessor>> processors;
 vector<std::shared_ptr<FrameRenderer>> renderers;
@@ -264,7 +268,6 @@ int main(int argc, char** argv)
 	t1 = std::time(nullptr);
 
 	uint32_t checksum_last_frame = 0;
-	int skippedFrames = 0;
 	bool sourcesFinished = false;
 	int activeSourceIndex = 0;
 	auto source = sources[activeSourceIndex];
@@ -286,10 +289,11 @@ int main(int argc, char** argv)
 		}
 		DMDFrame frame = source->getNextFrame();
 
+		INC_COUNTER(COUNT_FRAMES);
 
 		if (skip_unmodified_frames) {
 			if (frame.getChecksum() == checksum_last_frame) {
-				skippedFrames++;
+				INC_COUNTER(COUNT_FRAMES_SUPPRESSED);
 				continue;
 			}
 			checksum_last_frame = frame.getChecksum();
@@ -301,6 +305,9 @@ int main(int argc, char** argv)
 			frame = proc->processFrame(frame);
 			assert(frame.isValid());
 		}
+
+		INC_COUNTER(COUNT_FRAMES_PROCESSED);
+
 
 		for (auto renderer : renderers) {
 			renderer->renderFrame(frame);
@@ -316,10 +323,9 @@ int main(int argc, char** argv)
 	}
 
 	t2 = std::time(nullptr);
-	BOOST_LOG_TRIVIAL(info) << "[dmdreader] processed " << frameno << " frames in " << t2 - t1 << " seconds, " 
+	BOOST_LOG_TRIVIAL(info) << "[dmdreader] processed " << frameno << " frames in " << t2 - t1 << " seconds, "
 		<< (float)frameno / (t2 - t1) << " frames/s, "
-		<< source->getDroppedFrames() << " frames dropped, "
-		<< skippedFrames << " duplicated frames skipped";
+		<< source->getDroppedFrames() << " frames dropped in source";
 
 	// if the program should not terminate, just loop endlessly auntil aborted
 	while (! terminateWhenFinished) {
