@@ -1,5 +1,9 @@
 #include "frameprocessor.hpp"
 
+DMDFrameProcessor::DMDFrameProcessor()
+{
+}
+
 DMDFrameProcessor::~DMDFrameProcessor()
 {
 	close();

@@ -5,6 +5,10 @@
 // https://en.wikipedia.org/wiki/Pixel-art_scaling_algorithms
 //
 
+Upscale::Upscale() {
+	name = "Upscale";
+}
+
 Upscale::~Upscale() {
 	delete(xbrData);
 }

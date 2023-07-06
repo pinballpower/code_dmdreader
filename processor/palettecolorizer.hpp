@@ -9,6 +9,9 @@
 class PaletteColorizer : public DMDFrameProcessor {
 
 public:
+
+	PaletteColorizer();
+
 	virtual DMDFrame processFrame(DMDFrame& f) override;
 	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) override;
 

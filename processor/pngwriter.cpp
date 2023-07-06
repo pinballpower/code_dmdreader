@@ -15,6 +15,7 @@ bool PNGWriter::configureFromPtree(boost::property_tree::ptree pt_general, boost
 PNGWriter::PNGWriter()
 {
 	supportsColoredFrames = true;
+	name = "PNGWriter";
 }
 
 void PNGWriter::writeFrameToFile(DMDFrame& f, uint32_t timestamp)

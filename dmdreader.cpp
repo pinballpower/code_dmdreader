@@ -23,12 +23,15 @@
 #include "util/objectfactory.hpp"
 #include "services/serviceregistry.hpp"
 #include "util/counter.hpp"
+#include "util/profiler.hpp"
 
 using namespace std;
 
-#define COUNT_FRAMES				"dmreader::frames::all"
-#define COUNT_FRAMES_SUPPRESSED		"dmreader::frames::supressed"
-#define COUNT_FRAMES_PROCESSED		"dmreader::frames::processes"
+#define COUNT_FRAMES				"main::frames::all"
+#define COUNT_FRAMES_SUPPRESSED		"main::frames::supressed"
+#define COUNT_FRAMES_PROCESSED		"main::frames::processes"
+
+#define TIMING_PROCESSOR			"processor::"
 
 vector<std::shared_ptr<DMDSource>> sources;
 vector<std::shared_ptr<DMDFrameProcessor>> processors;
@@ -149,6 +152,7 @@ bool read_config(string filename) {
 				if (proc->configureFromPtree(pt_general, v.second)) {
 					BOOST_LOG_TRIVIAL(info) << "[readconfig] successfully initialized processor " << v.first;
 					processors.push_back(proc);
+					REGISTER_PROFILE(TIMING_PROCESSOR + proc->name);
 				}
 			}
 			else {
@@ -270,7 +274,7 @@ int main(int argc, char** argv)
 	uint32_t checksum_last_frame = 0;
 	bool sourcesFinished = false;
 	int activeSourceIndex = 0;
-	auto source = sources[activeSourceIndex];
+	auto &source = sources[activeSourceIndex];
 
 	while ((!(sourcesFinished) && (! isFinished))) {
 
@@ -301,15 +305,21 @@ int main(int argc, char** argv)
 
 		assert(frame.isValid());
 
-		for (auto proc : processors) {
+		for (auto &proc : processors) {
+			auto start = std::chrono::high_resolution_clock::now();
 			frame = proc->processFrame(frame);
+			auto end = std::chrono::high_resolution_clock::now();
+			float duration = static_cast<float>(std::chrono::duration_cast<std::chrono::microseconds>(end - start).count());
+			ADD_PROFILE_VALUE(TIMING_PROCESSOR + proc->name, duration);
+
 			assert(frame.isValid());
+
 		}
 
 		INC_COUNTER(COUNT_FRAMES_PROCESSED);
 
 
-		for (auto renderer : renderers) {
+		for (auto &renderer : renderers) {
 			renderer->renderFrame(frame);
 			assert(frame.isValid());
 		}
@@ -335,19 +345,19 @@ int main(int argc, char** argv)
 
 	// Finishing
 	BOOST_LOG_TRIVIAL(debug) << "[dmdreader] closing sources";
-	for (auto s : sources) {
+	for (auto &s : sources) {
 		s->close();
 	}
 	sources.clear();
 
 	BOOST_LOG_TRIVIAL(debug) << "[dmdreader] closing processors";
-	for (auto proc : processors) {
+	for (auto &proc : processors) {
 		proc->close();
 	}
 	processors.clear();
 
 	BOOST_LOG_TRIVIAL(debug) << "[dmdreader] closing renderers";
-	for (auto renderer : renderers) {
+	for (auto &renderer : renderers) {
 		renderer->close();
 	}
 	renderers.clear();

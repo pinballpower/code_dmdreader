@@ -34,6 +34,8 @@ public:
 class StateDetector : public DMDFrameProcessor {
 
 public:
+	StateDetector();
+
 	string getMatch(const DMDFrame& frame, const MatchParameters& mp, vector<Rectangle>& matchRectangles);
 	virtual DMDFrame processFrame(DMDFrame& f) override;
 	void setVariable(string name, string value);

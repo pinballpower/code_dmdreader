@@ -9,6 +9,7 @@
 
 PatternMatcher::PatternMatcher()
 {
+	name = "PatternMatcher";
 }
 
 PatternMatcher::PatternMatcher(string patternFile)

@@ -87,7 +87,7 @@ std::unique_ptr<PaletteMapping> VNIColorisation::findMapForPlaneData(const vecto
 	else {
 		// try to find a colormapping that matches
 		int i = 0;
-		for (auto mask : coloring.masks) {
+		for (auto &mask : coloring.masks) {
 			chk = crc32vect(pd, mask, true);
 			BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] plane masked crc32(full frame) " << std::hex << chk  << " with mask " << i;
 			map = coloring.findMapping(chk);
@@ -177,7 +177,6 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 		return std::move(f);
 	}
 
-	uint32_t chk;
 	BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] got frame " << f.getWidth() << "x" << f.getHeight() << " " << f.getBitsPerPixel() << "bpp, checksum " << f.getChecksum();
 	INC_COUNTER(FRAMES);
 

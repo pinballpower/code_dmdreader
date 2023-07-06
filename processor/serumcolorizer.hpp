@@ -12,6 +12,8 @@
 class SerumColorizer : public DMDFrameProcessor {
 
 public:
+	SerumColorizer();
+
 	virtual DMDFrame processFrame(DMDFrame& f) override;
 	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) override;
 

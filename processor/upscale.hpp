@@ -10,6 +10,7 @@ class Upscale : public DMDFrameProcessor {
 
 public:
 
+	Upscale();
 	~Upscale();
 
 	virtual DMDFrame processFrame(DMDFrame& f) override;

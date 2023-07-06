@@ -157,3 +157,6 @@ DMDFrame PUPCapture::processFrame(DMDFrame &f)
     return f;
 }
 
+PUPCapture::PUPCapture() {
+    name = "PUPCapture";
+}

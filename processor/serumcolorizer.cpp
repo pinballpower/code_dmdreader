@@ -115,3 +115,7 @@ bool SerumColorizer::configureFromPtree(boost::property_tree::ptree pt_general, 
 	return ok;
 
 }
+
+SerumColorizer::SerumColorizer() {
+	name = "SerumColorizer";
+}

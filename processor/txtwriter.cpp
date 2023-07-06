@@ -15,8 +15,6 @@ TXTWriter::~TXTWriter()
 	close();
 }
 
-
-
 bool TXTWriter::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)
 {
 	string name = pt_source.get("filename", "");
@@ -72,4 +70,8 @@ void TXTWriter::writeFrameToFile(DMDFrame& f, uint32_t timestamp)
 	else {
 		BOOST_LOG_TRIVIAL(debug) << "[TXTWriter] outut file closed, doing nothing";
 	}
+}
+
+TXTWriter::TXTWriter() {
+	name = "TXTWriter";
 }

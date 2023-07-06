@@ -10,9 +10,16 @@ using std::chrono::seconds;
 using std::chrono::system_clock;
 
 
+GenericWriter::GenericWriter()
+{
+	name = "GenericWriter";
+}
+
 GenericWriter::~GenericWriter()
 {
+	close();
 }
+
 
 
 

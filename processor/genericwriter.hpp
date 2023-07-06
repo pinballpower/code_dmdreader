@@ -16,6 +16,7 @@ class GenericWriter : public DMDFrameProcessor {
 
 public:
 
+	GenericWriter();
 	~GenericWriter();
 
 	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) override;

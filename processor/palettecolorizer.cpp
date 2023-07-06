@@ -104,3 +104,7 @@ DMDFrame highlightRectangles(const DMDFrame& f, const DMDPalette& palette, const
 
 	return result;
 }
+
+PaletteColorizer::PaletteColorizer() {
+	name = "PaletteColorizer";
+}

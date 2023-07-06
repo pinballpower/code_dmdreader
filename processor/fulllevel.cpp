@@ -20,6 +20,7 @@ int max_level_in_frame(DMDFrame f, int absoluteMaximum) {
 
 FullLevel::FullLevel()
 {
+	name = "FullLevel";
 }
 
 bool FullLevel::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source)

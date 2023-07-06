@@ -7,6 +7,7 @@
 
 FrameInfoLogger::FrameInfoLogger()
 {
+	name = "FrameInfoLogger";
 }
 
 FrameInfoLogger::~FrameInfoLogger()

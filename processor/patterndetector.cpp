@@ -103,3 +103,8 @@ void PatternDetector::close()
         BOOST_LOG_TRIVIAL(info) << "[PatternDetector] " << pattern.first << ": " << pattern.second;
     }
 }
+
+
+PatternDetector::PatternDetector() {
+    name = "PatternDetector";
+}

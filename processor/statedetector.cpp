@@ -162,10 +162,12 @@ bool StateDetector::loadRules(string filename)
 	return true;
 }
 
-
-
-
 bool MatcherRule::isValid()
 {
 	return matchParameters.size() > 0;
+}
+
+
+StateDetector::StateDetector() {
+	name = "StateDetector";
 }

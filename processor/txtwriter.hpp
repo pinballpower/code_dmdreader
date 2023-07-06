@@ -16,8 +16,9 @@
 class TXTWriter : public GenericWriter {
 
 public:
-
+	TXTWriter();
 	~TXTWriter();
+
 	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) override;
 
 protected:
