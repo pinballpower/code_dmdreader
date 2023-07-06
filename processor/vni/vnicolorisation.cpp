@@ -42,12 +42,12 @@ bool VNIColorisation::configureFromPtree(boost::property_tree::ptree pt_general,
 	animations = VniAnimationSet(basename + ".vni");
 
 	if (coloring.num_palettes == 0) {
-		BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] couldn't load any palette data from .pal file";
+		BOOST_LOG_TRIVIAL(error) << "[vnicolorisation] couldn't load any palette data from .pal file";
 		return false;
 	}
 
 	if (animations.getAnimations().size() == 0) {
-		BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] couldn't load any animations from .vni file";
+		BOOST_LOG_TRIVIAL(error) << "[vnicolorisation] couldn't load any animations from .vni file";
 		return false;
 	}
 
@@ -140,18 +140,18 @@ bool VNIColorisation::triggerAnimation(const DMDFrame& f) {
 			// Should the palette be used only for  specific number of frames?
 			if (map->duration) {
 				col_frames_left = map->duration;
-				BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] switching to palette " << index << " for " << col_frames_left << " frames";
+				BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] switching to palette " << index << " for " << col_frames_left << " frames";
 				// TODO: Implement start/stop/isActive
 			}
 			else {
 				col_frames_left = -1;
-				BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] switching to palette " << index;
+				BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] switching to palette " << index;
 			}
 
 			if (map->IsAnimation()) {
 				col_animation = animations.find(map->offset);
 				col_animation.start();
-				BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] starting animation " << col_animation.name << ", " << col_animation.framesLeft() << " frames left";
+				BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] starting animation " << col_animation.name << ", " << col_animation.framesLeft() << " frames left";
 			}
 			else if (col_mode == ModePalette) {
 				// stop animation if one if running
@@ -168,7 +168,7 @@ bool VNIColorisation::triggerAnimation(const DMDFrame& f) {
 DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 {
 	if (f.isNull()) {
-		BOOST_LOG_TRIVIAL(info) << "[vnicolorisation] got NULL frame doing nothing";
+		BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] got NULL frame doing nothing";
 		return f;
 	}
 
