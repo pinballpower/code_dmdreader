@@ -198,7 +198,8 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 		// animation finished?
 		if (! col_animation.isActive()) {
 			col_mode = ModePalette;
-			setDefaultPalette(); // or should it be setPreviousPalette?
+			// setDefaultPalette(); // or should it be 
+			setPreviousPalette();
 
 		}
 	}
