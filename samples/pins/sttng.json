@@ -12,7 +12,7 @@
    },
    "processor":{
       "vni":{
-         "basename":"../pinconfig/sttng/sttng_l7"
+         "basename":"sttng_l7"
       }
    },
    "renderer":{
