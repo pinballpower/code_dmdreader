@@ -298,7 +298,7 @@ void DMDFrame::calculatePlanes() const
 				planes[i].push_back(0);
 			}
 		}
-		for (uint8_t i = 0, mask = 1; i < bitsperpixel; i++, mask << 1) {
+		for (uint8_t i = 0, mask = 1; i < bitsperpixel; i++, mask <<= 1) {
 			if ((p & mask) != 0) {
 				planes[i].back() = (planes[i].back() << 1) | 1;
 			}
