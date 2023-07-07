@@ -1,7 +1,9 @@
 {
    "general":{
       "cwd_to_configdir":true,
-      "log":""
+      "log":"",
+      "skip_unmodified_frames": false,
+      "frame_every_microseconds": 17000
    },
    "source":{
       "spi":{
