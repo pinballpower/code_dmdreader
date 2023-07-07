@@ -367,8 +367,12 @@ int main(int argc, char** argv)
 			frame = proc->processFrame(frame);
 			END_PROFILER(name);
 
-			assert(frame.isValid());
+			// a processor can drop frames. In this case, it returns a null frame
+			if (frame.isNull()) {
+				BOOST_LOG_TRIVIAL(trace) << "[dmdreader] processor " << proc->name << " dropped frame";
+			}
 
+			assert(frame.isValid());
 		}
 
 		INC_COUNTER(COUNT_FRAMES_PROCESSED);

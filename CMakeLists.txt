@@ -526,7 +526,10 @@ set(PROCESSOR_SRC
     "processor/upscale.hpp"
     "processor/upscale.cpp"
     "processor/fulllevel.hpp"
-    "processor/fulllevel.cpp")
+    "processor/fulllevel.cpp"
+    "processor/ratelimit.hpp"
+    "processor/ratelimit.cpp"
+)
 set(SCORE_SRC
     "processor/statedetector.hpp" "processor/statedetector.cpp"
     "processor/patternmatcher.cpp" "processor/patternmatcher.hpp"
