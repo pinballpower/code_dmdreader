@@ -193,7 +193,7 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 
 		auto x = col_animation.framesLeft();
 		color_data= colorAnimationFrame(f, col_animation.getNextFrame().value(), len);
-		BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] getNextFrame, frames left after: " << col_animation.framesLeft();
+		BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] getNextFrame, frames left after: " << col_animation.framesLeft();
 		// animation finished?
 		if (! col_animation.isActive()) {
 			col_mode = ModePalette;
