@@ -13,3 +13,21 @@ In general there are 2 legal ways to get PAL/VNI files
 1. You did download these in the past and still have these laying around - just use them
 2. Contact the author and ask them. Some might be willing to just share these files. 
  Others might want to get paid for it.  And others might not be willing to share at all. 
+
+## Timing
+
+By default, duplicated frames are suppressed internally. This already happens on the hardware interface. It only sends modified frames to
+the Raspberry Pi. Some VNI colorisations won't work correctly if frames are not delievered at a fixed rate. You can enable this behavior in the "general" 
+section of the configuration:
+
+```
+"general":{
+  "skip_unmodified_frames": false,
+  "frame_every_microseconds": 17000
+},
+```
+
+This example configured the software that it will deliver frames every (at most) 17ms. If the pinball delivers frames faster than this, every frame is 
+being processed. However if frames are being delivered slower (usually because they don't change), the system will simple repeat the last frame. 
+In many case, you won't notice a difference. However, if a VNI colorisation uses relatively long animations, you might need to set this. Experiment a 
+bit with the timing. It will be different between different pinball platforms.
