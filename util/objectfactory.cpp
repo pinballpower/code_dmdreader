@@ -13,6 +13,7 @@
 #include "../processor/txtwriter.hpp"
 #include "../processor/pngwriter.hpp"
 #include "../processor/patterndetector.hpp"
+#include "../processor/ratelimit.hpp"
 #include "../processor/statedetector.hpp"
 #include "../processor/upscale.hpp"
 #include "../render/framerenderer.hpp"
@@ -99,6 +100,9 @@ std::shared_ptr<DMDFrameProcessor> createProcessor(string name) {
 	}
 	else if (name == "patterndetector") {
 		return std::make_shared<PatternDetector>();
+	}
+	else if (name == "ratelimit") {
+		return std::make_shared<RateLimit>();
 	}
 	else if (name == "statedetector") {
 		return std::make_shared<StateDetector>();
