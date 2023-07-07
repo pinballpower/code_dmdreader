@@ -162,7 +162,6 @@ void TXTDMDSource::preloadNextFrame()
 }
 
 
-
 DMDFrame TXTDMDSource::getNextFrame()
 {
 	DMDFrame res;
@@ -214,7 +213,6 @@ bool TXTDMDSource::isFrameReady()
 {
 	return (!eof);
 }
-
 
 SourceProperties TXTDMDSource::getProperties() {
 	return SourceProperties(preloadedFrame);
