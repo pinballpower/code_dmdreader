@@ -379,7 +379,7 @@ int main(int argc, char** argv)
 		INC_COUNTER(COUNT_FRAMES_PROCESSED);
 
 		if (frame.isNull()) {
-			break;
+			continue;
 		}
 
 
