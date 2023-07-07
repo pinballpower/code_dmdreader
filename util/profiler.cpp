@@ -2,6 +2,7 @@
 
 ProfilerRecord::ProfilerRecord()
 {
+    startTime = 0;
 }
 
 void ProfilerRecord::addRecord(const float v)
@@ -25,6 +26,23 @@ float ProfilerRecord::avg() const {
     }
 }
 
+
+void ProfilerRecord::startTimer() {
+    // Get the current time in microseconds
+    startTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+}
+
+void ProfilerRecord::endTimer() {
+    if (!startTime) return;
+
+    auto myTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    float ms = (float)(myTime - startTime)/1000;
+
+    addRecord(ms);
+    startTime = 0;
+}
+
+
 Profiler& Profiler::getInstance() {
     static Profiler instance;
     return instance;
@@ -45,4 +63,12 @@ std::vector<std::pair<std::string, ProfilerRecord>> Profiler::getAllRecords() co
             return a.first < b.first;
         });
     return profilerData;
+}
+
+void Profiler::startTimer(const std::string& name) {
+    records[name].startTimer();
+}
+
+void Profiler::endTimer(const std::string& name) {
+    records[name].endTimer();
 }

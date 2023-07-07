@@ -33,6 +33,9 @@ using namespace std;
 
 #define TIMING_PROCESSOR			"processor::"
 
+#define TIMING_FRAMES				"source::time_between_frames"
+#define TIMING_DEDUPLICATED_FRAMES	"source::time_between_deduplicated_frames"
+
 vector<std::shared_ptr<DMDSource>> sources;
 vector<std::shared_ptr<DMDFrameProcessor>> processors;
 vector<std::shared_ptr<FrameRenderer>> renderers;
@@ -152,7 +155,7 @@ bool read_config(string filename) {
 				if (proc->configureFromPtree(pt_general, v.second)) {
 					BOOST_LOG_TRIVIAL(info) << "[readconfig] successfully initialized processor " << v.first;
 					processors.push_back(proc);
-					REGISTER_PROFILE(TIMING_PROCESSOR + proc->name, "us");
+					REGISTER_PROFILER(TIMING_PROCESSOR + proc->name, "ms");
 				}
 			}
 			else {
@@ -276,6 +279,10 @@ int main(int argc, char** argv)
 	int activeSourceIndex = 0;
 	auto &source = sources[activeSourceIndex];
 
+	// Profiling data
+	REGISTER_PROFILER(TIMING_FRAMES, "ms");
+	REGISTER_PROFILER(TIMING_DEDUPLICATED_FRAMES, "ms");
+
 	while ((!(sourcesFinished) && (! isFinished))) {
 
 		BOOST_LOG_TRIVIAL(trace) << "[dmdreader] processing frame " << frameno;
@@ -292,8 +299,9 @@ int main(int argc, char** argv)
 			}
 		}
 		DMDFrame frame = source->getNextFrame();
-
 		INC_COUNTER(COUNT_FRAMES);
+		END_PROFILER(TIMING_FRAMES);
+		START_PROFILER(TIMING_FRAMES);
 
 		if (skip_unmodified_frames) {
 			if (frame.getChecksum() == checksum_last_frame) {
@@ -302,15 +310,16 @@ int main(int argc, char** argv)
 			}
 			checksum_last_frame = frame.getChecksum();
 		}
+		END_PROFILER(TIMING_DEDUPLICATED_FRAMES);
+		START_PROFILER(TIMING_DEDUPLICATED_FRAMES);
 
 		assert(frame.isValid());
 
 		for (auto &proc : processors) {
-			auto start = std::chrono::high_resolution_clock::now();
+			auto name = TIMING_PROCESSOR + proc->name;
+			START_PROFILER(name);
 			frame = proc->processFrame(frame);
-			auto end = std::chrono::high_resolution_clock::now();
-			float duration = static_cast<float>(std::chrono::duration_cast<std::chrono::microseconds>(end - start).count());
-			ADD_PROFILE_VALUE(TIMING_PROCESSOR + proc->name, duration);
+			END_PROFILER(name);
 
 			assert(frame.isValid());
 
@@ -372,9 +381,11 @@ int main(int argc, char** argv)
 
 	std::vector<std::pair<std::string, ProfilerRecord>> allProfilers = Profiler::getInstance().getAllRecords();
 	for (const auto& profilerPair : allProfilers) {
-		auto data = profilerPair.second;
+		auto &data = profilerPair.second;
 		BOOST_LOG_TRIVIAL(info) << "[report] " << profilerPair.first << ": "
-			<< data.avg() << data.unit << " avg, " << data.min << "-" << data.max << data.unit;
+			<< std::fixed << std::setprecision(1)
+			<< data.avg() << data.unit << " avg, " << data.min << "-" << data.max << data.unit
+			<< " (" << data.count << " recs)";
 	}
 
 #endif
