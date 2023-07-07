@@ -44,6 +44,7 @@ vector<std::shared_ptr<FrameRenderer>> renderers;
 bool terminateWhenFinished = true;
 
 bool skip_unmodified_frames = true;
+int frameEveryMicroseconds = 0; // force processing a frame every x microseconds
 
 bool read_config(string filename) {
 
@@ -116,6 +117,8 @@ bool read_config(string filename) {
 			boost::log::trivial::severity > boost::log::trivial::error
 		);
 	}
+
+	frameEveryMicroseconds = pt_general.get("frame_every_microseconds", 0);
 
 	//
 	// Sources
@@ -237,6 +240,10 @@ void signal_handler(int sig)
 	terminateWhenFinished = true;
 }
 
+int64_t getMicrosecondsTimestamp() {
+	return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+}
+
 
 int main(int argc, char** argv)
 {
@@ -285,9 +292,11 @@ int main(int argc, char** argv)
 	REGISTER_PROFILER(TIMING_FRAMES, "ms");
 	REGISTER_PROFILER(TIMING_DEDUPLICATED_FRAMES, "ms");
 
-	while ((!(sourcesFinished) && (! isFinished))) {
+	auto lastMicroseconds = getMicrosecondsTimestamp();
+	DMDFrame lastFrame;
+	DMDFrame frame;
 
-		BOOST_LOG_TRIVIAL(trace) << "[dmdreader] processing frame " << frameno;
+	while ((!(sourcesFinished) && (! isFinished))) {
 
 		if (source->isFinished()) {
 			// switch to next source if there is one
@@ -300,7 +309,39 @@ int main(int argc, char** argv)
 				continue;
 			}
 		}
-		DMDFrame frame = source->getNextFrame();
+
+		if (frameEveryMicroseconds) {
+			if (source->isFrameReady()) {
+				frame = source->getNextFrame();
+				lastFrame = frame; // store a copy that can be delivered again
+				lastMicroseconds = getMicrosecondsTimestamp();
+				BOOST_LOG_TRIVIAL(trace) << "[dmdreader] got a new frame from the source";
+			}
+			else {
+				auto currentTime = getMicrosecondsTimestamp();
+				auto usSinceLast = (currentTime - lastMicroseconds);
+				if (usSinceLast > frameEveryMicroseconds) {
+					BOOST_LOG_TRIVIAL(trace) << "[dmdreader] duplicating last frame";
+					lastMicroseconds = currentTime;
+					frame = lastFrame;
+				}
+				else {
+					// no new frame ready, but less than frameEveryMicroseconds time, 
+					// just wait a bit and try again (wait at most 1ms, but could be shorter if
+					// less time is left until next frame) 
+					auto waitTime = max((int)(frameEveryMicroseconds - usSinceLast), 1000);
+					std::this_thread::sleep_for(std::chrono::microseconds(waitTime));
+					continue;
+				}
+			}
+		}
+		else {
+			// just wait until the source provides the next frame
+			DMDFrame frame = source->getNextFrame();
+		}
+
+		BOOST_LOG_TRIVIAL(trace) << "[dmdreader] processing frame " << frameno;
+
 		INC_COUNTER(COUNT_FRAMES);
 		END_PROFILER(TIMING_FRAMES);
 		START_PROFILER(TIMING_FRAMES);
