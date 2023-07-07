@@ -340,7 +340,7 @@ int main(int argc, char** argv)
 		}
 		else {
 			// just wait until the source provides the next frame
-			DMDFrame frame = source->getNextFrame();
+			frame = source->getNextFrame();
 		}
 
 		BOOST_LOG_TRIVIAL(trace) << "[dmdreader] processing frame " << frameno;

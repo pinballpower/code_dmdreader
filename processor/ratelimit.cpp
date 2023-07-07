@@ -8,7 +8,8 @@ DMDFrame RateLimit::processFrame(DMDFrame& f)
 {
 	if (accept_every > 0) {
 		count += 1;
-		if (accept_every <= count) {
+		if (count >= accept_every) {
+			count = 0;
 			return f;
 		}
 		else {
