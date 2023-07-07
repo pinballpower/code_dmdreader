@@ -12,6 +12,8 @@ public:
 	FrameRenderer();
 	~FrameRenderer();
 
+	std::string name = "";
+
 	virtual void renderFrame(DMDFrame &f);
 	virtual void close();
 

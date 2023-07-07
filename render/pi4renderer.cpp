@@ -281,6 +281,7 @@ void Pi4Renderer::stop_fullscreen_ogl() {
 
 Pi4Renderer::Pi4Renderer() {
 	shader_prefix = "pi4";
+    name = "Pi4Renderer";
 }
 
 bool Pi4Renderer::configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_renderer)

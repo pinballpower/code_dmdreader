@@ -32,6 +32,7 @@ using namespace std;
 #define COUNT_FRAMES_PROCESSED		"main::frames::processes"
 
 #define TIMING_PROCESSOR			"processor::"
+#define TIMING_RENDERER			    "renderer::"
 
 #define TIMING_FRAMES				"source::time_between_frames"
 #define TIMING_DEDUPLICATED_FRAMES	"source::time_between_deduplicated_frames"
@@ -178,6 +179,7 @@ bool read_config(string filename) {
 				if (renderer->configureFromPtree(pt_general, v.second)) {
 					BOOST_LOG_TRIVIAL(info) << "[readconfig] successfully initialized renderer " << v.first;
 					renderers.push_back(renderer);
+					REGISTER_PROFILER(TIMING_RENDERER + renderer->name, "ms");
 				}
 				else {
 					BOOST_LOG_TRIVIAL(info) << "[readconfig] could not initialize renderer " << v.first << ", ignoring";
@@ -329,7 +331,10 @@ int main(int argc, char** argv)
 
 
 		for (auto &renderer : renderers) {
+			auto name = TIMING_RENDERER + renderer->name;
+			START_PROFILER(name);
 			renderer->renderFrame(frame);
+			END_PROFILER(name);
 			assert(frame.isValid());
 		}
 

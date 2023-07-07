@@ -4,6 +4,7 @@
 
 GladOpenGLRenderer::GladOpenGLRenderer() {
 	shader_prefix = "ogl";
+	name = "GladOpenGLRenderer";
 }
 
 bool GladOpenGLRenderer::initializeDisplay()

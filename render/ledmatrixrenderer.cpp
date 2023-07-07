@@ -4,6 +4,7 @@
 ;
 
 LEDMatrixRenderer::LEDMatrixRenderer() {
+    name = "LEDMatrixRenderer";
 }
 
 LEDMatrixRenderer::~LEDMatrixRenderer() {

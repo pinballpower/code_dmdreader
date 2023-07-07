@@ -6,6 +6,7 @@
 
 OpenGLRenderer::OpenGLRenderer()
 {
+	name = "OpenGLRenderer";
 }
 
 OpenGLRenderer::~OpenGLRenderer()

@@ -1,6 +1,7 @@
 #include "framerenderer.hpp"
 
 FrameRenderer::FrameRenderer() {
+	name = "FrameRenderer";
 }
 
 FrameRenderer::~FrameRenderer() {
