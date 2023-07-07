@@ -119,6 +119,9 @@ bool read_config(string filename) {
 	}
 
 	frameEveryMicroseconds = pt_general.get("frame_every_microseconds", 0);
+	if ((frameEveryMicroseconds) && skip_unmodified_frames) {
+		BOOST_LOG_TRIVIAL(info) << "[readconfig] frame_every_microseconds is set, disabling skip_unmodified_frames";
+	}
 
 	//
 	// Sources
