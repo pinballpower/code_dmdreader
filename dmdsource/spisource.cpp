@@ -4,6 +4,9 @@
 
 #include "spisource.hpp"
 #include "../rpi/spi.hpp"
+#include "../util/profiler.hpp"
+
+#define PROFILER_FRAME	"spisource::frame"
 
 uint16_t parse_u16(uint8_t* buf) {
 	return buf[1] + 256 * buf[0];
@@ -37,6 +40,9 @@ void SPISource::loopSPIRead() {
 			spi.readData(buf, 256);
 			continue;
 		}
+
+		END_PROFILER(PROFILER_FRAME);
+		START_PROFILER(PROFILER_FRAME);
 
 		try {
 			// Read 4 byte header
@@ -103,6 +109,7 @@ void SPISource::loopSPIRead() {
 
 SPISource::SPISource()
 {
+	REGISTER_PROFILER(PROFILER_FRAME, "ms");
 }
 
 SPISource::~SPISource()
