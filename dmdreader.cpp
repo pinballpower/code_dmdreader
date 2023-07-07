@@ -370,12 +370,17 @@ int main(int argc, char** argv)
 			// a processor can drop frames. In this case, it returns a null frame
 			if (frame.isNull()) {
 				BOOST_LOG_TRIVIAL(trace) << "[dmdreader] processor " << proc->name << " dropped frame";
+				break;
 			}
 
 			assert(frame.isValid());
 		}
 
 		INC_COUNTER(COUNT_FRAMES_PROCESSED);
+
+		if (frame.isNull()) {
+			break;
+		}
 
 
 		for (auto &renderer : renderers) {
