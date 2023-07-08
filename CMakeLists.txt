@@ -364,6 +364,7 @@ set(VNI_SRC
 	"processor/vni/palcoloring.cpp" 
 	"processor/vni/palmapping.hpp" 
 	"processor/vni/switchmode.hpp" 
+	"processor/vni/switchmode.cpp" 
 	"processor/vni/palmapping.cpp" 
 	"processor/vni/streamhelper.hpp" 
 	"processor/vni/streamhelper.cpp" 

@@ -11,3 +11,6 @@ enum SwitchMode {
 	ModeMaskedReplace = 7,
 	ModeUndefined = 8
 };
+
+
+bool usesAnimationFrame(SwitchMode mode);

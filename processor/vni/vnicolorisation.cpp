@@ -212,6 +212,14 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 	return res;
 }
 
+/*
+ * Checks if this pixel in the animation should be used (Mask bit 7 is set)
+ */
+bool isActive(uint8_t animationPixel) {
+	return animationPixel & 0x80;
+}
+
+
 vector <uint8_t> VNIColorisation::colorAnimationFrame(const DMDFrame &src_frame, const AnimationFrame &anim_frame, int len)
 {
 	if (col_mode == ModeEvent) {
@@ -239,10 +247,14 @@ vector <uint8_t> VNIColorisation::colorAnimationFrame(const DMDFrame &src_frame,
 
 		DMDColor c;
 
-		if (col_mode == ModeColorMask) {
-			uint8_t ani_px = *animIter;
+		uint8_t ani_px = 0;
+		if (usesAnimationFrame(col_mode)) {
+			ani_px = *animIter;
 			animIter++;
-			if (ani_px & 0x80) {
+		}
+
+		if (col_mode == ModeColorMask) {
+			if (isActive(ani_px)) {
 				uint8_t pv2 = src_px | (ani_px & color_mask);
 				c = col_palette[pv2];
 			}
@@ -251,9 +263,7 @@ vector <uint8_t> VNIColorisation::colorAnimationFrame(const DMDFrame &src_frame,
 			}
 		}
 		else if ((col_mode == ModeReplace) || (col_mode == ModeFollowReplace)) {
-			uint8_t ani_px = *animIter;
-			animIter++;
-			if (ani_px & 0x80) {
+			if (isActive(ani_px)) {
 				uint8_t pv2 = ani_px & 0x7f;
 				c = col_palette[pv2];
 			}
@@ -263,9 +273,7 @@ vector <uint8_t> VNIColorisation::colorAnimationFrame(const DMDFrame &src_frame,
 		}
 		else if (col_mode == ModeLayeredColorMask || (col_mode == ModeMaskedReplace) ) {
 			// Not sure if this is correct
-			uint8_t ani_px = *animIter;
-			animIter++;
-			if (ani_px & 0x80) {
+			if (isActive(ani_px)) {
 				uint8_t pv2 = src_px | (ani_px & color_mask);
 				c = col_palette[pv2];
 			}
