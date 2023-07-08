@@ -6,6 +6,7 @@ bool usesAnimationFrame(SwitchMode mode) {
 		(mode == ModeColorMask) ||
 		(mode == ModeLayeredColorMask) ||
 		(mode == ModeFollowReplace) ||
-		(mode == ModeMaskedReplace)
+		(mode == ModeMaskedReplace) ||
+		(mode == ModeReplace)
 		);
 }
