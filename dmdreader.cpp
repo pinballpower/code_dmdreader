@@ -28,6 +28,7 @@
 using namespace std;
 
 #define COUNT_FRAMES				"main::frames::all"
+#define COUNT_FRAMES_DUPLICATED		"main::frames::duplicated"
 #define COUNT_FRAMES_SUPPRESSED		"main::frames::supressed"
 #define COUNT_FRAMES_PROCESSED		"main::frames::processes"
 
@@ -121,6 +122,7 @@ bool read_config(string filename) {
 	frameEveryMicroseconds = pt_general.get("frame_every_microseconds", 0);
 	if ((frameEveryMicroseconds) && skip_unmodified_frames) {
 		BOOST_LOG_TRIVIAL(info) << "[readconfig] frame_every_microseconds is set, disabling skip_unmodified_frames";
+		skip_unmodified_frames = false;
 	}
 
 	//
@@ -327,6 +329,7 @@ int main(int argc, char** argv)
 					BOOST_LOG_TRIVIAL(trace) << "[dmdreader] duplicating last frame";
 					lastMicroseconds = currentTime;
 					frame = lastFrame;
+					INC_COUNTER(COUNT_FRAMES_DUPLICATED);
 				}
 				else {
 					// no new frame ready, but less than frameEveryMicroseconds time, 
