@@ -1,5 +1,7 @@
 #include "animation.hpp"
 
+#include "../../util/time.hpp"
+
 int Animation::getNumFrames() const
 {
 	return frames.size();
@@ -34,15 +36,22 @@ const std::optional<AnimationFrame> Animation::getNextFrame() {
 	if (!(isActive())) {
 		return {};
 	}
+
+	auto now = getMicrosecondsTimestamp();
+	auto timeCurrentFrame = frames[current_frame].delay*1000;
 	
-	auto res = getFrame(current_frame);
-	current_frame += 1;
+	if ((now - frameStartMicrosecs) > timeCurrentFrame) {
+		// time for current frame has expired, skip to next frame
+		current_frame += 1;
+		frameStartMicrosecs += timeCurrentFrame;
+	}
 
 	if (current_frame >= frames.size()) {
 		stop();
+		return {};
 	}
 
-	return res;
+	return frames[current_frame];
 }
 
 
@@ -57,11 +66,9 @@ Animation::Animation()
 
 
 void Animation::start(bool restart) {
-	if (restart) {
+	if ((restart) || (!isActive())) {
 		current_frame = 0;
-	}
-	else if (!isActive()) {
-		current_frame = 0;
+		frameStartMicrosecs = getMicrosecondsTimestamp();
 	}
 }
 

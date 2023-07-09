@@ -58,6 +58,8 @@ protected:
 	vector<AnimationFrame> frames;
 	vector<vector<uint8_t>> masks;
 
+	uint64_t frameStartMicrosecs = 0;
+
 
 private:
 	int current_frame = -1;

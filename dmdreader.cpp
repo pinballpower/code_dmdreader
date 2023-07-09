@@ -315,7 +315,14 @@ int main(int argc, char** argv)
 			}
 		}
 
+		// Deliver frames at a fixed rate?
 		if (frameEveryMicroseconds) {
+			auto currentMicroseconds = getMicrosecondsTimestamp();
+			auto usSinceLast = (currentMicroseconds - lastMicroseconds);
+			if (usSinceLast < frameEveryMicroseconds) {
+				// make sure frames won't be delivered faster than the defined rate
+				std::this_thread::sleep_for(std::chrono::microseconds(frameEveryMicroseconds-usSinceLast));
+			}
 			if (source->isFrameReady()) {
 				frame = source->getNextFrame();
 				lastFrame = frame; // store a copy that can be delivered again
@@ -323,23 +330,12 @@ int main(int argc, char** argv)
 				BOOST_LOG_TRIVIAL(trace) << "[dmdreader] got a new frame from the source";
 			}
 			else {
-				auto currentTime = getMicrosecondsTimestamp();
-				auto usSinceLast = (currentTime - lastMicroseconds);
-				if (usSinceLast > frameEveryMicroseconds) {
-					BOOST_LOG_TRIVIAL(trace) << "[dmdreader] duplicating last frame";
-					lastMicroseconds = currentTime;
-					frame = lastFrame;
-					INC_COUNTER(COUNT_FRAMES_DUPLICATED);
-				}
-				else {
-					// no new frame ready, but less than frameEveryMicroseconds time, 
-					// just wait a bit and try again (wait at most 1ms, but could be shorter if
-					// less time is left until next frame) 
-					auto waitTime = max((int)(frameEveryMicroseconds - usSinceLast), 1000);
-					std::this_thread::sleep_for(std::chrono::microseconds(waitTime));
-					continue;
-				}
+				BOOST_LOG_TRIVIAL(trace) << "[dmdreader] duplicating last frame";
+				lastMicroseconds += frameEveryMicroseconds;
+				frame = lastFrame;
+				INC_COUNTER(COUNT_FRAMES_DUPLICATED);
 			}
+			lastMicroseconds = currentMicroseconds;
 		}
 		else {
 			// just wait until the source provides the next frame
@@ -364,6 +360,7 @@ int main(int argc, char** argv)
 
 		assert(frame.isValid());
 
+		// run processors
 		for (auto &proc : processors) {
 			auto name = TIMING_PROCESSOR + proc->name;
 			START_PROFILER(name);

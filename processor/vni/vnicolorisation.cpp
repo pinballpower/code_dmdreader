@@ -192,6 +192,8 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 	if (col_animation.isActive()) {
 
 		auto x = col_animation.framesLeft();
+		// TODO: timing!
+
 		color_data= colorAnimationFrame(f, col_animation.getNextFrame().value(), len);
 		BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] getNextFrame, frames left after: " << col_animation.framesLeft();
 		// animation finished?
