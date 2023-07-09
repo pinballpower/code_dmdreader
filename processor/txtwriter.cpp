@@ -19,7 +19,7 @@ bool TXTWriter::configureFromPtree(boost::property_tree::ptree pt_general, boost
 {
 	string name = pt_source.get("filename", "");
 	if (name == "") {
-		BOOST_LOG_TRIVIAL(error) << "[TXTWriter] filename has not been configured, aborting";
+		BOOST_LOG_TRIVIAL(error) << "[txtwriter] filename has not been configured, aborting";
 		return false;
 	}
 	outputfile.open(name, ios::out);
@@ -31,7 +31,7 @@ void TXTWriter::close()
 {
 	GenericWriter::close();
 	outputfile.close();
-	BOOST_LOG_TRIVIAL(debug) << "[TXTWriter] " << frameno << " frames written";
+	BOOST_LOG_TRIVIAL(debug) << "[txtwriter] " << frameno << " frames written";
 }
 
 void TXTWriter::writeFrameToFile(DMDFrame& f, uint32_t timestamp)
@@ -63,12 +63,12 @@ void TXTWriter::writeFrameToFile(DMDFrame& f, uint32_t timestamp)
 
 		outputfile << std::endl;
 
-		BOOST_LOG_TRIVIAL(trace) << "[TXTWriter] frame " << frameno << " written";
+		BOOST_LOG_TRIVIAL(trace) << "[txtwriter] frame " << frameno << " written";
 
 		frameno++;
 	}
 	else {
-		BOOST_LOG_TRIVIAL(debug) << "[TXTWriter] outut file closed, doing nothing";
+		BOOST_LOG_TRIVIAL(debug) << "[txtwriter] outut file closed, doing nothing";
 	}
 }
 
