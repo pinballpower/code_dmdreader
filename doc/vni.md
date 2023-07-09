@@ -23,11 +23,8 @@ section of the configuration:
 ```
 "general":{
   "skip_unmodified_frames": false,
-  "frame_every_microseconds": 17000
+  "frame_every_microseconds": 16000
 },
 ```
 
-This example configured the software that it will deliver frames every (at most) 17ms. If the pinball delivers frames faster than this, every frame is 
-being processed. However if frames are being delivered slower (usually because they don't change), the system will simple repeat the last frame. 
-In many case, you won't notice a difference. However, if a VNI colorisation uses relatively long animations, you might need to set this. Experiment a 
-bit with the timing. It will be different between different pinball platforms.
+This example configured the software that it will deliver frames every 16ms.
