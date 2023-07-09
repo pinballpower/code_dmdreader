@@ -189,20 +189,18 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 
 	// Play animation
 	vector<uint8_t> color_data;
+
+	std::optional<AnimationFrame> nextAnimFrame = {};
 	if (col_animation.isActive()) {
-
-		auto x = col_animation.framesLeft();
-		// TODO: timing!
-
-		color_data= colorAnimationFrame(f, col_animation.getNextFrame().value(), len);
-		BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] getNextFrame, frames left after: " << col_animation.framesLeft();
-		// animation finished?
-		if (! col_animation.isActive()) {
+		nextAnimFrame = col_animation.getNextFrame();
+		if (!nextAnimFrame) {
 			col_mode = ModePalette;
-			// setDefaultPalette(); // or should it be 
-			setPreviousPalette();
-
+			// setDefaultPalette();
 		}
+	}
+
+	if (col_animation.isActive()) {
+		color_data= colorAnimationFrame(f, col_animation.getNextFrame().value(), len);
 	}
 	else {
 		AnimationFrame af;
