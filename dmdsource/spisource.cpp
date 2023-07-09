@@ -80,12 +80,12 @@ void SPISource::loopSPIRead() {
 				continue;
 			}
 
-                        if (packet_type == FRAME_ID_CRC) {
-                                crc32 = 1;
-                                data_offset = 12; 
-                        }
+            if (packet_type == FRAME_ID_CRC) {
+                    crc32 = 1;
+                    data_offset = 12; 
+            }
 
-			BOOST_LOG_TRIVIAL(debug) << "[spisource] got frame " << columns << "x" << rows << "x" << bitsperpixel << " CRC=" << crc32;
+			BOOST_LOG_TRIVIAL(trace) << "[spisource] got frame " << columns << "x" << rows << "x" << bitsperpixel << " CRC=" << crc32;
 			int queueLen = queuedFrames.size();
 			if (queueLen < MAX_QUEUED_FRAMES) {
 				DMDFrame frame = DMDFrame(columns, rows, bitsperpixel, buf + data_offset, true);
