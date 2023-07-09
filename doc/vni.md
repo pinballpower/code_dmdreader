@@ -27,4 +27,14 @@ section of the configuration:
 },
 ```
 
-This example configured the software that it will deliver frames every 16ms.
+This example configured the software that it will deliver frames every 16ms. Set this if you notice that there are animations to are playing too slow.
+You might not need this settin on every VNI colorisation. 
+
+## PAC files
+
+PAC files were created to implement digital rights management. These are encrypted files. The format is not documented and DMDReader can't read PAC files
+
+## FSQ files
+
+FSQ files are also encrypted files with integrated digital rights management. The format is not documented and DMDReader can't read FSQ files. There are also 
+unencrypted FSQ files available. However, also these unencrypted files are not supported. You need to use the VNI file instead.
