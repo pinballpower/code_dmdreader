@@ -32,18 +32,37 @@ const AnimationFrame Animation::getFrame(int index) const
 	return frames[index];
 }
 
-const std::optional<AnimationFrame> Animation::getNextFrame() {
+//
+// Get the next frame from an animation as follows:
+// - if the animation has not been started, return nothing
+// - if the current animation frame has a duration set, wait for this duration until skipping to the next frame
+// - if duration of the current animation frame is 0, only skip to next frame if "srcFrameChanged" is true (which means
+//   the source frame has been changed)
+// 
+const std::optional<AnimationFrame> Animation::getNextFrame(bool srcFrameChanged) {
 	if (!(isActive())) {
 		return {};
 	}
 
 	auto now = getMicrosecondsTimestamp();
 	auto timeCurrentFrame = frames[current_frame].delay*1000;
-	
-	if ((now - frameStartMicrosecs) > timeCurrentFrame) {
-		// time for current frame has expired, skip to next frame
-		current_frame += 1;
-		frameStartMicrosecs += timeCurrentFrame;
+
+	if (timeCurrentFrame == 0) {
+		if (srcFrameChanged) {
+			current_frame += 1;
+			frameStartMicrosecs += timeCurrentFrame;
+		}
+	}
+	else {
+		if ((now - frameStartMicrosecs) > timeCurrentFrame) {
+			// time for current frame has expired, skip to next frame
+			current_frame += 1;
+			frameStartMicrosecs += timeCurrentFrame;
+		}
+		else {
+			auto x = now - frameStartMicrosecs;
+			BOOST_LOG_TRIVIAL(debug) << "now:" << now/1000 << ", frameStartMicrosecs: " << frameStartMicrosecs/1000 << ", (now - frameStartMicrosecs):" << x/1000 << ", timeCurrentFrame: " << timeCurrentFrame/1000;
+		}
 	}
 
 	if (current_frame >= frames.size()) {
@@ -83,6 +102,11 @@ void Animation::stop() {
 bool Animation::isActive() const {
 	return (current_frame >= 0) && 
 		(current_frame < frames.size());
+}
+
+bool Animation::sameAnimation(Animation anim) const
+{
+	return this->offset == anim.offset;
 }
 
 const int Animation::framesLeft() const {

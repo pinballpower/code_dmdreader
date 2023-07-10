@@ -154,9 +154,15 @@ bool VNIColorisation::triggerAnimation(const DMDFrame& f) {
 			}
 
 			if (map->IsAnimation()) {
-				col_animation = animations.find(map->offset);
-				col_animation.start();
-				BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] starting animation " << col_animation.name << ", " << col_animation.framesLeft() << " frames left";
+				auto anim = animations.find(map->offset);
+				if (anim.sameAnimation(col_animation)) {
+					BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] animation " << col_animation.name << "already running, " << col_animation.framesLeft() << " frames left";
+				}
+				else {
+					col_animation = anim;
+					col_animation.start();
+					BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] starting animation " << col_animation.name << ", " << col_animation.framesLeft() << " frames left";
+				}
 			}
 			else if (col_mode == ModePalette) {
 				// stop animation if one if running
@@ -182,6 +188,11 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 		return std::move(f);
 	}
 
+	bool srcFrameChanged = (crcLastFrame != f.getChecksum());
+	if (srcFrameChanged) {
+		crcLastFrame = f.getChecksum();
+	}
+
 	BOOST_LOG_TRIVIAL(trace) << "[vnicolorisation] got frame " << f.getWidth() << "x" << f.getHeight() << " " << f.getBitsPerPixel() << "bpp, checksum " << f.getChecksum();
 	INC_COUNTER(FRAMES);
 
@@ -196,7 +207,7 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 	vector<uint8_t> color_data;
 
 	if (col_animation.isActive()) {
-		color_data= colorAnimationFrame(f, col_animation.getNextFrame().value(), len);
+		color_data= colorAnimationFrame(f, col_animation.getNextFrame(srcFrameChanged).value(), len);
 		// the animation could be finished after this frame, in this case, switch back to palette mode
 		if (!col_animation.isActive()) {
 			col_mode = ModePalette;

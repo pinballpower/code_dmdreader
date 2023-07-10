@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+#include <boost/log/trivial.hpp>
+
 #include "switchmode.hpp"
 #include "animationframe.hpp"
 
@@ -40,7 +42,7 @@ public:
 
 	const vector<AnimationFrame> getFrames() const;
 	const AnimationFrame getFrame(int index) const;
-	const std::optional<AnimationFrame> getNextFrame(); // get next frame from a running animation
+	const std::optional<AnimationFrame> getNextFrame(bool srcFrameChanged);
 	const int framesLeft() const; // how many frames are left in the current animation
 
 	// start the animation. If restart is true, it will always start with frame 0, otherwise it won't effect an animation that's
@@ -50,6 +52,8 @@ public:
 
 	void stop();
 	bool isActive() const;
+
+	bool sameAnimation(Animation anim) const;
 
 protected:
 	/// <summary>

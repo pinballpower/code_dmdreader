@@ -42,6 +42,8 @@ private:
 	Animation col_animation;
 	SwitchMode col_mode = ModePalette;
 
+	uint32_t crcLastFrame = 0;
+
 	// Features defined by the license
 	bool allow_vni = false;
 };
