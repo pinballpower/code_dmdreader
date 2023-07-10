@@ -47,5 +47,7 @@ private:
 	int bits = 0;
 	bool eof = false;
 
+	uint8_t maxValueFound = 0;
+
 	int id = 0;
 };

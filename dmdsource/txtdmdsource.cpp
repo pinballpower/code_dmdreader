@@ -37,6 +37,9 @@ TXTDMDSource::TXTDMDSource(const string& filename)
 
 TXTDMDSource::~TXTDMDSource()
 {
+	if (maxValueFound < ((1 << bits) - 1)) {
+		BOOST_LOG_TRIVIAL(warning) << "[txtdmdsource] maximum pixel value was " << maxValueFound << ", but " << bits << "configured, incorrect configuration?";
+	}
 }
 
 bool TXTDMDSource::openFile(const string& filename)
@@ -137,6 +140,7 @@ void TXTDMDSource::preloadNextFrame()
 
 		// Initialize frame
 		preloadedFrame = DMDFrame(width, height, bits);
+		uint8_t maxValue = 1 << bits;
 		id++;
 		preloadedFrame.setId(id);
 
@@ -148,6 +152,11 @@ void TXTDMDSource::preloadNextFrame()
 				} else {
 					pv = pv - 'a'+10;
 				}
+				if (pv > maxValue) {
+					BOOST_LOG_TRIVIAL(error) << "[txtdmdsource] found value " << pv << " in frame, but only " << bits << "configured, aborting";
+					eof = true;
+				}
+				maxValue = max(maxValue, pv);
 				preloadedFrame.appendPixel(pv);
 			}
 		}
