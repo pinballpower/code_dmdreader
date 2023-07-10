@@ -1,5 +1,9 @@
 #pragma once
 
+#include <string>
+
+using namespace std;
+
 enum SwitchMode {
 	ModePalette = 0,
 	ModeReplace = 1,
@@ -12,5 +16,5 @@ enum SwitchMode {
 	ModeUndefined = 8
 };
 
-
+string switchModeStr(SwitchMode mode);
 bool usesAnimationFrame(SwitchMode mode);

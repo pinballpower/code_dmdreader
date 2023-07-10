@@ -48,7 +48,7 @@ const std::optional<AnimationFrame> Animation::getNextFrame() {
 
 	if (current_frame >= frames.size()) {
 		stop();
-		return {};
+		return frames[frames.size()-1];
 	}
 
 	return frames[current_frame];

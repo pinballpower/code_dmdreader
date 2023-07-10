@@ -1,9 +1,12 @@
 #include <filesystem>
+#include <cstdint>
+#include <cstring>
 
 #include "vnicolorisation.hpp"
 #include "animationset.hpp"
 #include "animation.hpp"
 #include "palmapping.hpp"
+#include "switchmode.hpp"
 
 #include "palette_colorizer.hpp"
 #include "../../util/crc32.hpp"
@@ -13,6 +16,8 @@
 #define FOUND_MASKED		"vnicolorisation::found::masked"
 #define FOUND_NOT			"vnicolorisation::found::not_found"
 #define FRAMES				"vnicolorisation::frames"
+#define COL_MODE			"vnicolorisation::mode::"
+
 
 string to_hex(const vector<uint8_t> data) {
 	string res;
@@ -190,26 +195,19 @@ DMDFrame VNIColorisation::processFrame(DMDFrame& f)
 	// Play animation
 	vector<uint8_t> color_data;
 
-	std::optional<AnimationFrame> nextAnimFrame = {};
-	if (col_animation.isActive()) {
-		nextAnimFrame = col_animation.getNextFrame();
-		if (!nextAnimFrame) {
-			col_mode = ModePalette;
-			// setDefaultPalette();
-		}
-	}
-
 	if (col_animation.isActive()) {
 		color_data= colorAnimationFrame(f, col_animation.getNextFrame().value(), len);
-	}
-	else {
+		// the animation could be finished after this frame, in this case, switch back to palette mode
+		if (!col_animation.isActive()) {
+			col_mode = ModePalette;
+			setDefaultPalette();
+		}
+	} else {
 		AnimationFrame af;
 		color_data= colorAnimationFrame(f, af, len);
 	}
 
-	DMDFrame res = DMDFrame(w, h, 32, color_data);
-
-	return res;
+	return DMDFrame(w, h, 32, color_data);
 }
 
 /*
@@ -226,10 +224,6 @@ vector <uint8_t> VNIColorisation::colorAnimationFrame(const DMDFrame &src_frame,
 		BOOST_LOG_TRIVIAL(error) << "[vnicolorisation] mode EVENT not supported, ignoring";
 	}
 
-	if (col_mode == ModeLayeredColorMask) {
-		BOOST_LOG_TRIVIAL(error) << "[vnicolorisation] layered color masks to do";
-	}
-
 	vector <uint8_t> res;
 
 	bool is_animation = (col_mode != ModeEvent) && (col_mode != ModePalette);
@@ -241,6 +235,8 @@ vector <uint8_t> VNIColorisation::colorAnimationFrame(const DMDFrame &src_frame,
 	auto animIter = anim_frame_data.cbegin();
 
 	BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] mode " << col_mode;
+	INC_COUNTER(COL_MODE + switchModeStr(col_mode));
+
 
 	// loop through pixels
 	for (auto src_px: src_frame.getPixelData()) {
