@@ -24,6 +24,7 @@
 #include "services/serviceregistry.hpp"
 #include "util/counter.hpp"
 #include "util/profiler.hpp"
+#include "util/time.hpp"
 
 using namespace std;
 
@@ -245,11 +246,6 @@ void signal_handler(int sig)
 	terminateWhenFinished = true;
 }
 
-int64_t getMicrosecondsTimestamp() {
-	return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-}
-
-
 int main(int argc, char** argv)
 {
 	signal(SIGINT, signal_handler);
@@ -301,6 +297,10 @@ int main(int argc, char** argv)
 	DMDFrame lastFrame;
 	DMDFrame frame;
 
+	uint32_t timeStampLastFrame = 0;
+
+	source->start();
+
 	while ((!(sourcesFinished) && (! isFinished))) {
 
 		if (source->isFinished()) {
@@ -308,6 +308,7 @@ int main(int argc, char** argv)
 			if (activeSourceIndex < sources.size() - 1) {
 				activeSourceIndex++;
 				source = sources[activeSourceIndex];
+				source->start();
 			}
 			else {
 				sourcesFinished = true;
@@ -341,6 +342,13 @@ int main(int argc, char** argv)
 			// just wait until the source provides the next frame
 			frame = source->getNextFrame();
 		}
+
+		auto now = getMillisecondsTimestamp();
+		if (timeStampLastFrame) {
+			BOOST_LOG_TRIVIAL(info) << "[dmdreader] time last frame " << now- timeStampLastFrame << "ms";
+		}
+		timeStampLastFrame = now;
+
 
 		BOOST_LOG_TRIVIAL(trace) << "[dmdreader] processing frame " << frameno;
 

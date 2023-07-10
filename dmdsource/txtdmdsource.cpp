@@ -81,7 +81,7 @@ bool TXTDMDSource::openFile(const string& filename)
 	return true;
 }
 
-uint32_t TXTDMDSource::getCurrentTimestamp()
+uint32_t TXTDMDSource::getTimestampRelativeToStart()
 {
 	uint32_t now = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 	return now - startMillisec;
@@ -174,20 +174,22 @@ void TXTDMDSource::preloadNextFrame()
 DMDFrame TXTDMDSource::getNextFrame()
 {
 	DMDFrame res;
-	uint32_t timestamp = getCurrentTimestamp();
+	uint32_t timestamp = getTimestampRelativeToStart();
+
+	BOOST_LOG_TRIVIAL(error) << "[txtdmdsource] timestamp " << timestamp << ", preloadedFrameTimestamp: " << preloadedFrameTimestamp;
 
 	// new frame from TXT file not yet ready
 	if ((useTimingData) && (timestamp < preloadedFrameTimestamp)) {
 
 		auto delay_ms = preloadedFrameTimestamp - timestamp;
-		this_thread::sleep_for(std::chrono::milliseconds(10));
+		this_thread::sleep_for(std::chrono::milliseconds(delay_ms));
 	}
 
 	currentFrame = preloadedFrame;
 	res = std::move(preloadedFrame);
 	preloadNextFrame();
 
-	lastFrameSentMillis = getCurrentTimestamp();
+	lastFrameSentMillis = getTimestampRelativeToStart();
 	return res;
 }
 
@@ -199,7 +201,7 @@ bool TXTDMDSource::isFinished()
 bool TXTDMDSource::isFrameReady()
 {
 	if (useTimingData) {
-		uint32_t timestamp = getCurrentTimestamp();
+		uint32_t timestamp = getTimestampRelativeToStart();
 		return timestamp >= preloadedFrameTimestamp;
 	}
 	else {
@@ -217,7 +219,10 @@ bool TXTDMDSource::configureFromPtree(boost::property_tree::ptree pt_general, bo
 	bool res=openFile(pt_source.get("name", ""));
 	if (res) preloadNextFrame();
 
+	return res;
+}
+
+void TXTDMDSource::start() {
 	// TXT file might not start with timestamp 0, therefore adapt the start timestamp according to the first frame in the file
 	startMillisec = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count() - preloadedFrameTimestamp;
-	return res;
 }

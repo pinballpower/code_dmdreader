@@ -1,3 +1,4 @@
+#include "spisource.hpp"
 #include <thread>
 
 #include <boost/log/trivial.hpp>
@@ -171,10 +172,13 @@ bool SPISource::configureFromPtree(boost::property_tree::ptree pt_general, boost
 		return false;
 	}
 
+	return true;
+}
+
+void SPISource::start()
+{
 	active = true;
 	pollerThread = std::thread([this] { this->loopSPIRead(); });
-
-	return true;
 }
 
 SourceProperties SPISource::getProperties()

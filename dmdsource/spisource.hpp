@@ -28,6 +28,7 @@ public:
 	virtual int getDroppedFrames() override;
 
 	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) override;
+	virtual void start() override;
 
 	virtual SourceProperties getProperties() override;
 

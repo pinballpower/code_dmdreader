@@ -25,6 +25,7 @@ public:
 	virtual bool isFrameReady();
 	virtual void close();
 	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source);
+	virtual void start();
 
 	virtual SourceProperties getProperties();
 

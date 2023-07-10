@@ -23,6 +23,7 @@ public:
 	virtual bool isFrameReady() override;
 
 	virtual bool configureFromPtree(boost::property_tree::ptree pt_general, boost::property_tree::ptree pt_source) override;
+	virtual void start() override;
 
 	virtual SourceProperties getProperties() override;
 
@@ -42,7 +43,7 @@ private:
 
 	void preloadNextFrame();
 	bool openFile(const string& filename);
-	uint32_t getCurrentTimestamp();
+	uint32_t getTimestampRelativeToStart();
 
 	int bits = 0;
 	bool eof = false;

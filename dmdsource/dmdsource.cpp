@@ -28,6 +28,10 @@ void DMDSource::close()
 {
 }
 
+void DMDSource::start()
+{
+}
+
 int DMDSource::getDroppedFrames()
 {
 	return 0;
