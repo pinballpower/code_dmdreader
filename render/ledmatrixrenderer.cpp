@@ -106,6 +106,12 @@ bool LEDMatrixRenderer::configureFromPtree(boost::property_tree::ptree pt_genera
         row_addr_type = 100;
     }
 
+    int max_refresh_rate = pt_renderer.get("max_refresh_rate", 60);
+    if ((max_refresh_rate < 20) || (max_refresh_rate > 200)) {
+        BOOST_LOG_TRIVIAL(info) << "[ledmatrixrenderer] max_refresh_rate allowed range is 20-200Hz, ignoring " << brightness;
+        max_refresh_rate = 60;
+    }
+
     rotate_180 = pt_renderer.get("rotate_180", false);
 
     memset(&options, 0, sizeof(options));
@@ -121,6 +127,7 @@ bool LEDMatrixRenderer::configureFromPtree(boost::property_tree::ptree pt_genera
     options.pwm_lsb_nanoseconds = lsb_nanoseconds;
     options.brightness = brightness;
     options.row_address_type = row_addr_type;
+    options.limit_refresh_rate_hz = max_refresh_rate
 
     memset(&rt_options, 0, sizeof(rt_options));
     rt_options.gpio_slowdown = 4;
