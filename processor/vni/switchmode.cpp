@@ -3,7 +3,7 @@
 string switchModeStr(SwitchMode mode)
 {
 	switch (mode) {
-	case ModePalette: return "Replace";
+	case ModePalette: return "Palette";
 	case ModeReplace: return "Replace";
 	case ModeColorMask: return "ColorMask";
 	case ModeEvent: return "Event";
