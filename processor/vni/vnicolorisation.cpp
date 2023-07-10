@@ -226,15 +226,13 @@ vector <uint8_t> VNIColorisation::colorAnimationFrame(const DMDFrame &src_frame,
 
 	vector <uint8_t> res;
 
-	bool is_animation = (col_mode != ModeEvent) && (col_mode != ModePalette);
-
 	uint8_t src_mask = 0xff >> (8 - src_frame.getBitsPerPixel());
 	uint8_t color_mask = ~src_mask & 0x7f;
 
 	auto anim_frame_data = anim_frame.getFrameData();
 	auto animIter = anim_frame_data.cbegin();
 
-	BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] mode " << col_mode;
+	BOOST_LOG_TRIVIAL(debug) << "[vnicolorisation] mode " << switchModeStr(col_mode);
 	INC_COUNTER(COL_MODE + switchModeStr(col_mode));
 
 
