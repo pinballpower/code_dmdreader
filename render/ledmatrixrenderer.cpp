@@ -127,7 +127,7 @@ bool LEDMatrixRenderer::configureFromPtree(boost::property_tree::ptree pt_genera
     options.pwm_lsb_nanoseconds = lsb_nanoseconds;
     options.brightness = brightness;
     options.row_address_type = row_addr_type;
-    options.limit_refresh_rate_hz = max_refresh_rate
+    options.limit_refresh_rate_hz = max_refresh_rate;
 
     memset(&rt_options, 0, sizeof(rt_options));
     rt_options.gpio_slowdown = 4;
