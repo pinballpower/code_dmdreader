@@ -242,36 +242,25 @@ vector <uint8_t> VNIColorisation::colorAnimationFrame(const DMDFrame &src_frame,
 	for (auto src_px: src_frame.getPixelData()) {
 
 		DMDColor c;
-
-		uint8_t ani_px = 0;
 		if (usesAnimationFrame(col_mode)) {
-			ani_px = *animIter;
-			animIter++;
-		}
 
-		if (col_mode == ModeColorMask) {
+			uint8_t ani_px = *animIter;
+			animIter++;
+
 			if (isActive(ani_px)) {
-				uint8_t pv2 = src_px | (ani_px & color_mask);
-				c = col_palette[pv2];
-			}
-			else {
-				c = col_palette[src_px];
-			}
-		}
-		else if ((col_mode == ModeReplace) || (col_mode == ModeFollowReplace)) {
-			if (isActive(ani_px)) {
-				uint8_t pv2 = ani_px & 0x7f;
-				c = col_palette[pv2];
-			}
-			else {
-				c = col_palette[src_px];
-			}
-		}
-		else if (col_mode == ModeLayeredColorMask || (col_mode == ModeMaskedReplace) ) {
-			// Not sure if this is correct
-			if (isActive(ani_px)) {
-				uint8_t pv2 = src_px | (ani_px & color_mask);
-				c = col_palette[pv2];
+
+				if (col_mode == ModeColorMask) {
+					uint8_t pv2 = src_px | (ani_px & color_mask);
+					c = col_palette[pv2];
+				}
+				else if ((col_mode == ModeReplace) || (col_mode == ModeFollowReplace)) {
+					uint8_t pv2 = ani_px & 0x7f;
+					c = col_palette[pv2];
+				}
+				else if (col_mode == ModeLayeredColorMask || (col_mode == ModeMaskedReplace)) {
+					uint8_t pv2 = src_px | (ani_px & color_mask);
+					c = col_palette[pv2];
+				}
 			}
 			else {
 				c = col_palette[src_px];
