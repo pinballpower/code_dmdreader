@@ -175,6 +175,8 @@ Note that dmdreader have to run as root to use this.
 |lsb_nanoseconds|time the LSB is displayed, 50-300ns. shorter values increase load, but usually improve quality|
 |brightness|brightness in %|
 |rotate_180|rotate the display content by 180 degrees|
+|row_address_type|adressing of the rows. 0-4|
+|limit_refresh_rate|maximum screen refresh rate in Hz|
 
 
 
